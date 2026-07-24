@@ -19,7 +19,7 @@ body[data-wr-immersive-cards="true"] .wr-grid-card {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   aspect-ratio: 16 / 9 !important;
-  min-height: auto !important; /* override the 220px min-height */
+  min-height: 0 !important; /* override the 220px min-height */
 }
 
 body[data-wr-immersive-cards="true"] .wr-grid-card:hover {
@@ -95,8 +95,8 @@ body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-badge {
   right: 12px !important;
   z-index: 4 !important;
   background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
   color: #fff !important;
   border: 1px solid rgba(255,255,255,0.2) !important;
 }

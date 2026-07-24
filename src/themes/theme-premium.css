@@ -62,10 +62,10 @@ body[data-wr-enabled="true"] {
 body[data-wr-enabled="true"] article,
 body[data-wr-enabled="true"] div[class*="MuiCard-root"],
 body[data-wr-enabled="true"] .rp-glass-panel {
-  background: var(--rp-glass-base) !important;
-  backdrop-filter: blur(24px) saturate(140%) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
   -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
-  border: 1px solid var(--rp-glass-border) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow:
     var(--rp-shadow-2),
     inset 0 1px 0 0 var(--rp-glass-highlight) !important;

@@ -38,8 +38,8 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
   display: flex;
   flex-direction: column;
   background: var(--wr-glass-bg);
-  backdrop-filter: blur(var(--wr-glass-blur));
   -webkit-backdrop-filter: blur(var(--wr-glass-blur));
+  backdrop-filter: blur(var(--wr-glass-blur));
   border: 1px solid var(--wr-glass-border);
   border-radius: var(--wr-card-radius);
   overflow: hidden;
