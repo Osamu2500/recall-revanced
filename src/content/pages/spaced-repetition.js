@@ -343,71 +343,53 @@ window.WR_PAGES.spaced = {
       return;
     }
 
-    // Use the active tab to determine if we are on the Questions tab
-    const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
-    this.isQuestionsTab = activeTab && activeTab.textContent.toLowerCase().includes('questions');
+    // Extract the DOM elements using our robust image-density heuristic
+    const { container, rows } = this.findListContainerAndRows();
     
-    // Fallback: If we can't find the tab, look for the 'QUESTIONS' header in the table
-    if (!this.isQuestionsTab) {
-      const headers = Array.from(document.querySelectorAll('th, [role="columnheader"]'));
-      this.isQuestionsTab = headers.some(h => h.textContent.toLowerCase().includes('questions'));
-    }
+    // If we found a container with multiple image rows, we are definitively on the Questions tab.
+    // The Review tab is a single flashcard and will not match this heuristic.
+    this.isQuestionsTab = !!(container && rows && rows.length > 1);
     
-    // Check again before injecting to prevent race conditions
     if (this.isQuestionsTab) {
-      this.extractAndRenderGrid();
+      this.extractAndRenderGrid(container, rows);
     } else {
       this.restoreOriginalUI();
     }
   },
 
   findListContainerAndRows() {
-    // Find all rows (tr or role="row")
-    let allRows = Array.from(document.querySelectorAll('tr, [role="row"]'));
-    
-    // If native rows aren't found, try finding elements that contain the checkbox + image structure
-    if (allRows.length === 0) {
-      const potentialCheckboxes = Array.from(document.querySelectorAll('input[type="checkbox"], [role="checkbox"]'));
-      if (potentialCheckboxes.length > 0) {
-        allRows = potentialCheckboxes.map(cb => cb.closest('div[class*="flex"], div[class*="grid"]')).filter(r => r && r.parentElement);
-      }
-    }
-
-    if (allRows.length < 2) return { container: null, rows: [] };
-
-    // Group rows by their common parent container
-    const parentMap = new Map();
-    allRows.forEach(row => {
-      if (row.parentElement) {
-        const count = parentMap.get(row.parentElement) || 0;
-        parentMap.set(row.parentElement, count + 1);
-      }
-    });
-
     let bestContainer = null;
-    let maxRows = 0;
-    for (let [container, count] of parentMap.entries()) {
-      if (count > maxRows) {
-        maxRows = count;
-        bestContainer = container;
+    let maxImgChildren = 0;
+    
+    // 1. Find the container with the most children that contain an <img>
+    // This perfectly isolates the list of videos/cards regardless of HTML tags or class names!
+    const allElements = document.querySelectorAll('div, table, tbody, ul');
+    for (let el of allElements) {
+      if (el.children.length >= 2) {
+         let imgChildrenCount = 0;
+         for (let child of el.children) {
+           if (child.querySelector('img')) {
+             imgChildrenCount++;
+           }
+         }
+         if (imgChildrenCount > maxImgChildren) {
+           maxImgChildren = imgChildrenCount;
+           bestContainer = el;
+         }
       }
     }
 
-    if (!bestContainer || maxRows < 2) return { container: null, rows: [] };
+    if (!bestContainer || maxImgChildren < 2) return { container: null, rows: [] };
 
-    const rows = Array.from(bestContainer.children).filter(child => {
-      return child.tagName === 'TR' || child.getAttribute('role') === 'row' || child.querySelector('input[type="checkbox"], [role="checkbox"]');
-    });
+    // 2. The rows are ALL children of this container (including expanded question rows which lack images)
+    const rows = Array.from(bestContainer.children);
     
-    // Find a good wrapper to apply the drawer styling to
+    // 3. Find a good wrapper to apply the drawer styling to
     let wrapper = bestContainer;
-    
-    // If it's inside a standard table, grab the table or its container
     const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
     if (table) {
       wrapper = table.closest('.MuiTableContainer-root') || table;
     } else {
-      // For div-based lists, the parent of the row container is usually the scrollable wrapper
       const parent = bestContainer.parentElement;
       if (parent && parent !== document.body && parent.tagName !== 'MAIN') {
          wrapper = parent;
@@ -422,10 +404,8 @@ window.WR_PAGES.spaced = {
     return res.container;
   },
 
-  extractAndRenderGrid() {
-    const { container: originalTable, rows } = this.findListContainerAndRows();
-    
-    if (!originalTable || rows.length === 0) {
+  extractAndRenderGrid(originalTable, rows) {
+    if (!originalTable || !rows || rows.length === 0) {
       console.log(`[WIDER RECALL GRID] Could not find original table or rows.`);
       this.restoreOriginalUI();
       return;
@@ -724,7 +704,7 @@ window.WR_PAGES.spaced = {
 
   proxyCheckboxClick(card) {
     this.executeOnCard(card, (rowElement) => {
-      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"]');
+      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"], button, [class*="checkbox"], .checkbox');
       if (originalCheckbox) {
         if (originalCheckbox.tagName === 'INPUT') {
           // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
@@ -736,9 +716,13 @@ window.WR_PAGES.spaced = {
             originalCheckbox.click();
           }
         } else {
-          // It's an aria checkbox, just click it
+          // It's an aria checkbox or button, just click it
           originalCheckbox.click();
         }
+      } else {
+        // Fallback: Click the very first child of the row which usually houses the custom checkbox
+        const firstChild = rowElement.firstElementChild;
+        if (firstChild) firstChild.click();
       }
     });
     
