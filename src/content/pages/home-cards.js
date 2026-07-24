@@ -8,6 +8,7 @@
 
 window.WR_HOME_CARDS = {
   observer: null,
+  imageObservers: [],
   active: false,
   
   injectCss() {
@@ -86,6 +87,10 @@ window.WR_HOME_CARDS = {
   cleanup() {
     this.active = false;
     if (this.observer) this.observer.disconnect();
+    if (this.imageObservers) {
+      this.imageObservers.forEach(obs => obs.disconnect());
+      this.imageObservers = [];
+    }
     document.querySelectorAll('.wr-home-grid-container').forEach(el => el.remove());
     if (this._fallbackInterval) {
       clearInterval(this._fallbackInterval);
@@ -137,11 +142,24 @@ window.WR_HOME_CARDS = {
   scanAndProcessGrids() {
     const mainArea = document.querySelector('main') || document.getElementById('navigation-scroll-container') || document.body;
     
-    const allDivs = Array.from(mainArea.querySelectorAll('div'));
+    // Performance optimization: Only check elements that have children and aren't our custom elements
+    const allDivs = Array.from(mainArea.querySelectorAll('div')).filter(div => {
+       if (div.children.length === 0) return false;
+       const cl = div.classList;
+       if (cl.contains('wr-home-grid-container') || cl.contains('wr-grid-card') || cl.contains('wr-original-home-card')) return false;
+       return true;
+    });
+    
     const nativeGrids = [];
     
     for (const div of allDivs) {
-      if (div.classList.contains('wr-home-grid-container')) continue;
+      // Fast path: If already processed, it has our custom grid right before it.
+      // This skips getComputedStyle which causes massive layout thrashing on scroll.
+      const prev = div.previousElementSibling;
+      if (prev && prev.classList && prev.classList.contains('wr-home-grid-container')) {
+         nativeGrids.push(div);
+         continue;
+      }
       
       const style = window.getComputedStyle(div);
       if (style.display === 'grid') {
@@ -218,6 +236,8 @@ window.WR_HOME_CARDS = {
                 }
              });
              imgObserver.observe(row, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+             this.imageObservers = this.imageObservers || [];
+             this.imageObservers.push(imgObserver);
           }
         }
       });

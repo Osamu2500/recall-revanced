@@ -82,7 +82,7 @@ body[data-wr-enabled="true"][data-wr-theme="dracula"] .wr-bionic {
   text-shadow: 0 0 2px rgba(139, 233, 253, 0.4) !important;
 }
 
-/* Chat UI (AI Messages) */
+/* Chat UI (Bot Messages) */
 body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="message"],
 body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="bubble"] {
   background-color: var(--drac-current) !important;

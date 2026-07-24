@@ -99,7 +99,7 @@ window.WR_SELECTORS = Object.freeze({
     // Links in notes
     links:               '.ProseMirror a[href]',
 
-    // Summary/highlight section (Recall-generated AI summary card)
+    // Summary/highlight section (Recall-generated summary card)
     summaryCard:         '[class*="summary"], [class*="Summary"]',
   },
 
