@@ -395,32 +395,7 @@ window.WR_PAGES.spaced = {
     let wrapper = bestContainer;
     const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
     if (table) {
-      wrapper = table.closest('.MuiTableContainer-root') || table;
-    } else {
-      const parent = bestContainer.parentElement;
-      if (parent && parent !== document.body && parent.tagName !== 'MAIN') {
-         wrapper = parent;
-      }
-    }
-
-    // Detect if the side panel is open. If there is a large sibling (width > 250px)
-    // in the ancestor tree, the split-view is active, so we should abort grid extraction.
-    let node = wrapper;
-    let depth = 0;
-    while (node && node !== document.body && node.tagName !== 'MAIN' && depth < 4) {
-      if (node.parentElement) {
-        for (let sibling of node.parentElement.children) {
-          if (sibling === node || sibling.tagName === 'STYLE' || sibling.tagName === 'SCRIPT' || sibling.classList.contains('wr-custom-grid-container')) continue;
-          
-          const rect = sibling.getBoundingClientRect();
-          // A side panel typically has substantial width and height
-          if (rect.width > 250 && rect.height > 200) {
-             return { container: null, rows: [] };
-          }
-        }
-      }
-      node = node.parentElement;
-      depth++;
+      wrapper = table;
     }
 
     return { container: wrapper, rows: rows };
@@ -759,8 +734,6 @@ window.WR_PAGES.spaced = {
     this.executeOnCard(card, (rowElement) => {
       const arrowBtn = rowElement.querySelector('button');
       if (arrowBtn) {
-        // Immediately restore original UI to prevent layout jumping before next polling tick
-        this.restoreOriginalUI();
         arrowBtn.click();
       }
     });

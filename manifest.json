@@ -29,12 +29,7 @@
         "src/content/pages/search.js",
         "src/content/pages/chat.js",
         "src/content/pages/review.js",
-        "src/content/features/bionic-reading.js",
-        "src/content/features/command-palette.js",
-        "src/content/features/cinematic-zen.js",
         "src/content/features/media-tools.js",
-        "src/content/features/focus-mode.js",
-        "src/content/features/toc-minimap.js",
         "src/content/features/code-tools.js",
         "src/content/main.js"
       ],
