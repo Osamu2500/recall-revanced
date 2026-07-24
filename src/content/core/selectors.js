@@ -18,7 +18,7 @@ window.WR_SELECTORS = Object.freeze({
 
   // ─── Page Route Matchers ────────────────────────────────────────────────────
   pages: {
-    isHomeGrid:          (path) => path === '/' || path === '' || path === '/home',
+    isHomeGrid:          (path) => path === '/' || path === '' || path === '/home' || path.startsWith('/items'),
     isItemDetail:        (path) => path.startsWith('/item/'),
     isSpacedRepetition:  (path) => path.startsWith('/spaced-repetition'),
     isSettings:          (path) => path.startsWith('/settings'),

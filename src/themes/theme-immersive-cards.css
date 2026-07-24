@@ -89,6 +89,7 @@ body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-badge {
   z-index: 4 !important;
   background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   color: #fff !important;
   border: 1px solid rgba(255,255,255,0.2) !important;
 }
@@ -122,10 +123,10 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"]:hover {
 }
 
 /* Native Image wrapper -> absolute background */
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > div:first-child:has(img),
-body[data-wr-immersive-cards="true"] article > div:first-child:has(img),
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > a:first-child:has(img),
-body[data-wr-immersive-cards="true"] article > a:first-child:has(img) {
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > div:has(img),
+body[data-wr-immersive-cards="true"] article > div:has(img),
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > a:has(img),
+body[data-wr-immersive-cards="true"] article > a:has(img) {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -163,14 +164,21 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"]::after {
 }
 
 /* Native Card Body (Text) -> float at bottom */
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > div:last-child,
-body[data-wr-immersive-cards="true"] article > div:last-child,
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > a:last-child,
-body[data-wr-immersive-cards="true"] article > a:last-child {
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)),
+body[data-wr-immersive-cards="true"] article > *:not(:has(img)) {
   position: relative !important;
   z-index: 3 !important;
   background: transparent !important;
   color: #fff !important;
+  pointer-events: none !important;
+}
+
+/* Re-enable pointer events on links/buttons inside the content */
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)) a,
+body[data-wr-immersive-cards="true"] article > *:not(:has(img)) a,
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)) button,
+body[data-wr-immersive-cards="true"] article > *:not(:has(img)) button {
+  pointer-events: auto !important;
 }
 
 /* Ensure text inside native cards gets heavy shadow and turns white */
