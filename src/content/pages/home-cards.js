@@ -15,9 +15,15 @@ window.WR_HOME_CARDS = {
     const style = document.createElement('style');
     style.id = 'wr-home-cards-css';
     style.textContent = `
-      /* Hide native cards */
+      /* Hide native cards visually, but keep them in the DOM to trigger lazy loading */
       body[data-wr-enabled="true"][data-wr-immersive-cards="true"] .wr-original-home-card {
-        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
 
       /* Metadata Tags */
@@ -198,6 +204,21 @@ window.WR_HOME_CARDS = {
         if (cardData) {
           const customEl = this.createCardElement(cardData, index * 20);
           customGrid.appendChild(customEl);
+
+          // If the thumbnail wasn't loaded yet, observe the native row until React injects it
+          if (cardData.image.includes('placehold.co')) {
+             const imgObserver = new MutationObserver((mutations) => {
+                const newImgEl = row.querySelector('img');
+                if (newImgEl && newImgEl.src && !newImgEl.src.includes('placehold.co')) {
+                   const customImg = customEl.querySelector('.wr-card-image');
+                   if (customImg) {
+                      customImg.src = newImgEl.src;
+                   }
+                   imgObserver.disconnect();
+                }
+             });
+             imgObserver.observe(row, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+          }
         }
       });
     } else {
@@ -242,10 +263,15 @@ window.WR_HOME_CARDS = {
               let foundSvg = null;
               
               for (let i = 0; i < 3 && parent; i++) {
-                 const svgs = Array.from(parent.querySelectorAll('svg'));
-                 for (const svg of svgs) {
-                    if (!usedSvgs.has(svg)) {
-                       foundSvg = svg;
+                 const icons = Array.from(parent.querySelectorAll('svg, img'));
+                 for (const icon of icons) {
+                    if (!usedSvgs.has(icon)) {
+                       if (icon.tagName === 'IMG') {
+                          if (icon.className && icon.className.includes('thumbnail')) continue;
+                          if (icon.getAttribute('width') > 40 || icon.clientWidth > 40) continue;
+                          if (imgEl && icon.src === imgEl.src) continue; // skip main thumbnail
+                       }
+                       foundSvg = icon;
                        break;
                     }
                  }
@@ -257,11 +283,15 @@ window.WR_HOME_CARDS = {
                  usedSvgs.add(foundSvg);
                  const clonedSvg = foundSvg.cloneNode(true);
                  clonedSvg.removeAttribute('class');
-                 clonedSvg.setAttribute('width', '12');
-                 clonedSvg.setAttribute('height', '12');
+                 clonedSvg.setAttribute('width', '14');
+                 clonedSvg.setAttribute('height', '14');
                  clonedSvg.style.marginRight = '4px';
                  clonedSvg.style.display = 'inline-block';
                  clonedSvg.style.verticalAlign = 'middle';
+                 if (clonedSvg.tagName === 'IMG') {
+                    clonedSvg.style.borderRadius = '50%';
+                    clonedSvg.style.objectFit = 'contain';
+                 }
                  closestSvgHtml = clonedSvg.outerHTML;
               }
 
