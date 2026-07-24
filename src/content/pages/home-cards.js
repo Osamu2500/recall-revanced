@@ -117,33 +117,38 @@ window.WR_HOME_CARDS = {
   },
 
   extractAndRenderGrid() {
-    // Recall's homepage cards are often just generic <div class="MuiBox-root"> elements.
-    // The most reliable way to find them is to look for links to items.
-    const itemLinks = Array.from(document.querySelectorAll('a[href*="/item/"]'))
-      .filter(a => !a.closest('.wr-home-grid-container'));
-
-    if (itemLinks.length === 0) return;
-
-    // The actual "card" is usually the top-level block element that is a direct child of the grid container.
-    const rawCards = Array.from(new Set(itemLinks.map(link => {
-      let card = link;
-      while (card.parentElement && card.parentElement.tagName !== 'MAIN' && card.parentElement.id !== 'navigation-scroll-container') {
-        const parentStyle = window.getComputedStyle(card.parentElement);
-        if (parentStyle.display === 'grid' || parentStyle.display === 'flex' && card.parentElement.children.length > 2) {
-          break; // The parent is likely the grid container
+    // Recall's homepage cards are often generic <div class="MuiBox-root"> elements with React onClick handlers (no <a> tags).
+    // The most robust way to find them is to locate the main CSS Grid container that holds them.
+    const mainArea = document.querySelector('main') || document.getElementById('navigation-scroll-container') || document.body;
+    
+    // Find all potential grid containers
+    const allDivs = Array.from(mainArea.querySelectorAll('div'));
+    let nativeGridContainer = null;
+    let maxChildren = 0;
+    
+    for (const div of allDivs) {
+      if (div.classList.contains('wr-home-grid-container')) continue;
+      
+      const style = window.getComputedStyle(div);
+      if (style.display === 'grid' && div.children.length > maxChildren) {
+        // A typical card grid has many columns (repeat(...))
+        if (style.gridTemplateColumns && style.gridTemplateColumns.includes('px')) {
+          maxChildren = div.children.length;
+          nativeGridContainer = div;
         }
-        card = card.parentElement;
       }
-      return card;
-    })));
+    }
+
+    if (!nativeGridContainer || maxChildren === 0) return;
+
+    // The cards are the direct children of this grid container
+    const rawCards = Array.from(nativeGridContainer.children).filter(child => child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT');
 
     if (rawCards.length === 0) return;
 
-    // Find the closest common container of the native cards
-    let parentContainer = rawCards[0].parentElement;
-    
-    if (this.gridContainer.parentNode !== parentContainer) {
-      parentContainer.insertBefore(this.gridContainer, parentContainer.firstChild);
+    // We will insert our custom grid right before the native one
+    if (this.gridContainer.parentNode !== nativeGridContainer.parentNode) {
+      nativeGridContainer.parentNode.insertBefore(this.gridContainer, nativeGridContainer);
     }
 
     this.gridContainer.style.display = 'grid';
