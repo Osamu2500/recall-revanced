@@ -17,8 +17,7 @@ window.WR_HOME_CARDS = {
     style.id = 'wr-home-cards-css';
     style.textContent = `
       /* Hide native cards */
-      body[data-wr-enabled="true"][data-wr-immersive-cards="true"] article.wr-original-home-card,
-      body[data-wr-enabled="true"][data-wr-immersive-cards="true"] div[class*="MuiCard-root"].wr-original-home-card {
+      body[data-wr-enabled="true"][data-wr-immersive-cards="true"] .wr-original-home-card {
         display: none !important;
       }
 
