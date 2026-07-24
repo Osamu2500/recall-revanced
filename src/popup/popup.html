@@ -18,7 +18,7 @@
     body {
       margin: 0;
       padding: 0;
-      width: 420px;
+      width: 500px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
@@ -47,17 +47,25 @@
     .nav-tabs {
       display: flex;
       border-bottom: 1px solid var(--border);
-      padding: 0 16px;
+      padding: 0 8px;
       background: var(--bg-panel);
+      overflow-x: auto;
+    }
+    .nav-tabs::-webkit-scrollbar {
+      height: 2px;
+    }
+    .nav-tabs::-webkit-scrollbar-thumb {
+      background: var(--border);
     }
     .nav-item {
-      padding: 12px 16px;
+      padding: 12px 14px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
       color: var(--text-muted);
       border-bottom: 2px solid transparent;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .nav-item.active {
       color: var(--text);
@@ -68,7 +76,7 @@
     }
     .panels {
       position: relative;
-      height: 500px;
+      height: 600px;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -211,16 +219,34 @@
   </header>
 
   <div class="nav-tabs">
-    <div class="nav-item active" data-target="panel-general">General</div>
-    <div class="nav-item" data-target="panel-media">Reading & Media</div>
-    <div class="nav-item" data-target="panel-grid">Grid & Nav</div>
-    <div class="nav-item" data-target="panel-appearance">Appearance</div>
+    <div class="nav-item active" data-target="panel-global">Global</div>
+    <div class="nav-item" data-target="panel-home">Home</div>
+    <div class="nav-item" data-target="panel-cards">Cards</div>
+    <div class="nav-item" data-target="panel-review">Review</div>
+    <div class="nav-item" data-target="panel-graph">Graph</div>
+    <div class="nav-item" data-target="panel-chats">Chats</div>
   </div>
 
   <div class="panels">
-    <!-- GENERAL PANEL -->
-    <div id="panel-general" class="panel active">
-      <div class="section-title">Layout Width</div>
+    
+    <!-- GLOBAL PANEL -->
+    <div id="panel-global" class="panel active">
+      <div class="section-title">Color Themes</div>
+      <div class="themes-grid">
+        <button class="theme-btn" data-theme="default">Recall Default</button>
+        <button class="theme-btn" data-theme="notion">Notion Minimal</button>
+        <button class="theme-btn" data-theme="obsidian">Obsidian Gruvbox</button>
+        <button class="theme-btn" data-theme="cyberpunk">Cyberpunk Neon</button>
+        <button class="theme-btn" data-theme="dracula">Dracula</button>
+        <button class="theme-btn" data-theme="tokyo">Tokyo Night</button>
+        <button class="theme-btn" data-theme="nord">Nord</button>
+        <button class="theme-btn" data-theme="catppuccin">Catppuccin</button>
+        <button class="theme-btn" data-theme="solarized-dark">Solarized Dark</button>
+        <button class="theme-btn" data-theme="matrix">Matrix Hacker</button>
+        <button class="theme-btn" data-theme="monokai">Monokai</button>
+      </div>
+
+      <div class="section-title mt-20">Layout Width</div>
       <div class="range-container">
         <div class="range-header">
           <span>Max Width</span>
@@ -236,26 +262,32 @@
         <button class="pb" data-w="3000">Full Width</button>
       </div>
 
-      <div class="section-title mt-20">Navigation Settings</div>
-      
+      <div class="section-title mt-20">Global UI Toggles</div>
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-title">Hide Sidebar</span>
-          <span class="setting-desc">Auto-hide left navigation</span>
+          <span class="setting-desc">Auto-hide left navigation globally</span>
         </div>
         <label class="toggle"><input type="checkbox" id="hideSidebarCb" title="Hide Sidebar"><span class="slider"></span></label>
       </div>
-      
+
       <div class="setting-row">
         <div class="setting-info">
-          <span class="setting-title">Hide Outline</span>
-          <span class="setting-desc">Remove right table of contents</span>
+          <span class="setting-title">Premium Glassmorphism</span>
+          <span class="setting-desc">Enable frosted glass UI theme</span>
         </div>
-        <label class="toggle"><input type="checkbox" id="hideOutlineCb" title="Hide Outline"><span class="slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="premiumUiCb" title="Premium UI"><span class="slider"></span></label>
       </div>
 
-      <div class="section-title mt-20">Advanced Utilities</div>
-      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Typography Fixes</span>
+          <span class="setting-desc">Better fonts & spacing across the app</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
+      </div>
+
+      <div class="section-title mt-20">Global Tools</div>
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-title">Command Palette</span>
@@ -273,85 +305,14 @@
       </div>
     </div>
 
-    <!-- READING & MEDIA PANEL -->
-    <div id="panel-media" class="panel">
-      <div class="section-title">Reading Experience</div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Zen Mode</span>
-          <span class="setting-desc">Maximum focus, hide UI</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="zenCb" title="Zen Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Focus Mode</span>
-          <span class="setting-desc">Highlight hovered blocks</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="focusCb" title="Focus Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Bionic Reading</span>
-          <span class="setting-desc">Bold first letters</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="bionicCb" title="Bionic Reading"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Text Wrap</span>
-          <span class="setting-desc">Wrap code blocks</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="wrapCb" title="Text Wrap"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Typography Fixes</span>
-          <span class="setting-desc">Better fonts & spacing</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
-      </div>
-
-      <div class="section-title mt-20">Media Tools</div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Media Tools</span>
-          <span class="setting-desc">Video/Audio enhancements</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="mediaCb" title="Media Tools"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Image Lightbox</span>
-          <span class="setting-desc">Click images to zoom</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="lightboxCb" title="Image Lightbox"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Graph Tools</span>
-          <span class="setting-desc">Enhance knowledge graph</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="graphCb" title="Graph Tools"><span class="slider"></span></label>
-      </div>
-    </div>
-
-    <!-- GRID & NAV PANEL -->
-    <div id="panel-grid" class="panel">
-      <div class="section-title">Home Grid</div>
+    <!-- HOME PANEL -->
+    <div id="panel-home" class="panel">
+      <div class="section-title">Home Feed Grid</div>
       
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-title">Grid View</span>
-          <span class="setting-desc">Multi-column item grid</span>
+          <span class="setting-desc">Multi-column item grid on Home/Questions</span>
         </div>
         <label class="toggle"><input type="checkbox" id="gridCb" title="Grid View"><span class="slider"></span></label>
       </div>
@@ -364,7 +325,91 @@
         <input type="range" id="gridColsRange" min="2" max="5" step="1" value="3" title="Grid Columns">
       </div>
 
-      <div class="section-title mt-20">Table of Contents</div>
+      <div class="section-title mt-20">Feed Animations</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Entrance Animations</span>
+          <span class="setting-desc">Staggered load animations for feed items</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="animationsCb" title="Animations"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- CARDS PANEL -->
+    <div id="panel-cards" class="panel">
+      <div class="section-title">Card Aesthetics</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Immersive Glass Cards</span>
+          <span class="setting-desc">Full-bleed thumbnail backgrounds on cards</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="immersiveCardsCb" title="Immersive Cards"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Card Spotlight Hover</span>
+          <span class="setting-desc">Mouse-tracking glow effect on cards</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="spotlightCb" title="Spotlight"><span class="slider"></span></label>
+      </div>
+
+      <div class="section-title mt-20">Card Media</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Image Lightbox</span>
+          <span class="setting-desc">Click images to zoom in on card details</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="lightboxCb" title="Image Lightbox"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- REVIEW PANEL -->
+    <div id="panel-review" class="panel">
+      <div class="section-title">Reading & Focus</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Zen Mode</span>
+          <span class="setting-desc">Cinematic dynamic aura, hides UI</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="zenCb" title="Zen Mode"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Focus Mode</span>
+          <span class="setting-desc">Proximity tracking paragraph highlight</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="focusCb" title="Focus Mode"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Bionic Reading</span>
+          <span class="setting-desc">Advanced NLP fixation points</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="bionicCb" title="Bionic Reading"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Text Wrap</span>
+          <span class="setting-desc">Wrap code blocks inside reviews</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="wrapCb" title="Text Wrap"><span class="slider"></span></label>
+      </div>
+
+      <div class="section-title mt-20">Review Navigation</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Hide Outline</span>
+          <span class="setting-desc">Remove right table of contents</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="hideOutlineCb" title="Hide Outline"><span class="slider"></span></label>
+      </div>
 
       <div class="setting-row">
         <div class="setting-info">
@@ -377,63 +422,48 @@
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-title">TOC Minimap</span>
-          <span class="setting-desc">Scroll progress indicator</span>
+          <span class="setting-desc">Canvas-based visual document map</span>
         </div>
         <label class="toggle"><input type="checkbox" id="tocCb" title="TOC Minimap"><span class="slider"></span></label>
       </div>
+
+      <div class="section-title mt-20">Review Media</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Media Tools</span>
+          <span class="setting-desc">Picture-in-Picture & Speed controls</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="mediaCb" title="Media Tools"><span class="slider"></span></label>
+      </div>
     </div>
 
-    <!-- APPEARANCE & THEMES PANEL -->
-    <div id="panel-appearance" class="panel">
-      <div class="section-title">Color Themes</div>
-      <div class="themes-grid">
-        <button class="theme-btn" data-theme="default">Recall Default</button>
-        <button class="theme-btn" data-theme="notion">Notion Minimal</button>
-        <button class="theme-btn" data-theme="obsidian">Obsidian Gruvbox</button>
-        <button class="theme-btn" data-theme="cyberpunk">Cyberpunk Neon</button>
-        <button class="theme-btn" data-theme="dracula">Dracula</button>
-        <button class="theme-btn" data-theme="tokyo">Tokyo Night</button>
-        <button class="theme-btn" data-theme="nord">Nord</button>
-        <button class="theme-btn" data-theme="catppuccin">Catppuccin</button>
-        <button class="theme-btn" data-theme="solarized-dark">Solarized Dark</button>
-        <button class="theme-btn" data-theme="matrix">Matrix Hacker</button>
-        <button class="theme-btn" data-theme="monokai">Monokai</button>
-      </div>
-
-      <div class="section-title mt-20">Premium Visuals</div>
+    <!-- GRAPH PANEL -->
+    <div id="panel-graph" class="panel">
+      <div class="section-title">Knowledge Graph Enhancements</div>
       
       <div class="setting-row">
         <div class="setting-info">
-          <span class="setting-title">Immersive Glass Cards</span>
-          <span class="setting-desc">Full-bleed thumbnail backgrounds</span>
+          <span class="setting-title">Graph Tools</span>
+          <span class="setting-desc">Advanced force-directed physics engine hooks</span>
         </div>
-        <label class="toggle"><input type="checkbox" id="immersiveCardsCb" title="Immersive Cards"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Premium Glassmorphism</span>
-          <span class="setting-desc">Enable frosted glass UI theme</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="premiumUiCb" title="Premium UI"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Card Spotlight Hover</span>
-          <span class="setting-desc">Mouse-tracking glow effect</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="spotlightCb" title="Spotlight"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Card Entrance Animations</span>
-          <span class="setting-desc">Staggered load animations</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="animationsCb" title="Animations"><span class="slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="graphCb" title="Graph Tools"><span class="slider"></span></label>
       </div>
     </div>
+
+    <!-- CHATS PANEL -->
+    <div id="panel-chats" class="panel">
+      <div class="section-title">Chat Aesthetics</div>
+      
+      <div class="setting-row" style="opacity: 0.5;">
+        <div class="setting-info">
+          <span class="setting-title">Chat Bubble Styling (Coming Soon)</span>
+          <span class="setting-desc">Custom markdown rendering for chat</span>
+        </div>
+        <label class="toggle"><input type="checkbox" disabled><span class="slider"></span></label>
+      </div>
+    </div>
+
   </div>
 
   <script src="popup.js"></script>
