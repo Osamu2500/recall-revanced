@@ -21,6 +21,29 @@ window.WR_HOME_CARDS = {
         display: none !important;
       }
 
+      /* Metadata Tags */
+      body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+        pointer-events: none !important;
+      }
+      body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-tag {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.2);
+        padding: 3px 8px;
+        border-radius: 12px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
+
       /* Home Grid Container */
       body[data-wr-enabled="true"][data-wr-immersive-cards="true"] .wr-home-grid-container {
         display: grid;
@@ -214,6 +237,24 @@ window.WR_HOME_CARDS = {
         }
       }
 
+      // Extract all other text as metadata (tags, source, type)
+      const allTextNodes = [];
+      const walker = document.createTreeWalker(cardEl, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      while (node = walker.nextNode()) {
+        const text = node.textContent.trim();
+        // Skip empty, very long text, or the exact title
+        if (text && text.length > 0 && text.length < 40 && text !== title) {
+           // Skip if it's part of the title element
+           if (!titleEl || !titleEl.contains(node)) {
+              allTextNodes.push(text);
+           }
+        }
+      }
+      
+      // Deduplicate tags
+      const metadata = Array.from(new Set(allTextNodes));
+
       // Find the clickable link
       const linkEl = cardEl.querySelector('a');
       
@@ -221,6 +262,7 @@ window.WR_HOME_CARDS = {
         id: `wr-home-card-${index}`,
         image: imgUrl,
         title: title,
+        metadata: metadata,
         nativeCard: cardEl,
         link: linkEl ? linkEl.href : null
       };
@@ -236,12 +278,17 @@ window.WR_HOME_CARDS = {
     el.style.animationDelay = `${delayMs}ms`;
 
     // Only inject link wrapper if we found a link, otherwise it's just a div
+    const metadataHtml = card.metadata && card.metadata.length > 0 
+      ? `<div class="wr-card-metadata">${card.metadata.map(tag => `<span class="wr-card-tag">${tag}</span>`).join('')}</div>` 
+      : '';
+
     const contentHtml = `
       <div class="wr-card-image-wrapper">
         <img src="${card.image}" class="wr-card-image" loading="lazy" />
       </div>
       <div class="wr-card-content">
         <h3 class="wr-card-title">${card.title}</h3>
+        ${metadataHtml}
       </div>
     `;
 
