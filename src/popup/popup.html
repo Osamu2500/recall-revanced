@@ -22,7 +22,11 @@
     }
     * {
       -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+    }
+
+    /* Helper Classes */
+    .disabled-row {
+      opacity: 0.5;
     }
 
     body {
@@ -387,7 +391,7 @@
     <div id="panel-chats" class="panel">
       <div class="section-title">Chat Aesthetics</div>
       
-      <div class="setting-row" style="opacity: 0.5;">
+      <div class="setting-row disabled-row">
         <div class="setting-info">
           <span class="setting-title">Chat Bubble Styling (Coming Soon)</span>
           <span class="setting-desc">Custom markdown rendering for chat</span>
