@@ -5,6 +5,11 @@
 /* 
   1. CUSTOM SPACED REPETITION GRID (.wr-grid-card)
   ---------------------------------------------------------------------- */
+/* Adjust grid columns to comfortably fit 16:9 cards instead of squeezing 5 */
+body[data-wr-immersive-cards="true"] .wr-custom-grid-container {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+}
+
 body[data-wr-immersive-cards="true"] .wr-grid-card {
   position: relative !important;
   overflow: hidden !important;
@@ -14,6 +19,7 @@ body[data-wr-immersive-cards="true"] .wr-grid-card {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   aspect-ratio: 16 / 9 !important;
+  min-height: auto !important; /* override the 220px min-height */
 }
 
 body[data-wr-immersive-cards="true"] .wr-grid-card:hover {
@@ -113,8 +119,6 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-end !important;
-  min-height: auto !important;
   aspect-ratio: 16 / 9 !important;
 }
 
@@ -124,22 +128,19 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"]:hover {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
 }
 
-/* Native Image wrapper -> absolute background */
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > div:has(img),
-body[data-wr-immersive-cards="true"] article > div:has(img),
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > a:has(img),
-body[data-wr-immersive-cards="true"] article > a:has(img) {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
+/* Force direct children to be flex columns so we can use margin-top: auto */
+body[data-wr-immersive-cards="true"] article > a,
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > a,
+body[data-wr-immersive-cards="true"] article > div,
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > div {
+  display: flex !important;
+  flex-direction: column !important;
   width: 100% !important;
   height: 100% !important;
-  z-index: 1 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
-/* Native Image */
+/* The actual image becomes an absolute background */
 body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] img,
 body[data-wr-immersive-cards="true"] article img {
   position: absolute !important;
@@ -149,9 +150,10 @@ body[data-wr-immersive-cards="true"] article img {
   height: 100% !important;
   object-fit: cover !important;
   border-radius: 0 !important;
+  z-index: 1 !important;
 }
 
-/* Gradient overlay */
+/* Gradient overlay on the card itself */
 body[data-wr-immersive-cards="true"] article::after,
 body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"]::after {
   content: '' !important;
@@ -165,21 +167,22 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"]::after {
   pointer-events: none !important;
 }
 
-/* Native Card Body (Text) -> float at bottom */
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)),
-body[data-wr-immersive-cards="true"] article > *:not(:has(img)) {
+/* Target the text wrapper (element that doesn't have an image, but has text) */
+body[data-wr-immersive-cards="true"] article *:not(:has(img)):has(> h2, > h3, > p, > span, > h1, > h4),
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] *:not(:has(img)):has(> h2, > h3, > p, > span, > h1, > h4) {
   position: relative !important;
   z-index: 3 !important;
   background: transparent !important;
-  color: #fff !important;
+  margin-top: auto !important; /* Push to bottom */
+  padding: 16px !important;
   pointer-events: none !important;
 }
 
 /* Re-enable pointer events on links/buttons inside the content */
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)) a,
-body[data-wr-immersive-cards="true"] article > *:not(:has(img)) a,
-body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] > *:not(:has(img)) button,
-body[data-wr-immersive-cards="true"] article > *:not(:has(img)) button {
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] *:not(:has(img)) a,
+body[data-wr-immersive-cards="true"] article *:not(:has(img)) a,
+body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] *:not(:has(img)) button,
+body[data-wr-immersive-cards="true"] article *:not(:has(img)) button {
   pointer-events: auto !important;
 }
 
