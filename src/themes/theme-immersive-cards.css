@@ -9,10 +9,11 @@ body[data-wr-immersive-cards="true"] .wr-grid-card {
   position: relative !important;
   overflow: hidden !important;
   background: transparent !important;
-  border-radius: 16px !important;
+  border-radius: 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  aspect-ratio: 16 / 9 !important;
 }
 
 body[data-wr-immersive-cards="true"] .wr-grid-card:hover {
@@ -74,11 +75,11 @@ body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-dropdown-btn {
 
 body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-title {
   color: #fff !important;
-  font-weight: 700 !important;
-  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
   margin: 0 !important;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 8px rgba(0, 0, 0, 0.9) !important;
-  line-height: 1.4 !important;
+  line-height: 1.3 !important;
 }
 
 /* Badges floating on image */
@@ -107,13 +108,14 @@ body[data-wr-immersive-cards="true"] div[class*="MuiCard-root"] {
   position: relative !important;
   overflow: hidden !important;
   background: transparent !important;
-  border-radius: 16px !important;
+  border-radius: 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
-  min-height: 240px !important;
+  min-height: auto !important;
+  aspect-ratio: 16 / 9 !important;
 }
 
 body[data-wr-immersive-cards="true"] article:hover,
@@ -200,6 +202,8 @@ body[data-wr-immersive-cards="true"] article h5,
 body[data-wr-immersive-cards="true"] article h6 {
   color: #fff !important;
   text-shadow: 0 1px 4px rgba(0,0,0,0.9) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.3 !important;
 }
 
 /* Make sure SVG icons are bright */
