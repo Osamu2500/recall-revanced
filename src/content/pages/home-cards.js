@@ -223,20 +223,20 @@ window.WR_HOME_CARDS = {
     const el = document.createElement('div');
     // Using exactly the same classes as spaced repetition so Immersive CSS works
     el.className = 'wr-grid-card'; 
-    el.style.animationDelay = \`\${delayMs}ms\`;
+    el.style.animationDelay = `${delayMs}ms`;
 
     // Only inject link wrapper if we found a link, otherwise it's just a div
-    const contentHtml = \`
+    const contentHtml = `
       <div class="wr-card-image-wrapper">
-        <img src="\${card.image}" class="wr-card-image" loading="lazy" />
+        <img src="${card.image}" class="wr-card-image" loading="lazy" />
       </div>
       <div class="wr-card-content">
-        <h3 class="wr-card-title">\${card.title}</h3>
+        <h3 class="wr-card-title">${card.title}</h3>
       </div>
-    \`;
+    `;
 
     if (card.link) {
-      el.innerHTML = \`<a href="\${card.link}" style="text-decoration: none; color: inherit; width: 100%; height: 100%; display: flex; flex-direction: column;">\${contentHtml}</a>\`;
+      el.innerHTML = `<a href="${card.link}" style="text-decoration: none; color: inherit; width: 100%; height: 100%; display: flex; flex-direction: column;">${contentHtml}</a>`;
     } else {
       el.innerHTML = contentHtml;
       // Proxy clicks to native element if no direct link
@@ -251,8 +251,8 @@ window.WR_HOME_CARDS = {
       const rect = el.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
-      el.style.setProperty('--mx', \`\${x}%\`);
-      el.style.setProperty('--my', \`\${y}%\`);
+      el.style.setProperty('--mx', `${x}%`);
+      el.style.setProperty('--my', `${y}%`);
     });
 
     return el;
