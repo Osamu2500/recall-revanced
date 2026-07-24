@@ -18,7 +18,7 @@
     body {
       margin: 0;
       padding: 0;
-      width: 360px;
+      width: 420px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
@@ -68,7 +68,7 @@
     }
     .panels {
       position: relative;
-      height: 380px;
+      height: 500px;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -212,9 +212,9 @@
 
   <div class="nav-tabs">
     <div class="nav-item active" data-target="panel-general">General</div>
-    <div class="nav-item" data-target="panel-premium">Premium UI</div>
-    <div class="nav-item" data-target="panel-themes">Themes</div>
-    <div class="nav-item" data-target="panel-advanced">Advanced</div>
+    <div class="nav-item" data-target="panel-media">Reading & Media</div>
+    <div class="nav-item" data-target="panel-grid">Grid & Nav</div>
+    <div class="nav-item" data-target="panel-appearance">Appearance</div>
   </div>
 
   <div class="panels">
@@ -236,7 +236,7 @@
         <button class="pb" data-w="3000">Full Width</button>
       </div>
 
-      <div class="section-title mt-20">UI Elements</div>
+      <div class="section-title mt-20">Navigation Settings</div>
       
       <div class="setting-row">
         <div class="setting-info">
@@ -253,6 +253,100 @@
         </div>
         <label class="toggle"><input type="checkbox" id="hideOutlineCb" title="Hide Outline"><span class="slider"></span></label>
       </div>
+
+      <div class="section-title mt-20">Advanced Utilities</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Command Palette</span>
+          <span class="setting-desc">Enable Cmd+K menu</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="cmdCb" title="Command Palette"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Hotkeys</span>
+          <span class="setting-desc">Enable custom shortcuts</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="hotkeysCb" title="Hotkeys"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- READING & MEDIA PANEL -->
+    <div id="panel-media" class="panel">
+      <div class="section-title">Reading Experience</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Zen Mode</span>
+          <span class="setting-desc">Maximum focus, hide UI</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="zenCb" title="Zen Mode"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Focus Mode</span>
+          <span class="setting-desc">Highlight hovered blocks</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="focusCb" title="Focus Mode"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Bionic Reading</span>
+          <span class="setting-desc">Bold first letters</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="bionicCb" title="Bionic Reading"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Text Wrap</span>
+          <span class="setting-desc">Wrap code blocks</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="wrapCb" title="Text Wrap"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Typography Fixes</span>
+          <span class="setting-desc">Better fonts & spacing</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
+      </div>
+
+      <div class="section-title mt-20">Media Tools</div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Media Tools</span>
+          <span class="setting-desc">Video/Audio enhancements</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="mediaCb" title="Media Tools"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Image Lightbox</span>
+          <span class="setting-desc">Click images to zoom</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="lightboxCb" title="Image Lightbox"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Graph Tools</span>
+          <span class="setting-desc">Enhance knowledge graph</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="graphCb" title="Graph Tools"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- GRID & NAV PANEL -->
+    <div id="panel-grid" class="panel">
+      <div class="section-title">Home Grid</div>
       
       <div class="setting-row">
         <div class="setting-info">
@@ -269,11 +363,44 @@
         </div>
         <input type="range" id="gridColsRange" min="2" max="5" step="1" value="3" title="Grid Columns">
       </div>
+
+      <div class="section-title mt-20">Table of Contents</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Hover TOC</span>
+          <span class="setting-desc">Show outline on hover</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="tocHoverCb" title="Hover TOC"><span class="slider"></span></label>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">TOC Minimap</span>
+          <span class="setting-desc">Scroll progress indicator</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="tocCb" title="TOC Minimap"><span class="slider"></span></label>
+      </div>
     </div>
 
-    <!-- PREMIUM UI PANEL (New Features) -->
-    <div id="panel-premium" class="panel">
-      <div class="section-title">Wider Recall v6 Features</div>
+    <!-- APPEARANCE & THEMES PANEL -->
+    <div id="panel-appearance" class="panel">
+      <div class="section-title">Color Themes</div>
+      <div class="themes-grid">
+        <button class="theme-btn" data-theme="default">Recall Default</button>
+        <button class="theme-btn" data-theme="notion">Notion Minimal</button>
+        <button class="theme-btn" data-theme="obsidian">Obsidian Gruvbox</button>
+        <button class="theme-btn" data-theme="cyberpunk">Cyberpunk Neon</button>
+        <button class="theme-btn" data-theme="dracula">Dracula</button>
+        <button class="theme-btn" data-theme="tokyo">Tokyo Night</button>
+        <button class="theme-btn" data-theme="nord">Nord</button>
+        <button class="theme-btn" data-theme="catppuccin">Catppuccin</button>
+        <button class="theme-btn" data-theme="solarized-dark">Solarized Dark</button>
+        <button class="theme-btn" data-theme="matrix">Matrix Hacker</button>
+        <button class="theme-btn" data-theme="monokai">Monokai</button>
+      </div>
+
+      <div class="section-title mt-20">Premium Visuals</div>
       
       <div class="setting-row">
         <div class="setting-info">
@@ -305,125 +432,6 @@
           <span class="setting-desc">Staggered load animations</span>
         </div>
         <label class="toggle"><input type="checkbox" id="animationsCb" title="Animations"><span class="slider"></span></label>
-      </div>
-    </div>
-
-    <!-- THEMES PANEL -->
-    <div id="panel-themes" class="panel">
-      <div class="section-title">Color Themes</div>
-      <div class="themes-grid">
-        <button class="theme-btn" data-theme="default">Recall Default</button>
-        <button class="theme-btn" data-theme="notion">Notion Minimal</button>
-        <button class="theme-btn" data-theme="obsidian">Obsidian Gruvbox</button>
-        <button class="theme-btn" data-theme="cyberpunk">Cyberpunk Neon</button>
-        <button class="theme-btn" data-theme="dracula">Dracula</button>
-        <button class="theme-btn" data-theme="tokyo">Tokyo Night</button>
-        <button class="theme-btn" data-theme="nord">Nord</button>
-        <button class="theme-btn" data-theme="catppuccin">Catppuccin</button>
-        <button class="theme-btn" data-theme="solarized-dark">Solarized Dark</button>
-        <button class="theme-btn" data-theme="matrix">Matrix Hacker</button>
-        <button class="theme-btn" data-theme="monokai">Monokai</button>
-      </div>
-    </div>
-
-    <!-- ADVANCED PANEL -->
-    <div id="panel-advanced" class="panel">
-      <div class="section-title">Reading & Tools</div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Zen Mode</span>
-          <span class="setting-desc">Maximum focus, hide UI</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="zenCb" title="Zen Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Bionic Reading</span>
-          <span class="setting-desc">Bold first letters</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="bionicCb" title="Bionic Reading"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Command Palette</span>
-          <span class="setting-desc">Enable Cmd+K menu</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="cmdCb" title="Command Palette"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Text Wrap</span>
-          <span class="setting-desc">Wrap code blocks</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="wrapCb" title="Text Wrap"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Typography Fixes</span>
-          <span class="setting-desc">Better fonts & spacing</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Media Tools</span>
-          <span class="setting-desc">Video/Audio enhancements</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="mediaCb" title="Media Tools"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Focus Mode</span>
-          <span class="setting-desc">Highlight hovered blocks</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="focusCb" title="Focus Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Hover TOC</span>
-          <span class="setting-desc">Show outline on hover</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="tocHoverCb" title="Hover TOC"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">TOC Minimap</span>
-          <span class="setting-desc">Scroll progress indicator</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="tocCb" title="TOC Minimap"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Image Lightbox</span>
-          <span class="setting-desc">Click images to zoom</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="lightboxCb" title="Image Lightbox"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Graph Tools</span>
-          <span class="setting-desc">Enhance knowledge graph</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="graphCb" title="Graph Tools"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Hotkeys</span>
-          <span class="setting-desc">Enable custom shortcuts</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="hotkeysCb" title="Hotkeys"><span class="slider"></span></label>
       </div>
     </div>
   </div>

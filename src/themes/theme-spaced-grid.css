@@ -101,6 +101,7 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
   top: 12px;
   right: 12px;
   background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,0.1);
   color: #fff;
@@ -141,6 +142,7 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
   margin: 0 0 12px 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -158,6 +160,7 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
   border-radius: 6px;
   border: 2px solid rgba(255,255,255,0.4);
   background: rgba(0,0,0,0.4);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 10;
   cursor: pointer;
@@ -207,6 +210,7 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
     transparent 40%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -264,6 +268,7 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
   right: 20px;
   background: rgba(139, 92, 246, 0.2);
   border: 1px solid rgba(139, 92, 246, 0.4);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: #C4B5FD;
   padding: 8px 16px;
