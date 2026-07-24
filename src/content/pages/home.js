@@ -15,6 +15,9 @@ window.WR_PAGES.home = {
     if (typeof window.WR_EnhanceCards === 'function') {
       window.WR_EnhanceCards();
     }
+    if (window.WR_HOME_CARDS) {
+      window.WR_HOME_CARDS.init();
+    }
   },
   
   cleanup() {
@@ -22,6 +25,9 @@ window.WR_PAGES.home = {
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
+    }
+    if (window.WR_HOME_CARDS) {
+      window.WR_HOME_CARDS.cleanup();
     }
     console.log('[WR] Home Page cleaned up');
   },

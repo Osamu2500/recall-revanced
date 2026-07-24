@@ -23,6 +23,7 @@
         "src/content/pages/home.js",
         "src/content/pages/item.js",
         "src/content/pages/spaced-repetition.js",
+        "src/content/pages/home-cards.js",
         "src/content/pages/settings.js",
         "src/content/pages/graph.js",
         "src/content/pages/search.js",
