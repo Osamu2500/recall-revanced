@@ -112,52 +112,73 @@ window.WR_PAGES.spaced = {
     );
   },
 
+  _findCardRows() {
+    const checkboxes = Array.from(document.querySelectorAll('main input[type="checkbox"]'));
+    let candidates = [];
+
+    checkboxes.forEach(cb => {
+      let row = cb.parentElement;
+      let depth = 0;
+      // We look for a container that actually looks like a card (has some height)
+      while (row && row.tagName !== 'MAIN' && depth < 8) {
+        const h = row.getBoundingClientRect().height;
+        if (h > 40 && h < 600) {
+          candidates.push(row);
+        }
+        row = row.parentElement;
+        depth++;
+      }
+    });
+
+    // Deduplicate — keep only the innermost candidate for each checkbox
+    const innermost = candidates.filter(card => {
+      return !candidates.some(other => other !== card && card.contains(other));
+    });
+    
+    // We only want unique innermost elements (one per checkbox usually)
+    return [...new Set(innermost)];
+  },
+
   _enhanceQuestionsTab() {
     if (!this._isGridEnabled()) {
       this._restoreAll();
       return;
     }
 
-    // Find checkboxes in the main area to locate the list items
-    const checkboxes = Array.from(document.querySelectorAll('main input[type="checkbox"]'));
-    if (checkboxes.length === 0) return;
+    const cards = this._findCardRows();
+    if (cards.length === 0) return;
 
     let container = null;
-
     let delay = 0;
-    checkboxes.forEach((cb) => {
-      // The row/card is typically 3-4 levels up
-      let row = cb.parentElement;
-      for (let i = 0; i < 4; i++) {
-        if (row && row.parentElement && row.parentElement.tagName !== 'MAIN' && row.parentElement.tagName !== 'BODY') {
-          row = row.parentElement;
-        }
-      }
 
-      if (row && row.tagName !== 'MAIN') {
-        if (!container) container = row.parentElement;
+    cards.forEach((row) => {
+      if (!container) container = row.parentElement;
 
-        if (!this._enhancedCards.has(row)) {
-          this._enhancedCards.add(row);
-          row.classList.add('wr-spaced-card-enhanced', 'wr-question-row');
-          row.style.animationDelay = `${delay}ms`;
-          delay = Math.min(delay + 40, 400);
+      if (!this._enhancedCards.has(row)) {
+        this._enhancedCards.add(row);
+        row.classList.add('wr-spaced-card-enhanced', 'wr-question-row');
+        row.style.animationDelay = `${delay}ms`;
+        delay = Math.min(delay + 40, 400);
 
-          this._addSpotlight(row);
-          this._styleNativeCheckbox(row, cb);
-        }
+        this._addSpotlight(row);
+        
+        const nativeCb = row.querySelector('input[type="checkbox"]');
+        if (nativeCb) this._styleNativeCheckbox(row, nativeCb);
       }
     });
 
-    // Tag the container and its headers
+    // Tag the container
     if (container) {
       container.classList.add('wr-questions-container');
       
-      // Hide the header row (usually the first child if it doesn't contain a checkbox)
-      const firstChild = container.firstElementChild;
-      if (firstChild && !firstChild.querySelector('input[type="checkbox"]')) {
-        firstChild.classList.add('wr-questions-header');
-      }
+      // The header row is usually a sibling to the cards, or the first child of the container.
+      Array.from(container.children).forEach(child => {
+        if (!child.classList.contains('wr-question-row') && child.getBoundingClientRect().height < 100) {
+          if (!child.querySelector('input[type="checkbox"]')) {
+            child.classList.add('wr-questions-header');
+          }
+        }
+      });
     }
   },
 
@@ -317,12 +338,6 @@ window.WR_PAGES.spaced = {
         margin-bottom: 12px !important;
         display: block !important;
       }
-      
-      /* Fix text wrapping inside the row */
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row * {
-        white-space: normal !important;
-        overflow: visible !important;
-      }
 
       /* Spotlight radial gradient */
       body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row::before {
@@ -351,7 +366,9 @@ window.WR_PAGES.spaced = {
 
       /* ── Custom Checkbox Overlay ──────────────────────────────────────────── */
       .wr-cb-visual {
-        position: absolute;
+        position: absolute !important;
+        top: 12px !important;
+        left: 12px !important;
         width: 22px;
         height: 22px;
         border-radius: 6px;
@@ -365,14 +382,6 @@ window.WR_PAGES.spaced = {
         align-items: center;
         justify-content: center;
         transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      
-      /* Reposition checkbox wrapper inside the grid card */
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row > div:has(.wr-cb-visual) {
-        position: absolute !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 15 !important;
       }
 
       .wr-cb-visual:hover {
