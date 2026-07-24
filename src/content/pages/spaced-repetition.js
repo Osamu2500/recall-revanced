@@ -343,13 +343,12 @@ window.WR_PAGES.spaced = {
       return;
     }
 
-    // Extract the DOM elements using our robust image-density heuristic
+    // The Review tab is a single flashcard. The Questions tab is a list of items.
+    // If we see multiple checkboxes, we are almost certainly on the Questions tab.
     const { container, rows } = this.findListContainerAndRows();
+    this.isQuestionsTab = rows.length > 1;
     
-    // If we found a container with multiple image rows, we are definitively on the Questions tab.
-    // The Review tab is a single flashcard and will not match this heuristic.
-    this.isQuestionsTab = !!(container && rows && rows.length > 1);
-    
+    // Check again before injecting to prevent race conditions
     if (this.isQuestionsTab) {
       this.extractAndRenderGrid(container, rows);
     } else {
@@ -359,67 +358,40 @@ window.WR_PAGES.spaced = {
 
   findListContainerAndRows() {
     let bestContainer = null;
-    let rows = [];
+    let maxValidRows = 0;
 
-    // 1. Try standard table rows FIRST (most reliable)
-    let allRows = Array.from(document.querySelectorAll('tr, [role="row"]'));
-    // Filter out headers
-    allRows = allRows.filter(r => !r.querySelector('th, [role="columnheader"]'));
-    
-    // Group rows by container
-    if (allRows.length > 0) {
-      const parentMap = new Map();
-      allRows.forEach(row => {
-        if (row.parentElement) {
-          parentMap.set(row.parentElement, (parentMap.get(row.parentElement) || 0) + 1);
+    const allElements = document.querySelectorAll('div, ul');
+    for (let el of allElements) {
+      if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
+      if (el.tagName === 'MAIN' || el.id === 'root' || el.id === '__next' || el === document.body) continue;
+      
+      if (el.children.length >= 2) {
+        const classCounts = new Map();
+        for (let child of el.children) {
+          if (child.querySelector('img')) {
+             const sig = child.className || child.tagName;
+             classCounts.set(sig, (classCounts.get(sig) || 0) + 1);
+          }
         }
-      });
-      let maxCount = 0;
-      for (let [container, count] of parentMap.entries()) {
-        if (count > maxCount) {
-          maxCount = count;
-          bestContainer = container;
-        }
-      }
-      if (bestContainer) {
-        rows = Array.from(bestContainer.children).filter(c => c.tagName === 'TR' || c.getAttribute('role') === 'row');
-      }
-    }
-
-    // 2. Safe Fallback: Find a homogenous list container with images
-    if (!bestContainer || rows.length < 1) {
-      let maxImgChildren = 0;
-      const allElements = document.querySelectorAll('div, ul');
-      for (let el of allElements) {
-        if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
-        if (el.tagName === 'MAIN' || el.id === 'root' || el.id === '__next' || el === document.body) continue;
         
-        if (el.children.length >= 2) {
-           let imgChildrenCount = 0;
-           let classNames = new Set();
-           
-           for (let child of el.children) {
-             if (child.querySelector('img')) {
-               imgChildrenCount++;
-               classNames.add(child.className);
-             }
-           }
-           
-           // It must be a homogenous list (children have same class names)
-           if (imgChildrenCount > maxImgChildren && classNames.size <= 2) {
-             maxImgChildren = imgChildrenCount;
-             bestContainer = el;
-           }
+        let localMax = 0;
+        for (let count of classCounts.values()) {
+           if (count > localMax) localMax = count;
+        }
+
+        if (localMax > maxValidRows && localMax >= 2) {
+           maxValidRows = localMax;
+           bestContainer = el;
         }
       }
-      if (bestContainer) {
-        rows = Array.from(bestContainer.children);
-      }
+    }
+    
+    if (!bestContainer || maxValidRows < 2) {
+      return { container: null, rows: [] };
     }
 
-    if (!bestContainer || rows.length === 0) return { container: null, rows: [] };
-
-    // 3. Find a good wrapper to apply the drawer styling to
+    const rows = Array.from(bestContainer.children).filter(child => child.querySelector('img'));
+    
     let wrapper = bestContainer;
     const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
     if (table) {
@@ -570,13 +542,13 @@ window.WR_PAGES.spaced = {
       const id = `wr-card-${safeTitle}`;
 
       // 4. Checkbox
-      const checkboxInput = row.querySelector('input[type="checkbox"], [role="checkbox"]');
+      const checkboxInput = row.querySelector('input[type="checkbox"], [role="checkbox"], svg[class*="checkbox"], svg');
       let isChecked = false;
       if (checkboxInput) {
         if (checkboxInput.tagName === 'INPUT') {
           isChecked = checkboxInput.checked;
         } else {
-          isChecked = checkboxInput.getAttribute('aria-checked') === 'true';
+          isChecked = checkboxInput.getAttribute('aria-checked') === 'true' || checkboxInput.classList.contains('checked');
         }
       }
 
@@ -739,10 +711,9 @@ window.WR_PAGES.spaced = {
 
   proxyCheckboxClick(card) {
     this.executeOnCard(card, (rowElement) => {
-      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"], button, [class*="checkbox"], .checkbox');
+      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"], svg[class*="checkbox"], svg');
       if (originalCheckbox) {
         if (originalCheckbox.tagName === 'INPUT') {
-          // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
           if (nativeInputValueSetter) {
             nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
@@ -751,11 +722,9 @@ window.WR_PAGES.spaced = {
             originalCheckbox.click();
           }
         } else {
-          // It's an aria checkbox or button, just click it
-          originalCheckbox.click();
+           originalCheckbox.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
         }
       } else {
-        // Fallback: Click the very first child of the row which usually houses the custom checkbox
         const firstChild = rowElement.firstElementChild;
         if (firstChild) firstChild.click();
       }
