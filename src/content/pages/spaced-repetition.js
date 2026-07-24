@@ -1,775 +1,432 @@
 'use strict';
 
 /**
- * Wider Recall: Advanced Spaced Repetition Grid Controller
- * Intercepts the Material UI list view and generates a high-fidelity
- * interactive custom grid with virtualized updates and proxy-clicking.
+ * @fileoverview Wider Recall — Spaced Repetition Page Handler (v1.2)
+ *
+ * KEY INSIGHT (from live page analysis):
+ * The /spaced-repetition page has TWO tabs:
+ *   - "Review"    → Dashboard showing stats, streak, activity (no card grid)
+ *   - "Questions" → A NATIVE card grid already rendered by Recall
+ *
+ * This module NO LONGER replaces the native grid DOM.
+ * Instead it ENHANCES the existing native cards on the Questions tab with:
+ *   - Glassmorphism styles
+ *   - Entrance animations
+ *   - Spotlight hover effect
+ *   - Styled checkboxes
+ *
+ * This approach is far more stable because we're decorating existing elements,
+ * not fighting React's reconciler with a parallel DOM tree.
  */
 
 window.WR_PAGES.spaced = {
-  observer: null,
-  active: false,
-  gridContainer: null,
-  syncIndicator: null,
-  syncIndicator: null,
-  cardsData: new Map(), // Stores parsed card data
-  orderedCardIds: [], // Stores original order of cards
-  isQuestionsTab: false,
-  
-  injectCss() {
-    if (document.getElementById('wr-spaced-repetition-css')) return;
-    const style = document.createElement('style');
-    style.id = 'wr-spaced-repetition-css';
-    style.textContent = `
-      /* Hide original card rows EXCEPT the expanded one */
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-original-row-card:not(.wr-expanded-original-row) {
-        display: none !important;
-      }
+  _observer: null,
+  _tabObserver: null,
+  _active: false,
+  _currentTab: null, // 'review' | 'questions'
+  _enhancedCards: new WeakSet(), // Track which cards already have our enhancements
 
-      /* Turn the original container into a fixed right drawer */
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-original-questions-table {
-        position: fixed !important;
-        top: 60px !important;
-        right: 0 !important;
-        width: 470px !important;
-        height: calc(100vh - 60px) !important;
-        background: var(--bg-panel, rgba(20, 20, 22, 0.95)) !important;
+  // ─── Lifecycle ─────────────────────────────────────────────────────────────
+
+  init() {
+    this._active = true;
+    this._injectStyles();
+    this._detectTabAndApply();
+    this._watchTabSwitches();
+
+    // Periodic check to catch delayed React renders
+    this._fallbackTimer = setInterval(() => {
+      if (this._active) this._detectTabAndApply();
+    }, 1200);
+
+    console.log('[WR Spaced] Initialized');
+  },
+
+  cleanup() {
+    this._active = false;
+    clearInterval(this._fallbackTimer);
+    if (this._observer)    { this._observer.disconnect();    this._observer    = null; }
+    if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
+    this._restoreAll();
+    console.log('[WR Spaced] Cleaned up');
+  },
+
+  // ─── Tab Detection ──────────────────────────────────────────────────────────
+
+  /**
+   * Reads which tab is currently active by checking [role="tab"][aria-selected="true"]
+   * Returns 'questions', 'review', or null.
+   */
+  _getActiveTab() {
+    const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+    if (!activeTab) return null;
+    const text = activeTab.textContent.trim().toLowerCase();
+    if (text.includes('question')) return 'questions';
+    if (text.includes('review'))   return 'review';
+    return null;
+  },
+
+  _detectTabAndApply() {
+    if (!this._active) return;
+    if (!window.WR_STATE || !window.WR_STATE.enabled) return;
+
+    const tab = this._getActiveTab();
+    if (tab === this._currentTab) {
+      // Same tab — just apply enhancements to any new cards that appeared
+      if (tab === 'questions') this._enhanceQuestionsTab();
+      return;
+    }
+
+    this._currentTab = tab;
+
+    if (tab === 'questions') {
+      this._onQuestionsTabActivated();
+    } else if (tab === 'review') {
+      this._onReviewTabActivated();
+    }
+  },
+
+  // ─── Tab Switch Watcher ─────────────────────────────────────────────────────
+
+  _watchTabSwitches() {
+    if (this._tabObserver) this._tabObserver.disconnect();
+
+    // Watch for aria-selected attribute changes on tab elements
+    const tabList = document.querySelector('[role="tablist"]');
+    if (!tabList) {
+      // Retry after a short delay — React may not have rendered the tabs yet
+      setTimeout(() => { if (this._active) this._watchTabSwitches(); }, 500);
+      return;
+    }
+
+    this._tabObserver = new MutationObserver(() => {
+      if (this._active) this._detectTabAndApply();
+    });
+
+    this._tabObserver.observe(tabList, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-selected'],
+    });
+  },
+
+  // ─── Review Tab ────────────────────────────────────────────────────────────
+
+  _onReviewTabActivated() {
+    // Clean up Questions tab enhancements
+    this._restoreAll();
+    // The Review tab is the dashboard — no custom grid, just apply subtle polish
+    this._enhanceReviewDashboard();
+    console.log('[WR Spaced] Review tab active');
+  },
+
+  _enhanceReviewDashboard() {
+    // Enhance the stat cards on the review dashboard
+    const statCards = document.querySelectorAll(
+      '[data-wr-page="spaced"] [class*="Card"], [data-wr-page="spaced"] article'
+    );
+    statCards.forEach(card => {
+      if (!this._enhancedCards.has(card)) {
+        this._enhancedCards.add(card);
+        card.classList.add('wr-spaced-stat-card');
+      }
+    });
+  },
+
+  // ─── Questions Tab ──────────────────────────────────────────────────────────
+
+  _onQuestionsTabActivated() {
+    const isGridEnabled = this._isGridEnabled();
+    if (!isGridEnabled) {
+      this._restoreAll();
+      return;
+    }
+
+    this._enhanceQuestionsTab();
+    this._watchForNewCards();
+    console.log('[WR Spaced] Questions tab active — enhancing native grid');
+  },
+
+  _isGridEnabled() {
+    return (
+      document.body.getAttribute('data-wr-grid') === 'true' &&
+      document.body.getAttribute('data-wr-enabled') === 'true'
+    );
+  },
+
+  /**
+   * Finds native card elements and applies our visual enhancements.
+   * We look for elements containing an image AND a question count text.
+   * We DO NOT manipulate their position, layout, or parent containers.
+   */
+  _enhanceQuestionsTab() {
+    if (!this._isGridEnabled()) {
+      this._restoreAll();
+      return;
+    }
+
+    const cards = this._findNativeCards();
+    if (cards.length === 0) return;
+
+    let delay = 0;
+    cards.forEach((card) => {
+      if (this._enhancedCards.has(card)) return; // Already done
+      this._enhancedCards.add(card);
+
+      // Add glassmorphism + animation classes
+      card.classList.add('wr-spaced-card-enhanced');
+      card.style.animationDelay = `${delay}ms`;
+      delay = Math.min(delay + 40, 400);
+
+      // Spotlight mouse-tracking effect
+      this._addSpotlight(card);
+
+      // Style the native checkbox
+      this._styleNativeCheckbox(card);
+    });
+  },
+
+  /**
+   * Finds the native card elements on the Questions tab.
+   * Strategy: Find all elements with an image AND sibling text containing "question".
+   * We avoid looking for generated class names.
+   */
+  _findNativeCards() {
+    const candidates = [];
+
+    // Strategy 1: Any element that contains an img and a text node with "question"
+    const allImgContainers = document.querySelectorAll('img');
+    const seen = new Set();
+
+    allImgContainers.forEach(img => {
+      // Walk up to find the card container (usually 3-5 levels up)
+      let el = img.parentElement;
+      let depth = 0;
+      while (el && depth < 6 && el !== document.body) {
+        if (
+          el.textContent.toLowerCase().includes('question') &&
+          el.querySelector('img') &&
+          !seen.has(el) &&
+          // Exclude very large containers (the whole page)
+          el.children.length < 20
+        ) {
+          // This is likely a card
+          seen.add(el);
+          candidates.push(el);
+          break;
+        }
+        el = el.parentElement;
+        depth++;
+      }
+    });
+
+    // Deduplicate — if a candidate is an ancestor of another, keep the smaller one
+    return candidates.filter(card => {
+      return !candidates.some(other => other !== card && card.contains(other));
+    });
+  },
+
+  _addSpotlight(card) {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${((e.clientX - rect.left) / rect.width) * 100}%`);
+      card.style.setProperty('--my', `${((e.clientY - rect.top) / rect.height) * 100}%`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.setProperty('--mx', '50%');
+      card.style.setProperty('--my', '50%');
+    });
+  },
+
+  /**
+   * Styles the native checkbox inside a card row.
+   * We add a visual overlay instead of replacing the checkbox (which would
+   * break React's onChange handler).
+   */
+  _styleNativeCheckbox(card) {
+    const nativeCb = card.querySelector('input[type="checkbox"]');
+    if (!nativeCb || nativeCb.getAttribute('data-wr-styled')) return;
+
+    nativeCb.setAttribute('data-wr-styled', 'true');
+
+    // Create a visual overlay that sits on top of the native checkbox
+    const visualCb = document.createElement('div');
+    visualCb.className = 'wr-cb-visual';
+    visualCb.setAttribute('aria-hidden', 'true');
+
+    // Sync state
+    const syncVisual = () => {
+      visualCb.classList.toggle('wr-cb-checked', nativeCb.checked);
+    };
+    syncVisual();
+
+    // When visual is clicked, trigger the native checkbox (React-compatible)
+    visualCb.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nativeCb.click(); // .click() fires React's synthetic event properly
+    });
+
+    // Watch for React state changes
+    nativeCb.addEventListener('change', syncVisual);
+
+    // Hide native, insert visual overlay next to it
+    nativeCb.style.cssText = 'position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;';
+    nativeCb.parentElement.style.position = 'relative';
+    nativeCb.after(visualCb);
+  },
+
+  // ─── New Card Observer ───────────────────────────────────────────────────────
+
+  _watchForNewCards() {
+    if (this._observer) this._observer.disconnect();
+
+    const target = document.querySelector('main') || document.body;
+    let debounce;
+
+    this._observer = new MutationObserver(() => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        if (this._active && this._getActiveTab() === 'questions') {
+          this._enhanceQuestionsTab();
+        }
+      }, 200);
+    });
+
+    this._observer.observe(target, { childList: true, subtree: true });
+  },
+
+  // ─── Cleanup / Restore ───────────────────────────────────────────────────────
+
+  _restoreAll() {
+    // Remove all our enhancement classes from native elements
+    document.querySelectorAll('.wr-spaced-card-enhanced').forEach(card => {
+      card.classList.remove('wr-spaced-card-enhanced');
+      card.style.animationDelay = '';
+    });
+    document.querySelectorAll('.wr-spaced-stat-card').forEach(card => {
+      card.classList.remove('wr-spaced-stat-card');
+    });
+
+    // Restore native checkboxes
+    document.querySelectorAll('[data-wr-styled="true"]').forEach(cb => {
+      cb.removeAttribute('data-wr-styled');
+      cb.style.cssText = '';
+      const visual = cb.nextElementSibling;
+      if (visual && visual.classList.contains('wr-cb-visual')) {
+        visual.remove();
+      }
+    });
+
+    this._enhancedCards = new WeakSet();
+  },
+
+  // ─── CSS Injection ───────────────────────────────────────────────────────────
+
+  _injectStyles() {
+    if (document.getElementById('wr-spaced-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'wr-spaced-styles';
+    style.textContent = `
+      /* ── Enhanced native card on the Questions tab ──────────────────────── */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced {
+        position: relative !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(18, 18, 28, 0.6) !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
-        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-        z-index: 9999 !important;
-        transform: translateX(100%);
-        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
-        display: block !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        padding: 0 !important;
+        transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                    box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                    border-color 0.25s ease !important;
+        overflow: hidden !important;
+        animation: wr-card-enter 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) both !important;
       }
 
-      /* Strip native borders and backgrounds from the nested inner containers inside the drawer to make it seamless */
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-original-questions-table .MuiPaper-root,
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-original-questions-table table {
-        border: none !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced:hover {
+        transform: translateY(-5px) scale(1.01) !important;
+        border-color: rgba(139, 92, 246, 0.45) !important;
+        box-shadow: 0 16px 32px rgba(0,0,0,0.4), 0 0 20px rgba(139,92,246,0.15) !important;
       }
 
-      /* Open state */
-      body[data-wr-grid="true"][data-wr-enabled="true"][data-wr-drawer-open="true"] .wr-original-questions-table {
-        transform: translateX(0);
-      }
-
-      /* The question rows and active row will render natively as in the original UI */
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-custom-grid-container {
-        display: grid;
-        grid-template-columns: repeat(var(--wr-grid-cols, 3), 1fr) !important;
-        gap: 20px;
-        width: 100%;
-        padding: 20px 0;
-      }
-      body[data-wr-grid="false"] .wr-custom-grid-container, body:not([data-wr-enabled="true"]) .wr-custom-grid-container {
-        display: none !important;
-      }
-      
-      /* Make parent containers span full width but reserve 470px on the right for the drawer ALWAYS */
-      body[data-wr-grid="true"][data-wr-enabled="true"] .wr-main-container {
-        max-width: none !important;
-        padding-right: 470px !important; /* ALWAYS leave space for the right drawer */
-      }
-      
-      .wr-grid-card {
-        display: flex;
-        flex-direction: column;
-        background: var(--rp-glass-base, rgba(30, 30, 30, 0.6));
-        border: 1px solid var(--rp-glass-border, rgba(255, 255, 255, 0.08));
-        border-radius: 12px;
-        overflow: hidden;
-        position: relative;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        min-height: 220px;
-        --mx: 50%;
-        --my: 50%;
-      }
-      
-      .wr-grid-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      }
-      
-      .wr-card-active {
-        border-color: #8b5cf6 !important;
-        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3), 0 8px 24px rgba(0,0,0,0.3) !important;
-        transform: translateY(-4px);
-      }
-      
-      .wr-grid-card::before {
+      /* Spotlight radial gradient (mouse-tracked via JS --mx/--my) */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(800px circle at var(--mx) var(--my), rgba(255,255,255,0.06), transparent 40%);
+        border-radius: inherit;
+        background: radial-gradient(
+          500px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(255, 255, 255, 0.07),
+          transparent 40%
+        );
         pointer-events: none;
         z-index: 2;
         opacity: 0;
         transition: opacity 0.3s;
       }
-      
-      .wr-grid-card:hover::before {
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced:hover::before {
         opacity: 1;
       }
-      
-      .wr-custom-checkbox {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 6px;
-        background: rgba(0,0,0,0.5);
-        z-index: 3;
-        transition: 0.2s;
-        cursor: pointer;
+
+      @keyframes wr-card-enter {
+        from { opacity: 0; transform: translateY(18px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
       }
-      
-      .wr-custom-checkbox.wr-checked {
+
+      /* ── Custom Checkbox Overlay ──────────────────────────────────────────── */
+      .wr-cb-visual {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .wr-cb-visual:hover {
+        border-color: rgba(139, 92, 246, 0.8);
+        background: rgba(0, 0, 0, 0.65);
+        transform: scale(1.1);
+      }
+      .wr-cb-visual.wr-cb-checked {
         background: #8b5cf6;
         border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
       }
-      
-      .wr-custom-checkbox.wr-checked::after {
+      .wr-cb-visual.wr-cb-checked::after {
         content: '';
-        position: absolute;
-        left: 6px;
-        top: 2px;
-        width: 4px;
+        width: 5px;
         height: 10px;
         border: solid white;
         border-width: 0 2px 2px 0;
         transform: rotate(45deg);
-      }
-      
-      .wr-card-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: rgba(0,0,0,0.6);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        z-index: 3;
-        backdrop-filter: blur(4px);
-      }
-      
-      .wr-card-badge.wr-badge-empty {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-      }
-      
-      .wr-card-image-wrapper {
-        width: 100%;
-        height: 140px;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .wr-card-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s;
-      }
-      
-      .wr-grid-card:hover .wr-card-image {
-        transform: scale(1.05);
-      }
-      
-      .wr-card-content {
-        padding: 16px;
-        flex: 1;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-      }
-      
-      .wr-card-title {
-        flex: 1;
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        color: #fff;
+        margin-top: -2px;
       }
 
-      .wr-card-dropdown-btn {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: 0.2s;
-        flex-shrink: 0;
+      /* ── Review Tab Dashboard Card Enhancements ───────────────────────────── */
+      body[data-wr-enabled="true"] .wr-spaced-stat-card {
+        border-radius: 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(18, 18, 28, 0.6) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        transition: box-shadow 0.25s ease, border-color 0.25s ease !important;
       }
-      
-      .wr-card-dropdown-btn:hover {
-        background: rgba(139, 92, 246, 0.8);
-      }
-      
-      .wr-card-dropdown-btn svg {
-        width: 16px;
-        height: 16px;
-        color: white;
-      }
-      
-      .wr-card-active .wr-card-dropdown-btn {
-        background: rgba(139, 92, 246, 1);
-      }
-
-      .wr-syncing-indicator {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: rgba(139, 92, 246, 0.9);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        opacity: 0;
-        transition: opacity 0.3s;
-        pointer-events: none;
-        z-index: 9999;
-      }
-      
-      .wr-syncing-indicator.show {
-        opacity: 1;
+      body[data-wr-enabled="true"] .wr-spaced-stat-card:hover {
+        border-color: rgba(139, 92, 246, 0.3) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
       }
     `;
     document.head.appendChild(style);
   },
-  
-  init() {
-    this.injectCss();
-    this.active = true;
-    console.log('Wider Recall: Initialized Advanced Spaced Repetition Grid');
-    
-    // Create custom grid container
-    this.gridContainer = document.createElement('div');
-    this.gridContainer.className = 'wr-custom-grid-container';
-    this.gridContainer.style.display = 'none';
-    
-    // Create sync indicator
-    this.syncIndicator = document.createElement('div');
-    this.syncIndicator.className = 'wr-syncing-indicator';
-    this.syncIndicator.innerHTML = 'Syncing...';
-    document.body.appendChild(this.syncIndicator);
-
-    this.startObservation();
-    
-    // Periodic fallback check in case of SPA transitions missing mutations
-    this._fallbackInterval = setInterval(() => {
-      if (this.active) this.checkAndInject();
-    }, 1000);
-  },
-  
-  cleanup() {
-    this.active = false;
-    if (this.observer) this.observer.disconnect();
-    if (this.gridContainer && this.gridContainer.parentNode) {
-      this.gridContainer.parentNode.removeChild(this.gridContainer);
-    }
-    if (this.syncIndicator && this.syncIndicator.parentNode) {
-      this.syncIndicator.parentNode.removeChild(this.syncIndicator);
-    }
-    if (this._fallbackInterval) {
-      clearInterval(this._fallbackInterval);
-    }
-    
-    this.restoreOriginalUI();
-    
-    console.log('Wider Recall: Cleaned up Spaced Repetition Grid');
-  },
-
-  startObservation() {
-    if (this.observer) this.observer.disconnect();
-    
-    let debounceTimer;
-    this.observer = new MutationObserver((mutations) => {
-      if (!this.active) return;
-      
-      // Throttle heavy DOM extraction
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => this.checkAndInject(), 150);
-    });
-
-    const root = document.querySelector('main') || document.body;
-    this.observer.observe(root, { childList: true, subtree: true, attributes: false });
-  },
-
-  restoreOriginalUI() {
-    if (this.gridContainer) {
-      this.gridContainer.style.display = 'none';
-    }
-    document.querySelectorAll('.wr-original-questions-table').forEach(el => {
-      el.classList.remove('wr-original-questions-table');
-    });
-    document.querySelectorAll('.wr-main-container').forEach(el => {
-      el.classList.remove('wr-main-container');
-    });
-    document.querySelectorAll('.wr-original-row-card, .wr-original-row-question, .wr-expanded-original-row').forEach(el => {
-      el.classList.remove('wr-original-row-card', 'wr-original-row-question', 'wr-expanded-original-row');
-    });
-    document.body.removeAttribute('data-wr-drawer-open');
-  },
-
-  checkAndInject() {
-    if (!this.active || window.location.pathname !== '/spaced-repetition') return;
-
-    // Check if the grid feature is explicitly toggled ON
-    const isGridEnabled = document.body.getAttribute('data-wr-grid') === 'true' && document.body.getAttribute('data-wr-enabled') === 'true';
-    if (!isGridEnabled) {
-      this.restoreOriginalUI();
-      return;
-    }
-
-    // The Review tab is a single flashcard. The Questions tab is a list of items.
-    // If we see multiple checkboxes, we are almost certainly on the Questions tab.
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    this.isQuestionsTab = checkboxes.length > 3;
-    
-    // Check again before injecting to prevent race conditions
-    if (this.isQuestionsTab) {
-      this.extractAndRenderGrid();
-    } else {
-      this.restoreOriginalUI();
-    }
-  },
-
-  findListContainerAndRows() {
-    const allCbs = Array.from(document.querySelectorAll('input[type="checkbox"]'));
-    if (allCbs.length < 2) return { container: null, rows: [] };
-
-    // Group checkboxes by their common container
-    // The true list container will have multiple direct children (the rows), each containing a checkbox.
-    let bestContainer = null;
-    let maxRows = 0;
-    
-    // Check all ancestors of all checkboxes
-    const candidates = new Set();
-    allCbs.forEach(cb => {
-      let p = cb.parentElement;
-      while (p && p !== document.body) {
-        candidates.add(p);
-        p = p.parentElement;
-      }
-    });
-
-    // Find the container with the most checkbox-containing children
-    for (let container of candidates) {
-      let rowCount = 0;
-      for (let child of container.children) {
-        if (child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox')) {
-          rowCount++;
-        }
-      }
-      if (rowCount > maxRows) {
-        maxRows = rowCount;
-        bestContainer = container;
-      }
-    }
-
-    if (!bestContainer || maxRows < 2) {
-      return { container: null, rows: [] };
-    }
-
-    // The rows are the children that contain a checkbox
-    const rows = Array.from(bestContainer.children).filter(child => {
-      return child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox');
-    });
-    
-    // Find a good wrapper to apply the drawer styling to
-    let wrapper = bestContainer;
-    
-    // If it's inside a standard table, grab the table or its container
-    const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
-    if (table) {
-      wrapper = table.closest('.MuiTableContainer-root') || table;
-    } else {
-      // For div-based lists, the parent of the row container is usually the scrollable wrapper
-      const parent = bestContainer.parentElement;
-      if (parent && parent !== document.body && parent.tagName !== 'MAIN') {
-         wrapper = parent;
-      }
-    }
-
-    return { container: wrapper, rows: rows };
-  },
-
-  findOriginalTable() {
-    const res = this.findListContainerAndRows();
-    return res.container;
-  },
-
-  extractAndRenderGrid() {
-    const { container: originalTable, rows } = this.findListContainerAndRows();
-    
-    if (!originalTable || rows.length === 0) {
-      console.log(`[WIDER RECALL GRID] Could not find original table or rows.`);
-      this.restoreOriginalUI();
-      return;
-    }
-    
-    console.log(`[WIDER RECALL GRID] Found originalTable, extracted ${rows.length} rows`);
-
-    if (rows.length === 0) return;
-
-    // Hide original table visually
-    originalTable.classList.add('wr-original-questions-table');
-    
-    // Add custom class to the main content container to stretch it safely without breaking sidebar
-    const mainContainer = originalTable.closest('.MuiContainer-root, .MuiContainer-maxWidthMd, .MuiContainer-maxWidthLg');
-    if (mainContainer) {
-      mainContainer.classList.add('wr-main-container');
-    }
-
-    // Attach our custom grid as a sibling to the original table if not attached
-    if (this.gridContainer.parentNode !== originalTable.parentNode) {
-      originalTable.parentNode.insertBefore(this.gridContainer, originalTable.nextSibling);
-    }
-    
-    this.gridContainer.style.display = 'grid';
-
-    // Parse Data
-    const newCardsData = new Map();
-    let index = 0;
-    
-    let currentCardId = null;
-    let hasQuestions = false;
-    this.activeExpandedCardId = null;
-
-    rows.forEach(row => {
-      // Skip header rows if they snuck in
-      if (row.querySelector('th') || (row.textContent && row.textContent.toUpperCase().includes('QUESTIONS') && row.textContent.toUpperCase().includes('CARD') && !row.querySelector('img'))) return; 
-      
-      const isCard = !!row.querySelector('img');
-
-      if (isCard) {
-        const cardData = this.parseRow(row, index++);
-        if (cardData) {
-          row.setAttribute('data-wr-proxy-id', cardData.id);
-          row.classList.add('wr-original-row-card');
-          row.classList.remove('wr-original-row-question');
-          row.classList.remove('wr-expanded-original-row');
-          currentCardId = cardData.id;
-          newCardsData.set(cardData.id, cardData);
-        }
-      } else {
-        row.classList.add('wr-original-row-question');
-        row.classList.remove('wr-original-row-card');
-        hasQuestions = true;
-        if (currentCardId) {
-          this.activeExpandedCardId = currentCardId;
-          const activeRow = row.parentNode.querySelector(`[data-wr-proxy-id="${currentCardId}"]`);
-          if (activeRow) activeRow.classList.add('wr-expanded-original-row');
-        }
-      }
-    });
-
-    if (hasQuestions) {
-      document.body.setAttribute('data-wr-drawer-open', 'true');
-      // Merge with previous data because React removed the other cards from the DOM
-      for (let [id, oldCard] of this.cardsData.entries()) {
-        if (!newCardsData.has(id)) {
-          newCardsData.set(id, oldCard);
-        }
-      }
-    } else {
-      document.body.setAttribute('data-wr-drawer-open', 'false');
-      // If we are in the full list, update the ordering
-      if (newCardsData.size > 1) {
-        this.orderedCardIds = Array.from(newCardsData.keys());
-      }
-    }
-
-    // Check for changes to avoid useless re-renders
-    const currentKeys = Array.from(this.cardsData.keys()).join(',');
-    const newKeys = Array.from(newCardsData.keys()).join(',');
-    
-    let needsUpdate = currentKeys !== newKeys;
-    
-    if (!needsUpdate) {
-      for (let [id, newCard] of newCardsData.entries()) {
-        const oldCard = this.cardsData.get(id);
-        if (!oldCard || oldCard.checked !== newCard.checked || oldCard.questionCount !== newCard.questionCount) {
-          needsUpdate = true;
-          break;
-        }
-      }
-    }
-
-    if (needsUpdate) {
-      this.cardsData = newCardsData;
-      this.renderGrid();
-    }
-  },
-
-  parseRow(row, fallbackIndex) {
-    try {
-      // 1. Image
-      const imgEl = row.querySelector('img');
-      const imgUrl = imgEl ? imgEl.src : 'https://placehold.co/600x400/12121c/3a3a4c?text=No+Thumbnail';
-
-      // 2. Title & Question Count
-      let title = "Unknown Card";
-      let qCountText = "0 questions";
-      
-      // Look at all text nodes or elements with text
-      const textElements = Array.from(row.querySelectorAll('p, span, div')).filter(el => el.children.length === 0 && el.textContent.trim().length > 0);
-      
-      for (let el of textElements) {
-        const text = el.textContent.trim();
-        if (text.toLowerCase().includes('question')) {
-          qCountText = text;
-        } else if (text.length > 5 && text !== title && !text.match(/^[0-9]+$/)) {
-          // Usually the longest string is the title
-          if (text.length > title.length || title === "Unknown Card") {
-             title = text;
-          }
-        }
-      }
-
-      // 3. ID
-      const safeTitle = title === "Unknown Card" ? `idx-${fallbackIndex}` : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
-      const id = `wr-card-${safeTitle}`;
-
-      // 4. Checkbox
-      const checkboxInput = row.querySelector('input[type="checkbox"]');
-      const isChecked = checkboxInput ? checkboxInput.checked : false;
-
-      return {
-        id: id,
-        image: imgUrl,
-        title: title,
-        questionCount: qCountText,
-        checked: isChecked,
-        rowElement: row
-      };
-    } catch (e) {
-      console.warn("Wider Recall: Failed to parse row", e);
-      return null;
-    }
-  },
-
-  renderGrid() {
-    this.gridContainer.innerHTML = '';
-    
-    if (this.cardsData.size === 0) {
-      this.gridContainer.innerHTML = `
-        <div class="wr-grid-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-          No cards found for spaced repetition.
-        </div>
-      `;
-      return;
-    }
-
-    let delay = 0;
-    
-    const renderedIds = new Set();
-    const idsToRender = [];
-    if (this.orderedCardIds) {
-      for (let id of this.orderedCardIds) {
-        if (this.cardsData.has(id)) {
-          idsToRender.push(id);
-          renderedIds.add(id);
-        }
-      }
-    }
-    for (let id of this.cardsData.keys()) {
-      if (!renderedIds.has(id)) {
-        idsToRender.push(id);
-      }
-    }
-
-    for (let id of idsToRender) {
-      const card = this.cardsData.get(id);
-      const cardEl = this.createCardElement(card, delay);
-      this.gridContainer.appendChild(cardEl);
-      delay += 30; // Staggered entrance
-    }
-  },
-
-  createCardElement(card, delayMs) {
-    const el = document.createElement('div');
-    const isActive = card.id === this.activeExpandedCardId;
-    el.className = `wr-grid-card ${card.checked ? 'wr-selected' : ''} ${isActive ? 'wr-card-active' : ''}`;
-    el.setAttribute('data-proxy-id', card.id);
-    el.style.animationDelay = `${delayMs}ms`;
-
-    const qNumberMatch = card.questionCount.match(/\d+/);
-    const qCountNum = qNumberMatch ? parseInt(qNumberMatch[0]) : 0;
-    const badgeClass = qCountNum === 0 ? 'wr-badge-empty' : '';
-
-    el.innerHTML = `
-      <div class="wr-custom-checkbox ${card.checked ? 'wr-checked' : ''}" data-action="toggle"></div>
-      
-      <div class="wr-card-badge ${badgeClass}">
-        ${card.questionCount}
-      </div>
-
-      <div class="wr-card-image-wrapper" data-action="navigate">
-        <img src="${card.image}" class="wr-card-image" loading="lazy" />
-      </div>
-
-      <div class="wr-card-content" data-action="navigate">
-        <h3 class="wr-card-title">${card.title}</h3>
-        <div class="wr-card-dropdown-btn" data-action="expand">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-        </div>
-      </div>
-    `;
-
-    // Add Spotlight Effect Tracking
-    el.addEventListener('mousemove', (e) => {
-      const rect = el.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      el.style.setProperty('--mx', `${x}%`);
-      el.style.setProperty('--my', `${y}%`);
-    });
-
-    el.addEventListener('mouseleave', () => {
-      el.style.setProperty('--mx', '50%');
-      el.style.setProperty('--my', '50%');
-    });
-
-    // Handle Clicks via Event Delegation
-    el.addEventListener('click', (e) => {
-      const actionEl = e.target.closest('[data-action]');
-      if (!actionEl) return;
-      
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const action = actionEl.getAttribute('data-action');
-      if (action === 'toggle') {
-        this.proxyCheckboxClick(card);
-      } else if (action === 'navigate') {
-        this.proxyRowClick(card);
-      } else if (action === 'expand') {
-        this.proxyExpandClick(card);
-      }
-    });
-
-    return el;
-  },
-
-  executeOnCard(card, actionCallback) {
-    if (document.body.contains(card.rowElement)) {
-      actionCallback(card.rowElement);
-      return;
-    }
-    
-    // The card is detached because another card is expanded! 
-    this.showSyncIndicator();
-    if (this.activeExpandedCardId) {
-      const activeCard = this.cardsData.get(this.activeExpandedCardId);
-      if (activeCard && document.body.contains(activeCard.rowElement)) {
-        const activeChevron = activeCard.rowElement.querySelector('svg.lucide-chevron-right, svg.lucide-chevron-down, .lucide-chevron-right, .lucide-chevron-down');
-        if (activeChevron) {
-          activeChevron.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        }
-      }
-    }
-    
-    // Wait and find the new row element when React re-renders the full list
-    setTimeout(() => {
-      const newRows = Array.from(document.querySelectorAll('tr, [role="row"], .wr-original-row-card'));
-      for (let row of newRows) {
-        if (row.textContent.includes(card.title) && !!row.querySelector('img')) {
-          card.rowElement = row;
-          actionCallback(row);
-          return;
-        }
-      }
-      console.warn("Wider Recall: Could not find row for card after collapse", card.title);
-    }, 400);
-  },
-
-  proxyCheckboxClick(card) {
-    this.executeOnCard(card, (rowElement) => {
-      const originalCheckbox = rowElement.querySelector('input[type="checkbox"]');
-      if (originalCheckbox) {
-        // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
-        if (nativeInputValueSetter) {
-          nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
-          originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-          originalCheckbox.click();
-        }
-      }
-    });
-    
-    // Optimistic UI Update (always runs immediately for responsiveness)
-    card.checked = !card.checked;
-    this.updateCardDOMState(card.id, card.checked);
-  },
-
-  proxyRowClick(card) {
-    this.executeOnCard(card, (rowElement) => {
-      const textElements = rowElement.querySelectorAll('p, span');
-      let targetEl = null;
-      for (let el of textElements) {
-        if (el.textContent === card.title) {
-          targetEl = el;
-          break;
-        }
-      }
-      if (targetEl) {
-        targetEl.click();
-      } else {
-        rowElement.click();
-      }
-    });
-  },
-
-  proxyExpandClick(card) {
-    this.executeOnCard(card, (rowElement) => {
-      const chevronSvg = rowElement.querySelector('svg.lucide-chevron-right, svg.lucide-chevron-down, .lucide-chevron-right, .lucide-chevron-down');
-      if (chevronSvg) {
-        chevronSvg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-      } else {
-        console.warn("Wider Recall: Could not find chevron SVG to click!");
-        rowElement.click();
-      }
-    });
-  },
-
-  updateCardDOMState(id, isChecked) {
-    // Fast path to update visual state without full re-render
-    const cardNodes = this.gridContainer.querySelectorAll('.wr-grid-card');
-    // We know order matches, but we can search or rely on index
-    // For safety, let's just trigger a re-extract loop quickly
-    setTimeout(() => this.checkAndInject(), 50);
-  },
-  
-  showSyncIndicator() {
-    this.syncIndicator.classList.add('wr-visible');
-    clearTimeout(this._syncTimeout);
-    this._syncTimeout = setTimeout(() => {
-      this.syncIndicator.classList.remove('wr-visible');
-    }, 800);
-  }
 };

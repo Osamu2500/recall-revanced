@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @fileoverview Wider Recall - State Manager
+ * @fileoverview Wider Recall - State Manager (v1.2)
  * Handles the core state of the extension, local storage synchronization, 
  * and Single Page Application (SPA) navigation interception.
  */
@@ -9,7 +9,8 @@
 window.WR_DEFAULTS = Object.freeze({ 
   width: 1100, wrap: true, hideSidebar: false, hideOutline: true, grid: true, gridCols: 3, typo: true, enabled: true,
   zen: false, media: true, tocHover: false, graph: true, hotkeys: true,
-  bionic: false, cmd: true, lightbox: true, theme: 'default', focus: false, toc: false
+  bionic: false, cmd: true, lightbox: true, theme: 'default', focus: false, toc: false,
+  animations: true, spotlight: true, premiumUi: true
 });
 
 window.WR_STATE = { ...window.WR_DEFAULTS };
@@ -21,12 +22,20 @@ window.WR_STATE = { ...window.WR_DEFAULTS };
 window.WR_API = {
   /**
    * Determines the current page type based on the URL.
-   * @returns {'item'|'spaced'|'other'} The active page type.
+   * @returns {'item'|'spaced'|'home'|'settings'|'graph'|'search'|'chat'|'review'|'other'}
    */
   getPage() {
     const path = window.location.pathname;
-    if (window.WR_SELECTORS.pages.isItemDetail(path)) return 'item';
-    if (window.WR_SELECTORS.pages.isSpacedRepetition(path)) return 'spaced';
+    if (window.WR_SELECTORS && window.WR_SELECTORS.pages) {
+      if (window.WR_SELECTORS.pages.isItemDetail(path)) return 'item';
+      if (window.WR_SELECTORS.pages.isSpacedRepetition(path)) return 'spaced';
+      if (window.WR_SELECTORS.pages.isHomeGrid(path)) return 'home';
+      if (window.WR_SELECTORS.pages.isSettings(path)) return 'settings';
+      if (window.WR_SELECTORS.pages.isGraph(path)) return 'graph';
+      if (window.WR_SELECTORS.pages.isSearch(path)) return 'search';
+      if (window.WR_SELECTORS.pages.isChat(path)) return 'chat';
+      if (window.WR_SELECTORS.pages.isReview(path)) return 'review';
+    }
     return 'other';
   },
   
@@ -41,7 +50,7 @@ window.WR_API = {
 
   /**
    * Applies the provided settings object to the DOM by setting data-attributes.
-   * Triggers downstream feature updates (Bionic Reading, Zen Mode, etc).
+   * Triggers downstream feature updates.
    * @param {Object} opts - The settings object to apply.
    */
   applySettings(opts) {
@@ -56,6 +65,7 @@ window.WR_API = {
 
     if (!window.WR_STATE.enabled) {
       body.removeAttribute('data-wr-enabled');
+      // If disabled, we might want to clean up UI elements, handled by features observing this
     } else {
       body.setAttribute('data-wr-enabled', 'true');
       const widthVal = window.WR_STATE.width === 3000 ? '100%' : `${window.WR_STATE.width}px`;
@@ -80,6 +90,14 @@ window.WR_API = {
 
       body.setAttribute('data-wr-theme', window.WR_STATE.theme || 'default');
       body.setAttribute('data-wr-page', this.getPage());
+      
+      // Determine subpage context
+      const activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
+      if (activeTabEl) {
+        body.setAttribute('data-wr-subpage', activeTabEl.textContent.trim().toLowerCase());
+      } else {
+        body.removeAttribute('data-wr-subpage');
+      }
     }
     
     // Trigger feature lifecycle hooks if they exist
@@ -107,7 +125,7 @@ window.WR_API = {
     if (!id || !window.WR_STATE.enabled) return;
     
     try {
-      const activeTabEl = document.querySelector(window.WR_SELECTORS.elements.activeTab);
+      const activeTabEl = document.querySelector(window.WR_SELECTORS.memory.activeTab);
       const activeTab = activeTabEl ? activeTabEl.textContent.trim() : null;
       sessionStorage.setItem(this.getMemoryKey(id), JSON.stringify({ scroll: scrollY, tab: activeTab }));
     } catch (e) {
@@ -130,9 +148,9 @@ window.WR_API = {
       
       // Restore Tab
       if (state.tab) {
-        const tabs = Array.from(document.querySelectorAll(window.WR_SELECTORS.elements.tabs));
+        const tabs = Array.from(document.querySelectorAll(window.WR_SELECTORS.memory.tabs));
         const targetTab = tabs.find(t => t.textContent.trim() === state.tab);
-        const activeTabEl = document.querySelector(window.WR_SELECTORS.elements.activeTab);
+        const activeTabEl = document.querySelector(window.WR_SELECTORS.memory.activeTab);
         if (targetTab && activeTabEl && activeTabEl !== targetTab) {
           targetTab.click();
         }
@@ -145,7 +163,7 @@ window.WR_API = {
         let attempts = 0;
         window.WR_restoreInterval = setInterval(() => {
           attempts++;
-          const scrollContainer = document.querySelector(window.WR_SELECTORS.elements.scrollContainer) || document.querySelector(window.WR_SELECTORS.elements.fallbackScrollContainer);
+          const scrollContainer = document.querySelector(window.WR_SELECTORS.memory.scrollContainer) || document.querySelector(window.WR_SELECTORS.memory.fallbackScroll);
           const target = scrollContainer || window;
           target.scrollTo({ top: state.scroll, behavior: 'instant' });
           
@@ -165,7 +183,9 @@ window.WR_API = {
  * Intercepts HTML5 History API methods to dispatch a custom event on SPA navigation.
  */
 const injectHistoryInterceptor = () => {
+  if (document.getElementById('wr-history-interceptor')) return;
   const script = document.createElement('script');
+  script.id = 'wr-history-interceptor';
   script.textContent = `
     (function() {
       const pushState = history.pushState;
@@ -189,7 +209,7 @@ const injectHistoryInterceptor = () => {
     })();
   `;
   (document.head || document.documentElement).appendChild(script);
-  script.remove();
+  script.remove(); // execute and remove
 };
 injectHistoryInterceptor();
 
@@ -228,7 +248,7 @@ window.addEventListener('scroll', (e) => {
 // Save state immediately on tab change
 document.addEventListener('click', (e) => {
   if (e.target && e.target.closest) {
-    const tabBtn = e.target.closest(window.WR_SELECTORS.elements.tabs);
+    const tabBtn = e.target.closest(window.WR_SELECTORS.memory.tabs);
     if (tabBtn) {
       setTimeout(() => window.WR_API.saveState(lastScrollY), 50);
     }
