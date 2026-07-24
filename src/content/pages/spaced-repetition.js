@@ -359,34 +359,66 @@ window.WR_PAGES.spaced = {
 
   findListContainerAndRows() {
     let bestContainer = null;
-    let maxImgChildren = 0;
-    
-    // 1. Find the container with the most children that contain an <img>
-    // This perfectly isolates the list of videos/cards regardless of HTML tags or class names!
-    const allElements = document.querySelectorAll('div, table, tbody, ul');
-    for (let el of allElements) {
-      // CRITICAL: Ignore our own injected grid to prevent infinite loop/layout thrashing!
-      if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
+    let rows = [];
 
-      if (el.children.length >= 2) {
-         let imgChildrenCount = 0;
-         for (let child of el.children) {
-           if (child.querySelector('img')) {
-             imgChildrenCount++;
-           }
-         }
-         if (imgChildrenCount > maxImgChildren) {
-           maxImgChildren = imgChildrenCount;
-           bestContainer = el;
-         }
+    // 1. Try standard table rows FIRST (most reliable)
+    let allRows = Array.from(document.querySelectorAll('tr, [role="row"]'));
+    // Filter out headers
+    allRows = allRows.filter(r => !r.querySelector('th, [role="columnheader"]'));
+    
+    // Group rows by container
+    if (allRows.length > 0) {
+      const parentMap = new Map();
+      allRows.forEach(row => {
+        if (row.parentElement) {
+          parentMap.set(row.parentElement, (parentMap.get(row.parentElement) || 0) + 1);
+        }
+      });
+      let maxCount = 0;
+      for (let [container, count] of parentMap.entries()) {
+        if (count > maxCount) {
+          maxCount = count;
+          bestContainer = container;
+        }
+      }
+      if (bestContainer) {
+        rows = Array.from(bestContainer.children).filter(c => c.tagName === 'TR' || c.getAttribute('role') === 'row');
       }
     }
 
-    if (!bestContainer || maxImgChildren < 2) return { container: null, rows: [] };
+    // 2. Safe Fallback: Find a homogenous list container with images
+    if (!bestContainer || rows.length < 1) {
+      let maxImgChildren = 0;
+      const allElements = document.querySelectorAll('div, ul');
+      for (let el of allElements) {
+        if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
+        if (el.tagName === 'MAIN' || el.id === 'root' || el.id === '__next' || el === document.body) continue;
+        
+        if (el.children.length >= 2) {
+           let imgChildrenCount = 0;
+           let classNames = new Set();
+           
+           for (let child of el.children) {
+             if (child.querySelector('img')) {
+               imgChildrenCount++;
+               classNames.add(child.className);
+             }
+           }
+           
+           // It must be a homogenous list (children have same class names)
+           if (imgChildrenCount > maxImgChildren && classNames.size <= 2) {
+             maxImgChildren = imgChildrenCount;
+             bestContainer = el;
+           }
+        }
+      }
+      if (bestContainer) {
+        rows = Array.from(bestContainer.children);
+      }
+    }
 
-    // 2. The rows are ALL children of this container (including expanded question rows which lack images)
-    const rows = Array.from(bestContainer.children);
-    
+    if (!bestContainer || rows.length === 0) return { container: null, rows: [] };
+
     // 3. Find a good wrapper to apply the drawer styling to
     let wrapper = bestContainer;
     const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
