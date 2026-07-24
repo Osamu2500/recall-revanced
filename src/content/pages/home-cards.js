@@ -225,15 +225,18 @@ window.WR_HOME_CARDS = {
       const imgUrl = imgEl ? imgEl.src : 'https://placehold.co/600x400/12121c/3a3a4c?text=No+Thumbnail';
 
       let title = "Knowledge Item";
+      let titleEl = null;
       // Find headings
       const hEls = cardEl.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="title"]');
       if (hEls.length > 0) {
-        title = Array.from(hEls).reduce((a, b) => a.textContent.length > b.textContent.length ? a : b).textContent.trim();
+        titleEl = Array.from(hEls).reduce((a, b) => a.textContent.length > b.textContent.length ? a : b);
+        title = titleEl.textContent.trim();
       } else {
         // Fallback to longest paragraph
         const textElements = Array.from(cardEl.querySelectorAll('p, span')).filter(el => el.children.length === 0);
         if (textElements.length > 0) {
-           title = textElements.reduce((a, b) => a.textContent.length > b.textContent.length ? a : b).textContent.trim();
+           titleEl = textElements.reduce((a, b) => a.textContent.length > b.textContent.length ? a : b);
+           title = titleEl.textContent.trim();
         }
       }
 
