@@ -9,7 +9,6 @@
 window.WR_HOME_CARDS = {
   observer: null,
   active: false,
-  gridContainer: null,
   
   injectCss() {
     if (document.getElementById('wr-home-cards-css')) return;
@@ -30,6 +29,8 @@ window.WR_HOME_CARDS = {
         pointer-events: none !important;
       }
       body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-tag {
+        display: inline-flex;
+        align-items: center;
         font-size: 0.65rem;
         font-weight: 700;
         color: rgba(255, 255, 255, 0.9);
@@ -42,6 +43,9 @@ window.WR_HOME_CARDS = {
         letter-spacing: 0.5px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
+      body[data-wr-immersive-cards="true"] .wr-grid-card .wr-card-tag svg {
+        fill: currentColor;
       }
 
       /* Home Grid Container */
@@ -58,12 +62,6 @@ window.WR_HOME_CARDS = {
       body:not([data-wr-immersive-cards="true"]) .wr-home-grid-container {
         display: none !important;
       }
-
-      /* Native grid layout hiding if immersive is true */
-      body[data-wr-immersive-cards="true"] .wr-home-grid-container + div, 
-      body[data-wr-immersive-cards="true"] .wr-home-grid-container + ul {
-         /* Prevent layout shifts if Recall tries to re-render original grid below ours */
-      }
     `;
     document.head.appendChild(style);
   },
@@ -72,12 +70,6 @@ window.WR_HOME_CARDS = {
     this.injectCss();
     this.active = true;
     
-    if (!this.gridContainer) {
-      this.gridContainer = document.createElement('div');
-      this.gridContainer.className = 'wr-home-grid-container';
-      this.gridContainer.style.display = 'none';
-    }
-
     this.startObservation();
     
     this._fallbackInterval = setInterval(() => {
@@ -88,9 +80,7 @@ window.WR_HOME_CARDS = {
   cleanup() {
     this.active = false;
     if (this.observer) this.observer.disconnect();
-    if (this.gridContainer && this.gridContainer.parentNode) {
-      this.gridContainer.parentNode.removeChild(this.gridContainer);
-    }
+    document.querySelectorAll('.wr-home-grid-container').forEach(el => el.remove());
     if (this._fallbackInterval) {
       clearInterval(this._fallbackInterval);
     }
@@ -112,9 +102,9 @@ window.WR_HOME_CARDS = {
   },
 
   restoreOriginalUI() {
-    if (this.gridContainer) {
-      this.gridContainer.style.display = 'none';
-    }
+    document.querySelectorAll('.wr-home-grid-container').forEach(el => {
+      el.style.display = 'none';
+    });
     document.querySelectorAll('.wr-original-home-card').forEach(el => {
       el.classList.remove('wr-original-home-card');
     });
@@ -135,70 +125,71 @@ window.WR_HOME_CARDS = {
       return;
     }
 
-    this.extractAndRenderGrid();
+    this.scanAndProcessGrids();
   },
 
-  extractAndRenderGrid() {
-    // Recall's homepage cards are often generic <div class="MuiBox-root"> elements with React onClick handlers (no <a> tags).
-    // The most robust way to find them is to locate the main CSS Grid container that holds them.
+  scanAndProcessGrids() {
     const mainArea = document.querySelector('main') || document.getElementById('navigation-scroll-container') || document.body;
     
-    // Find all potential grid containers
     const allDivs = Array.from(mainArea.querySelectorAll('div'));
-    let nativeGridContainer = null;
-    let maxChildren = 0;
+    const nativeGrids = [];
     
     for (const div of allDivs) {
       if (div.classList.contains('wr-home-grid-container')) continue;
       
       const style = window.getComputedStyle(div);
-      if (style.display === 'grid' && div.children.length > maxChildren) {
-        // A typical card grid has many columns (repeat(...))
-        if (style.gridTemplateColumns && style.gridTemplateColumns.includes('px')) {
-          maxChildren = div.children.length;
-          nativeGridContainer = div;
+      if (style.display === 'grid') {
+        if (style.gridTemplateColumns && (style.gridTemplateColumns.includes('px') || style.gridTemplateColumns.includes('rem') || style.gridTemplateColumns.includes('fr'))) {
+          const rawCards = Array.from(div.children).filter(child => child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT');
+          if (rawCards.length > 0) {
+             nativeGrids.push(div);
+          }
         }
       }
     }
 
-    if (!nativeGridContainer || maxChildren === 0) return;
+    if (nativeGrids.length === 0) return;
 
-    // The cards are the direct children of this grid container
-    const rawCards = Array.from(nativeGridContainer.children).filter(child => child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT');
+    if (this.observer) this.observer.disconnect();
 
+    for (const nativeGrid of nativeGrids) {
+       this.processGrid(nativeGrid);
+    }
+
+    const root = document.querySelector('main') || document.body;
+    this.observer.observe(root, { childList: true, subtree: true, attributes: false });
+  },
+
+  processGrid(nativeGrid) {
+    const rawCards = Array.from(nativeGrid.children).filter(child => child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT' && !child.classList.contains('wr-home-grid-container'));
     if (rawCards.length === 0) return;
 
-    // We will insert our custom grid right before the native one
-    if (this.gridContainer.parentNode !== nativeGridContainer.parentNode) {
-      nativeGridContainer.parentNode.insertBefore(this.gridContainer, nativeGridContainer);
+    let customGrid = nativeGrid.previousElementSibling;
+    if (!customGrid || !customGrid.classList.contains('wr-home-grid-container')) {
+       customGrid = document.createElement('div');
+       customGrid.className = 'wr-home-grid-container';
+       nativeGrid.parentNode.insertBefore(customGrid, nativeGrid);
     }
+    customGrid.style.display = 'grid';
 
-    this.gridContainer.style.display = 'grid';
-
-    // To prevent infinite re-rendering, we track elements by DOM node
     let needsUpdate = false;
-    const currentNativeCards = new Set(rawCards);
-
-    // If counts differ or new cards appeared, we re-render everything (simple approach for homepage)
-    if (this.lastCardCount !== rawCards.length) {
+    const lastCount = parseInt(customGrid.getAttribute('data-wr-last-count') || '0', 10);
+    
+    if (lastCount !== rawCards.length) {
       needsUpdate = true;
     }
-    this.lastCardCount = rawCards.length;
 
     if (!needsUpdate && rawCards.length > 0) {
-       // Deep check to see if the first card's actual textual content changed (e.g. folder navigation)
        const firstNativeText = rawCards[0].textContent || '';
-       const savedNativeText = this.gridContainer.getAttribute('data-wr-first-native-text') || '';
+       const savedNativeText = customGrid.getAttribute('data-wr-first-native-text') || '';
        if (firstNativeText !== savedNativeText) needsUpdate = true;
     }
 
     if (needsUpdate) {
-      // Pause observer so our own DOM changes don't trigger another cycle
-      if (this.observer) this.observer.disconnect();
-
-      this.gridContainer.innerHTML = '';
+      customGrid.innerHTML = '';
       if (rawCards.length > 0) {
-        this.gridContainer.setAttribute('data-wr-first-native-text', rawCards[0].textContent || '');
+        customGrid.setAttribute('data-wr-first-native-text', rawCards[0].textContent || '');
+        customGrid.setAttribute('data-wr-last-count', rawCards.length);
       }
       
       rawCards.forEach((row, index) => {
@@ -206,15 +197,10 @@ window.WR_HOME_CARDS = {
         const cardData = this.parseCard(row, index);
         if (cardData) {
           const customEl = this.createCardElement(cardData, index * 20);
-          this.gridContainer.appendChild(customEl);
+          customGrid.appendChild(customEl);
         }
       });
-
-      // Resume observer
-      const root = document.querySelector('main') || document.body;
-      this.observer.observe(root, { childList: true, subtree: true, attributes: false });
     } else {
-       // Ensure all are hidden (doesn't trigger loop if already hidden)
        rawCards.forEach(row => row.classList.add('wr-original-home-card'));
     }
   },
@@ -226,13 +212,11 @@ window.WR_HOME_CARDS = {
 
       let title = "Knowledge Item";
       let titleEl = null;
-      // Find headings
       const hEls = cardEl.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="title"]');
       if (hEls.length > 0) {
         titleEl = Array.from(hEls).reduce((a, b) => a.textContent.length > b.textContent.length ? a : b);
         title = titleEl.textContent.trim();
       } else {
-        // Fallback to longest paragraph
         const textElements = Array.from(cardEl.querySelectorAll('p, span')).filter(el => el.children.length === 0);
         if (textElements.length > 0) {
            titleEl = textElements.reduce((a, b) => a.textContent.length > b.textContent.length ? a : b);
@@ -240,25 +224,52 @@ window.WR_HOME_CARDS = {
         }
       }
 
-      // Extract all other text as metadata (tags, source, type)
-      const allTextNodes = [];
+      const metadata = [];
+      const seenTexts = new Set();
+      const usedSvgs = new Set();
+
       const walker = document.createTreeWalker(cardEl, NodeFilter.SHOW_TEXT, null, false);
       let node;
       while (node = walker.nextNode()) {
         const text = node.textContent.trim();
-        // Skip empty, very long text, or the exact title
-        if (text && text.length > 0 && text.length < 40 && text !== title) {
-           // Skip if it's part of the title element
+        if (text && text.length > 0 && text.length < 40 && text !== title && text !== 'No Thumbnail') {
            if (!titleEl || !titleEl.contains(node)) {
-              allTextNodes.push(text);
+              if (seenTexts.has(text)) continue;
+              seenTexts.add(text);
+
+              let closestSvgHtml = '';
+              let parent = node.parentElement;
+              let foundSvg = null;
+              
+              for (let i = 0; i < 3 && parent; i++) {
+                 const svgs = Array.from(parent.querySelectorAll('svg'));
+                 for (const svg of svgs) {
+                    if (!usedSvgs.has(svg)) {
+                       foundSvg = svg;
+                       break;
+                    }
+                 }
+                 if (foundSvg) break;
+                 parent = parent.parentElement;
+              }
+
+              if (foundSvg) {
+                 usedSvgs.add(foundSvg);
+                 const clonedSvg = foundSvg.cloneNode(true);
+                 clonedSvg.removeAttribute('class');
+                 clonedSvg.setAttribute('width', '12');
+                 clonedSvg.setAttribute('height', '12');
+                 clonedSvg.style.marginRight = '4px';
+                 clonedSvg.style.display = 'inline-block';
+                 clonedSvg.style.verticalAlign = 'middle';
+                 closestSvgHtml = clonedSvg.outerHTML;
+              }
+
+              metadata.push({ text, svgHtml: closestSvgHtml });
            }
         }
       }
-      
-      // Deduplicate tags
-      const metadata = Array.from(new Set(allTextNodes));
 
-      // Find the clickable link
       const linkEl = cardEl.querySelector('a');
       
       return {
@@ -276,13 +287,11 @@ window.WR_HOME_CARDS = {
 
   createCardElement(card, delayMs) {
     const el = document.createElement('div');
-    // Using exactly the same classes as spaced repetition so Immersive CSS works
     el.className = 'wr-grid-card'; 
     el.style.animationDelay = `${delayMs}ms`;
 
-    // Only inject link wrapper if we found a link, otherwise it's just a div
     const metadataHtml = card.metadata && card.metadata.length > 0 
-      ? `<div class="wr-card-metadata">${card.metadata.map(tag => `<span class="wr-card-tag">${tag}</span>`).join('')}</div>` 
+      ? `<div class="wr-card-metadata">${card.metadata.map(tag => `<span class="wr-card-tag">${tag.svgHtml}${tag.text}</span>`).join('')}</div>` 
       : '';
 
     const contentHtml = `
@@ -299,14 +308,12 @@ window.WR_HOME_CARDS = {
       el.innerHTML = `<a href="${card.link}" style="text-decoration: none; color: inherit; width: 100%; height: 100%; display: flex; flex-direction: column;">${contentHtml}</a>`;
     } else {
       el.innerHTML = contentHtml;
-      // Proxy clicks to native element if no direct link
       el.addEventListener('click', () => {
         const nativeClickable = card.nativeCard.querySelector('a, button') || card.nativeCard;
         nativeClickable.click();
       });
     }
 
-    // Add Spotlight Effect Tracking
     el.addEventListener('mousemove', (e) => {
       const rect = el.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
