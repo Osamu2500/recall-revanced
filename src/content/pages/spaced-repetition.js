@@ -365,6 +365,9 @@ window.WR_PAGES.spaced = {
     // This perfectly isolates the list of videos/cards regardless of HTML tags or class names!
     const allElements = document.querySelectorAll('div, table, tbody, ul');
     for (let el of allElements) {
+      // CRITICAL: Ignore our own injected grid to prevent infinite loop/layout thrashing!
+      if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
+
       if (el.children.length >= 2) {
          let imgChildrenCount = 0;
          for (let child of el.children) {
