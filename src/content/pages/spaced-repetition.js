@@ -345,57 +345,72 @@ window.WR_PAGES.spaced = {
 
     // The Review tab is a single flashcard. The Questions tab is a list of items.
     // If we see multiple checkboxes, we are almost certainly on the Questions tab.
-    const { container, rows } = this.findListContainerAndRows();
-    this.isQuestionsTab = rows.length > 1;
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    this.isQuestionsTab = checkboxes.length > 3;
     
     // Check again before injecting to prevent race conditions
     if (this.isQuestionsTab) {
-      this.extractAndRenderGrid(container, rows);
+      this.extractAndRenderGrid();
     } else {
       this.restoreOriginalUI();
     }
   },
 
   findListContainerAndRows() {
+    const allCbs = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+    if (allCbs.length < 2) return { container: null, rows: [] };
+
+    // Group checkboxes by their common container
+    // The true list container will have multiple direct children (the rows), each containing a checkbox.
     let bestContainer = null;
-    let maxValidRows = 0;
+    let maxRows = 0;
+    
+    // Check all ancestors of all checkboxes
+    const candidates = new Set();
+    allCbs.forEach(cb => {
+      let p = cb.parentElement;
+      while (p && p !== document.body) {
+        candidates.add(p);
+        p = p.parentElement;
+      }
+    });
 
-    const allElements = document.querySelectorAll('div, ul');
-    for (let el of allElements) {
-      if (el.classList.contains('wr-custom-grid-container') || el.closest('.wr-custom-grid-container')) continue;
-      if (el.tagName === 'MAIN' || el.id === 'root' || el.id === '__next' || el === document.body) continue;
-      
-      if (el.children.length >= 2) {
-        const classCounts = new Map();
-        for (let child of el.children) {
-          if (child.querySelector('img')) {
-             const sig = child.className || child.tagName;
-             classCounts.set(sig, (classCounts.get(sig) || 0) + 1);
-          }
-        }
-        
-        let localMax = 0;
-        for (let count of classCounts.values()) {
-           if (count > localMax) localMax = count;
-        }
-
-        if (localMax > maxValidRows && localMax >= 2) {
-           maxValidRows = localMax;
-           bestContainer = el;
+    // Find the container with the most checkbox-containing children
+    for (let container of candidates) {
+      let rowCount = 0;
+      for (let child of container.children) {
+        if (child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox')) {
+          rowCount++;
         }
       }
+      if (rowCount > maxRows) {
+        maxRows = rowCount;
+        bestContainer = container;
+      }
     }
-    
-    if (!bestContainer || maxValidRows < 2) {
+
+    if (!bestContainer || maxRows < 2) {
       return { container: null, rows: [] };
     }
 
-    const rows = Array.from(bestContainer.children).filter(child => child.querySelector('img'));
+    // The rows are the children that contain a checkbox
+    const rows = Array.from(bestContainer.children).filter(child => {
+      return child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox');
+    });
     
+    // Find a good wrapper to apply the drawer styling to
     let wrapper = bestContainer;
+    
+    // If it's inside a standard table, grab the table or its container
     const table = bestContainer.closest('table, [role="table"], .MuiTable-root');
     if (table) {
-      wrapper = table;
+      wrapper = table.closest('.MuiTableContainer-root') || table;
+    } else {
+      // For div-based lists, the parent of the row container is usually the scrollable wrapper
+      const parent = bestContainer.parentElement;
+      if (parent && parent !== document.body && parent.tagName !== 'MAIN') {
+         wrapper = parent;
+      }
     }
 
     return { container: wrapper, rows: rows };
@@ -406,8 +421,10 @@ window.WR_PAGES.spaced = {
     return res.container;
   },
 
-  extractAndRenderGrid(originalTable, rows) {
-    if (!originalTable || !rows || rows.length === 0) {
+  extractAndRenderGrid() {
+    const { container: originalTable, rows } = this.findListContainerAndRows();
+    
+    if (!originalTable || rows.length === 0) {
       console.log(`[WIDER RECALL GRID] Could not find original table or rows.`);
       this.restoreOriginalUI();
       return;
@@ -537,15 +554,8 @@ window.WR_PAGES.spaced = {
       const id = `wr-card-${safeTitle}`;
 
       // 4. Checkbox
-      const checkboxInput = row.querySelector('input[type="checkbox"], [role="checkbox"], svg[class*="checkbox"], svg');
-      let isChecked = false;
-      if (checkboxInput) {
-        if (checkboxInput.tagName === 'INPUT') {
-          isChecked = checkboxInput.checked;
-        } else {
-          isChecked = checkboxInput.getAttribute('aria-checked') === 'true' || checkboxInput.classList.contains('checked');
-        }
-      }
+      const checkboxInput = row.querySelector('input[type="checkbox"]');
+      const isChecked = checkboxInput ? checkboxInput.checked : false;
 
       return {
         id: id,
@@ -706,37 +716,22 @@ window.WR_PAGES.spaced = {
 
   proxyCheckboxClick(card) {
     this.executeOnCard(card, (rowElement) => {
-      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"], svg[class*="checkbox"], svg');
+      const originalCheckbox = rowElement.querySelector('input[type="checkbox"]');
       if (originalCheckbox) {
-        if (originalCheckbox.tagName === 'INPUT') {
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
-          if (nativeInputValueSetter) {
-            nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
-            originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-          } else {
-            originalCheckbox.click();
-          }
+        // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
+        if (nativeInputValueSetter) {
+          nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
+          originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
-           originalCheckbox.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+          originalCheckbox.click();
         }
-      } else {
-        const firstChild = rowElement.firstElementChild;
-        if (firstChild) firstChild.click();
       }
     });
     
     // Optimistic UI Update (always runs immediately for responsiveness)
     card.checked = !card.checked;
     this.updateCardDOMState(card.id, card.checked);
-  },
-
-  proxyArrowClick(card) {
-    this.executeOnCard(card, (rowElement) => {
-      const arrowBtn = rowElement.querySelector('button');
-      if (arrowBtn) {
-        arrowBtn.click();
-      }
-    });
   },
 
   proxyRowClick(card) {
@@ -763,8 +758,13 @@ window.WR_PAGES.spaced = {
       if (chevronSvg) {
         chevronSvg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       } else {
-        console.warn("Wider Recall: Could not find chevron SVG to click!");
-        rowElement.click();
+        const arrowBtn = rowElement.querySelector('button');
+        if (arrowBtn) {
+          arrowBtn.click();
+        } else {
+          console.warn("Wider Recall: Could not find chevron SVG or button to click!");
+          rowElement.click();
+        }
       }
     });
   },
