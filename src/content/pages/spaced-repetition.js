@@ -403,6 +403,26 @@ window.WR_PAGES.spaced = {
       }
     }
 
+    // Detect if the side panel is open. If there is a large sibling (width > 250px)
+    // in the ancestor tree, the split-view is active, so we should abort grid extraction.
+    let node = wrapper;
+    let depth = 0;
+    while (node && node !== document.body && node.tagName !== 'MAIN' && depth < 4) {
+      if (node.parentElement) {
+        for (let sibling of node.parentElement.children) {
+          if (sibling === node || sibling.tagName === 'STYLE' || sibling.tagName === 'SCRIPT' || sibling.classList.contains('wr-custom-grid-container')) continue;
+          
+          const rect = sibling.getBoundingClientRect();
+          // A side panel typically has substantial width and height
+          if (rect.width > 250 && rect.height > 200) {
+             return { container: null, rows: [] };
+          }
+        }
+      }
+      node = node.parentElement;
+      depth++;
+    }
+
     return { container: wrapper, rows: rows };
   },
 
@@ -733,6 +753,17 @@ window.WR_PAGES.spaced = {
     // Optimistic UI Update (always runs immediately for responsiveness)
     card.checked = !card.checked;
     this.updateCardDOMState(card.id, card.checked);
+  },
+
+  proxyArrowClick(card) {
+    this.executeOnCard(card, (rowElement) => {
+      const arrowBtn = rowElement.querySelector('button');
+      if (arrowBtn) {
+        // Immediately restore original UI to prevent layout jumping before next polling tick
+        this.restoreOriginalUI();
+        arrowBtn.click();
+      }
+    });
   },
 
   proxyRowClick(card) {
