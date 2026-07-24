@@ -117,8 +117,25 @@ window.WR_HOME_CARDS = {
   },
 
   extractAndRenderGrid() {
-    const rawCards = Array.from(document.querySelectorAll('article, div[class*="MuiCard-root"]'))
-      .filter(card => !card.closest('.wr-home-grid-container')); // exclude our own cards
+    // Recall's homepage cards are often just generic <div class="MuiBox-root"> elements.
+    // The most reliable way to find them is to look for links to items.
+    const itemLinks = Array.from(document.querySelectorAll('a[href*="/item/"]'))
+      .filter(a => !a.closest('.wr-home-grid-container'));
+
+    if (itemLinks.length === 0) return;
+
+    // The actual "card" is usually the top-level block element that is a direct child of the grid container.
+    const rawCards = Array.from(new Set(itemLinks.map(link => {
+      let card = link;
+      while (card.parentElement && card.parentElement.tagName !== 'MAIN' && card.parentElement.id !== 'navigation-scroll-container') {
+        const parentStyle = window.getComputedStyle(card.parentElement);
+        if (parentStyle.display === 'grid' || parentStyle.display === 'flex' && card.parentElement.children.length > 2) {
+          break; // The parent is likely the grid container
+        }
+        card = card.parentElement;
+      }
+      return card;
+    })));
 
     if (rawCards.length === 0) return;
 
