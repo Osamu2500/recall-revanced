@@ -162,15 +162,21 @@ window.WR_HOME_CARDS = {
     }
     this.lastCardCount = rawCards.length;
 
-    if (!needsUpdate) {
-       // Deep check? For now, count is enough for homepage lazy loading
-       const firstNativeImg = rawCards[0]?.querySelector('img')?.src;
-       const firstCustomImg = this.gridContainer.querySelector('img')?.src;
-       if (firstNativeImg !== firstCustomImg) needsUpdate = true;
+    if (!needsUpdate && rawCards.length > 0) {
+       // Deep check to see if the first card's actual textual content changed (e.g. folder navigation)
+       const firstNativeText = rawCards[0].textContent || '';
+       const savedNativeText = this.gridContainer.getAttribute('data-wr-first-native-text') || '';
+       if (firstNativeText !== savedNativeText) needsUpdate = true;
     }
 
     if (needsUpdate) {
+      // Pause observer so our own DOM changes don't trigger another cycle
+      if (this.observer) this.observer.disconnect();
+
       this.gridContainer.innerHTML = '';
+      if (rawCards.length > 0) {
+        this.gridContainer.setAttribute('data-wr-first-native-text', rawCards[0].textContent || '');
+      }
       
       rawCards.forEach((row, index) => {
         row.classList.add('wr-original-home-card');
@@ -180,8 +186,12 @@ window.WR_HOME_CARDS = {
           this.gridContainer.appendChild(customEl);
         }
       });
+
+      // Resume observer
+      const root = document.querySelector('main') || document.body;
+      this.observer.observe(root, { childList: true, subtree: true, attributes: false });
     } else {
-       // Ensure all are hidden
+       // Ensure all are hidden (doesn't trigger loop if already hidden)
        rawCards.forEach(row => row.classList.add('wr-original-home-card'));
     }
   },
