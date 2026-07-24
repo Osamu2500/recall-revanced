@@ -1,0 +1,86 @@
+/* src/themes/wider-features.css (Appending to wider.css effectively) */
+
+/* ── UPDATE 2.0: Hover Focus Mode ────────────────────────────────────── */
+body.wr-focus-mode-active .ProseMirror > * {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+body.wr-focus-mode-active .ProseMirror > .wr-focus-dim {
+  opacity: 0.2 !important;
+  filter: blur(1px) !important;
+}
+body.wr-focus-mode-active .ProseMirror > .wr-focus-highlight {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: scale(1.02);
+  z-index: 10;
+  position: relative;
+}
+
+/* ── UPDATE 2.0: Table of Contents Minimap ───────────────────────────── */
+#wr-toc-minimap {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  width: 250px;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  background: rgba(20, 20, 25, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition: opacity 0.3s ease;
+}
+.wr-toc-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 5px;
+}
+.wr-toc-link {
+  display: block;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 4px 0;
+  margin: 2px 0;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wr-toc-link:hover {
+  color: #fff;
+  padding-left: 5px;
+}
+.wr-toc-h1 { font-weight: bold; }
+.wr-toc-h2 { margin-left: 10px; opacity: 0.9; }
+.wr-toc-h3 { margin-left: 20px; font-size: 12px; opacity: 0.7; }
+
+/* ── UPDATE 2.0: Code Copy Buttons ───────────────────────────────────── */
+.wr-code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+.ProseMirror pre:hover .wr-code-copy-btn {
+  opacity: 1;
+}
+.wr-code-copy-btn:hover {
+  background: rgba(255,255,255,0.2);
+}

@@ -1,0 +1,297 @@
+/* ── SPACED REPETITION CUSTOM GRID THEME ──────────────────────────── */
+/* Ultra-premium glassmorphism grid for Spaced Repetition Questions Tab */
+
+:root {
+  --wr-grid-gap: 20px;
+  --wr-card-radius: 16px;
+  --wr-glass-bg: rgba(22, 22, 28, 0.45);
+  --wr-glass-border: rgba(255, 255, 255, 0.08);
+  --wr-glass-blur: 16px;
+  --wr-accent: #8b5cf6;
+  --wr-accent-hover: #a78bfa;
+}
+
+/* Hide the original table entirely when our custom grid is active */
+body[data-wr-enabled="true"] .wr-original-questions-table {
+  display: none !important;
+}
+
+/* Container for our custom grid */
+.wr-custom-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--wr-grid-gap);
+  width: 100%;
+  padding: 10px 0 40px 0;
+  perspective: 1000px;
+  animation: wr-grid-fade-in 0.4s ease-out forwards;
+}
+
+@keyframes wr-grid-fade-in {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Card Element */
+.wr-grid-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--wr-glass-bg);
+  backdrop-filter: blur(var(--wr-glass-blur));
+  -webkit-backdrop-filter: blur(var(--wr-glass-blur));
+  border: 1px solid var(--wr-glass-border);
+  border-radius: var(--wr-card-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transform-style: preserve-3d;
+  opacity: 0;
+  animation: wr-card-enter 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes wr-card-enter {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wr-grid-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.wr-grid-card.wr-selected {
+  border-color: var(--wr-accent);
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 0 1px var(--wr-accent), 0 10px 30px rgba(139, 92, 246, 0.2);
+}
+
+/* Image Container */
+.wr-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.wr-card-image-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15,15,20,1) 0%, rgba(15,15,20,0) 100%);
+  pointer-events: none;
+}
+
+.wr-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.wr-grid-card:hover .wr-card-image {
+  transform: scale(1.08);
+}
+
+/* Question Count Badge */
+.wr-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+
+.wr-card-badge.wr-badge-empty {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+/* Content Area */
+.wr-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.wr-card-title {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Checkbox (Custom) */
+.wr-custom-checkbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wr-custom-checkbox:hover {
+  border-color: var(--wr-accent-hover);
+  background: rgba(0,0,0,0.6);
+  transform: scale(1.1);
+}
+
+.wr-custom-checkbox.wr-checked {
+  background: var(--wr-accent);
+  border-color: var(--wr-accent);
+}
+
+.wr-custom-checkbox::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.wr-custom-checkbox.wr-checked::after {
+  transform: rotate(45deg) scale(1);
+  opacity: 1;
+}
+
+/* Spotlight Effect specific for custom grid */
+.wr-grid-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    600px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255,255,255,0.1),
+    transparent 40%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.wr-grid-card:hover::before {
+  opacity: 1;
+}
+
+/* Empty State */
+.wr-grid-empty {
+  width: 100%;
+  padding: 60px 20px;
+  text-align: center;
+  color: rgba(255,255,255,0.5);
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.wr-grid-empty svg {
+  width: 64px;
+  height: 64px;
+  opacity: 0.2;
+}
+
+/* Loading Skeleton */
+.wr-grid-skeleton {
+  width: 100%;
+  height: 280px;
+  border-radius: var(--wr-card-radius);
+  background: linear-gradient(90deg, 
+    var(--wr-glass-bg) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    var(--wr-glass-bg) 100%);
+  background-size: 200% 100%;
+  animation: wr-shimmer 2s infinite linear;
+}
+
+@keyframes wr-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Sync indicator */
+.wr-syncing-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  backdrop-filter: blur(8px);
+  color: #C4B5FD;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+.wr-syncing-indicator.wr-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.wr-syncing-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #C4B5FD;
+  animation: wr-pulse 1s infinite alternate;
+}
+@keyframes wr-pulse {
+  from { opacity: 0.5; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}

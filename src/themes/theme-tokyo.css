@@ -1,0 +1,92 @@
+/* src/themes/theme-tokyo.css */
+/* ── DEEP TOKYO NIGHT THEME ────────────────────────────────────────── */
+:root {
+  --tokyo-bg: #1a1b26;
+  --tokyo-bg-alt: #16161e;
+  --tokyo-fg: #c0caf5;
+  --tokyo-fg-dark: #a9b1d6;
+  --tokyo-cyan: #7dcfff;
+  --tokyo-blue: #7aa2f7;
+  --tokyo-magenta: #bb9af7;
+  --tokyo-green: #9ece6a;
+  --tokyo-red: #f7768e;
+  --tokyo-orange: #ff9e64;
+  --tokyo-yellow: #e0af68;
+  --tokyo-border: #292e42;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] {
+  background-color: var(--tokyo-bg) !important;
+  color: var(--tokyo-fg) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] * {
+  border-color: var(--tokyo-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] header,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] nav,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiDrawer-paper {
+  background-color: var(--tokyo-bg-alt) !important;
+  border-right: 1px solid var(--tokyo-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] header a,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] nav a,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] header button,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] nav button {
+  color: var(--tokyo-blue) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror {
+  background-color: var(--tokyo-bg) !important;
+  color: var(--tokyo-fg) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror h1,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror h2,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror h3 {
+  color: var(--tokyo-magenta) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror a {
+  color: var(--tokyo-cyan) !important;
+  text-decoration: underline;
+  text-decoration-color: var(--tokyo-blue) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror blockquote {
+  border-left: 4px solid var(--tokyo-magenta) !important;
+  background-color: var(--tokyo-bg-alt) !important;
+  padding: 10px 15px !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror pre,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .ProseMirror code {
+  background-color: var(--tokyo-bg-alt) !important;
+  color: var(--tokyo-green) !important;
+  border: 1px solid var(--tokyo-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [class*="message"],
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [class*="bubble"] {
+  background-color: var(--tokyo-bg-alt) !important;
+  border: 1px solid var(--tokyo-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [class*="card"],
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [class*="flashcard"] {
+  background-color: var(--tokyo-bg-alt) !important;
+  border: 1px solid var(--tokyo-border) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiButton-root {
+  background-color: var(--tokyo-border) !important;
+  color: var(--tokyo-blue) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiButton-root:hover {
+  background-color: var(--tokyo-blue) !important;
+  color: var(--tokyo-bg) !important;
+}

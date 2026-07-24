@@ -1,0 +1,1253 @@
+/* Immersive Glass Card Style */
+
+/* ========================================================
+   1. GLOBAL RENDERER STYLING (Card Boundaries)
+   ======================================================== */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer,
+html[data-ypp-card-style='immersive-glass'] .ypp-grid-item {
+  margin-bottom: 24px !important;
+  background: transparent !important;
+  border-radius: 20px !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-radio-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-channel-renderer,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer {
+  margin-bottom: 24px !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 20px !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer > #content,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-radio-renderer,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  > #content,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer > #content,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer > #content {
+  border-radius: 20px !important;
+}
+
+/* Base card body clipping */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer #dismissible,
+/* Search page: activate via body.ypp-search-list-mode (set by search-redesign.js fallback) */
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-radio-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-channel-renderer #dismissible,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-playlist-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-radio-renderer,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer #dismissible,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer #dismissible,
+/* Scoped yt-lockup-view-model — ONLY inside known video card containers */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] #related yt-lockup-view-model {
+  position: relative !important;
+  width: 100% !important; /* Fix search grid collapsing */
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: block !important;
+  aspect-ratio: 16 / 9 !important; /* Force perfectly fitting aspect ratio */
+}
+
+/* Hover effect - no scaling, just box-shadow, to keep video preview aligned perfectly */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer:hover #dismissible,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-radio-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-channel-renderer:hover #dismissible,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-playlist-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-radio-renderer:hover,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer:hover #dismissible,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer:hover #dismissible,
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer:hover yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode *:hover > yt-lockup-view-model,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode *:hover > yt-lockup-view-model {
+  transform: none !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Thumbnails — target ONLY the actual thumbnail element, NOT the renderer itself */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  ytd-playlist-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  yt-lockup-view-model
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-radio-renderer
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer ytd-thumbnail,
+html[data-ypp-card-style='immersive-glass'] .ytLockupViewModelContentImage {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 20px !important;
+  display: block !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-playlist-renderer ytd-playlist-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode yt-lockup-view-model ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-radio-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-channel-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer ytd-thumbnail img,
+html[data-ypp-card-style='immersive-glass'] .ytCoreImageHost {
+  position: relative !important;
+  z-index: 1 !important;
+  border-radius: 20px !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+/* ========================================================
+   2. HOMEPAGE & CHANNEL PAGE SPECIFICS 
+   (ytd-rich-item-renderer / ytd-grid-video-renderer)
+   Scoped to ONLY fire on homepage/grid cards, NOT search cards.
+   ======================================================== */
+/* Make the metadata container cover the entire card */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer #details,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer #details {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+/* Force the main video links UNDER the details container */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer a#thumbnail,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer a#thumbnail,
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer a#video-title-link,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer a#video-title-link,
+html[data-ypp-card-style='immersive-glass'] .yt-lockup-view-model-wiz__url {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* New lockup model metadata overlay — guard with :not(ytd-search *) to avoid search cards */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer .ytLockupViewModelMetadata,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer .ytLockupViewModelMetadata,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer .ytLockupViewModelMetadata,
+html[data-ypp-card-style='immersive-glass'] #related .ytLockupViewModelMetadata {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] yt-lockup-metadata-view-model {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  pointer-events: none !important;
+}
+
+/* Place the text at the bottom — homepage/channel only */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer #meta,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer #meta,
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer #meta,
+html[data-ypp-card-style='immersive-glass'] #related #meta,
+html[data-ypp-card-style='immersive-glass']
+  ytd-rich-item-renderer
+  .ytLockupMetadataViewModelTextContainer,
+html[data-ypp-card-style='immersive-glass']
+  ytd-grid-video-renderer
+  .ytLockupMetadataViewModelTextContainer,
+html[data-ypp-card-style='immersive-glass']
+  ytd-compact-video-renderer
+  .ytLockupMetadataViewModelTextContainer,
+html[data-ypp-card-style='immersive-glass']
+  #related
+  .ytLockupMetadataViewModelTextContainer {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 16px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: auto !important;
+}
+
+/* Avatar placements (Top Left) — homepage/channel only */
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer #avatar,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer #avatar,
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer .yt-avatar-stack,
+html[data-ypp-card-style='immersive-glass'] ytd-grid-video-renderer .yt-avatar-stack,
+html[data-ypp-card-style='immersive-glass']
+  ytd-rich-item-renderer
+  .ytLockupMetadataViewModelAvatarContainer,
+html[data-ypp-card-style='immersive-glass']
+  ytd-grid-video-renderer
+  .ytLockupMetadataViewModelAvatarContainer {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  z-index: 3 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 4px !important;
+  pointer-events: auto !important;
+}
+
+/* Search page: scoped avatar stacking container */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  .ytLockupMetadataViewModelAvatarContainer,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  .ytLockupMetadataViewModelAvatarContainer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode .yt-avatar-stack,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode .yt-avatar-stack {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  z-index: 3 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 4px !important;
+  pointer-events: auto !important;
+}
+
+/* ========================================================
+   3. SEARCH RESULTS SPECIFICS (ytd-video-renderer)
+   Activated by: body.ypp-search-list-mode (set by search-redesign.js,
+   either from the Search Grid feature OR the card-style fallback)
+   ======================================================== */
+
+/* Fix for search grid shrinking when immersive glass removes intrinsic width */
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-section-list-renderer,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-section-list-renderer {
+  width: 100% !important;
+  flex: 1 !important;
+}
+
+/* Fix search list/grid mode dismissible so thumbnails and text stack perfectly */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-radio-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-playlist-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-radio-renderer
+  #dismissible,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-channel-renderer
+  #dismissible {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/*
+   Override search-ast.css structural rules so the overlay layout works.
+   .text-wrapper must cover the entire card as an absolute overlay.
+*/
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-radio-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-playlist-renderer
+  .text-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-radio-renderer
+  .text-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  padding: 16px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+/* Remove the ::before spacer, we will use margin-top: auto on the title */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-radio-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-playlist-renderer
+  .text-wrapper::before,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-radio-renderer
+  .text-wrapper::before {
+  display: none !important;
+}
+
+/* Remove normal flow from inner containers so children can be absolutely positioned relative to .text-wrapper */
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode ytd-video-renderer #meta,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-info,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode ytd-video-renderer #meta,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-info {
+  display: block !important;
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 1. Title (Top-most text, anchored to bottom so it grows upwards) */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #title-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  #title-wrapper,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #title-wrapper {
+  position: absolute !important;
+  bottom: 54px !important;
+  left: 16px !important;
+  right: 16px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+}
+
+/* 2. Channel Name (Middle text) */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  ytd-channel-name,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  ytd-channel-name {
+  position: absolute !important;
+  bottom: 34px !important;
+  left: 16px !important;
+  right: 16px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+}
+
+/* 3. Views / Time (Bottom-most text) */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  ytd-video-meta-block,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  ytd-video-meta-block {
+  position: absolute !important;
+  bottom: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+}
+
+/* Hide the intrusive SAVE button injected into cards */
+html[data-ypp-card-style='immersive-glass']
+  ytd-video-renderer
+  ytd-thumbnail-overlay-toggle-button-renderer,
+html[data-ypp-card-style='immersive-glass']
+  ytd-video-renderer
+  ytd-thumbnail-overlay-button-renderer,
+html[data-ypp-card-style='immersive-glass']
+  ytd-video-renderer
+  yt-button-shape:has(path[d*='M20 6h-8l-2-2']),
+html[data-ypp-card-style='immersive-glass'] ytd-video-renderer [aria-label*='Save'],
+html[data-ypp-card-style='immersive-glass'] ytd-video-renderer [title*='Save'],
+html[data-ypp-card-style='immersive-glass'] ytd-video-renderer .ypp-folder-save-btn,
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer ytd-thumbnail-overlay-toggle-button-renderer,
+html[data-ypp-card-style='immersive-glass'] ytd-rich-item-renderer ytd-thumbnail-overlay-button-renderer {
+  display: none !important;
+}
+
+/* Hide snippet, badges, and action buttons that clash with the overlay layout */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  .metadata-snippet-container,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  yt-formatted-string.metadata-snippet-text,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  yt-formatted-string#description-text,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  .metadata-snippet-container,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  yt-formatted-string.metadata-snippet-text,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  yt-formatted-string#description-text,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-list-mode .ypp-card-folder-btn,
+html[data-ypp-card-style='immersive-glass'] body.ypp-search-grid-mode .ypp-card-folder-btn {
+  display: none !important;
+}
+
+/* Ensure any other elements inside text-wrapper don't have bottom margins pushing content up */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  .text-wrapper
+  > *,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  .text-wrapper
+  > * {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/*
+   Position the channel avatar at the top-left of the immersive card.
+   The .text-wrapper (position:absolute) is the stacking context.
+*/
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-channel-renderer
+  #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-playlist-renderer
+  #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-info
+  > a:first-child,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-info
+  > a:first-child,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-info
+  yt-avatar-shape,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-info
+  yt-avatar-shape {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  margin: 0 !important;
+  z-index: 3 !important;
+  pointer-events: auto !important;
+}
+
+/* ─── Text layout inside the overlay ─────────────────────────────────────── */
+/* The .text-wrapper is position:absolute covering the whole card.
+   We use a flex spacer (::before) to push all content to the bottom.
+   Each child element needs display:block and pointer-events:auto. */
+
+/* Title — bold, white, 2-line clamp */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-playlist-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-radio-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-playlist-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-radio-renderer
+  #video-title,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #video-title
+  yt-formatted-string,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #video-title
+  yt-formatted-string {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin: 0 0 4px 0 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 8px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.7) !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+}
+
+/* Channel name */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  ytd-channel-name
+  yt-formatted-string,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  ytd-channel-name
+  a {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  pointer-events: auto !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+}
+
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  ytd-channel-name
+  yt-formatted-string,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  ytd-channel-name
+  a {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  pointer-events: auto !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+}
+
+/* Metadata line (views • time ago) */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #metadata-line,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #metadata-line
+  span,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #metadata-line,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #metadata-line
+  span {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  pointer-events: auto !important;
+  display: inline !important;
+}
+
+/* Channel-info row: flex so avatar + text line up */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-info,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-info {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Badges beside channel name — keep visible */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  ytd-video-renderer
+  #channel-info
+  ytd-badge-supported-renderer,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  ytd-video-renderer
+  #channel-info
+  ytd-badge-supported-renderer {
+  display: flex !important;
+  flex-shrink: 0 !important;
+}
+
+/* Handle multiple collab avatars in search results */
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  #channel-thumbnail
+  ~ #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  #channel-thumbnail
+  ~ #channel-thumbnail {
+  left: 56px !important;
+}
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-list-mode
+  #channel-thumbnail
+  ~ #channel-thumbnail
+  ~ #channel-thumbnail,
+html[data-ypp-card-style='immersive-glass']
+  body.ypp-search-grid-mode
+  #channel-thumbnail
+  ~ #channel-thumbnail
+  ~ #channel-thumbnail {
+  left: 100px !important;
+}
+
+/* ========================================================
+   4. SIDEBAR SPECIFICS (ytd-compact-video-renderer)
+   ======================================================== */
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer .details {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 10px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+}
+
+/* Base text rules for sidebar */
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer #video-title {
+  line-height: 1.2 !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+}
+
+/* 
+   SIDEBAR LAYOUT INTEGRATION:
+   Immersive Glass forces the sidebar into an "Expanded" (full width) layout
+   automatically because the text is overlaid directly on the large thumbnail. 
+*/
+html[data-ypp-card-style='immersive-glass']
+  :is(#related, ytd-watch-next-secondary-results-renderer)
+  ytd-compact-video-renderer,
+html[data-ypp-card-style='immersive-glass']
+  :is(#related, ytd-watch-next-secondary-results-renderer)
+  yt-lockup-view-model {
+  margin-bottom: 24px !important;
+}
+
+/* Force larger fonts and more padding to match the Expanded feel */
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer #video-title {
+  font-size: 1.4rem !important;
+  -webkit-line-clamp: 3 !important; /* Allow more text on big cards */
+  line-clamp: 3 !important;
+}
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer #metadata-line {
+  font-size: 1.2rem !important;
+}
+html[data-ypp-card-style='immersive-glass'] ytd-compact-video-renderer .details {
+  padding: 16px !important; /* Extra breathing room */
+}
+
+/* ========================================================
+   5. GLOBAL AVATAR FIXES (Squircle, Styles)
+   ======================================================== */
+/* Individual avatars (fallback absolute if no container) */
+html[data-ypp-card-style='immersive-glass'] #avatar-link,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelAvatar {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+}
+
+/* If avatars are multiple siblings, separate them */
+html[data-ypp-card-style='immersive-glass'] #avatar-link:nth-of-type(2),
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelAvatar:nth-of-type(2),
+html[data-ypp-card-style='immersive-glass'] ytd-channel-thumbnail-with-link-renderer:nth-of-type(2),
+html[data-ypp-card-style='immersive-glass'] #avatar ~ #avatar,
+html[data-ypp-card-style='immersive-glass']
+  ytd-channel-thumbnail-with-link-renderer
+  ~ ytd-channel-thumbnail-with-link-renderer {
+  left: 56px !important; /* 12 + 40 + 4 */
+}
+html[data-ypp-card-style='immersive-glass'] #avatar-link:nth-of-type(3),
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelAvatar:nth-of-type(3),
+html[data-ypp-card-style='immersive-glass'] ytd-channel-thumbnail-with-link-renderer:nth-of-type(3),
+html[data-ypp-card-style='immersive-glass'] #avatar ~ #avatar ~ #avatar,
+html[data-ypp-card-style='immersive-glass']
+  ytd-channel-thumbnail-with-link-renderer
+  ~ ytd-channel-thumbnail-with-link-renderer
+  ~ ytd-channel-thumbnail-with-link-renderer {
+  left: 100px !important; /* 56 + 40 + 4 */
+}
+
+/* Cancel absolute position if they are safely inside an absolute container */
+html[data-ypp-card-style='immersive-glass'] #avatar #avatar-link,
+html[data-ypp-card-style='immersive-glass'] #avatar ytd-channel-thumbnail-with-link-renderer,
+html[data-ypp-card-style='immersive-glass'] .yt-avatar-stack #avatar-link,
+html[data-ypp-card-style='immersive-glass'] .yt-avatar-stack .ytLockupMetadataViewModelAvatar,
+html[data-ypp-card-style='immersive-glass']
+  .ytLockupMetadataViewModelAvatarContainer
+  .ytLockupMetadataViewModelAvatar {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] #avatar-link yt-img-shadow,
+html[data-ypp-card-style='immersive-glass'] .ytSpecAvatarShapeHost,
+html[data-ypp-card-style='immersive-glass'] .yt-spec-avatar-shape,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelAvatar,
+html[data-ypp-card-style='immersive-glass'] #channel-thumbnail yt-img-shadow {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important; /* Back to circular */
+  overflow: hidden !important;
+
+  /* Strong black border and shadow just like the text */
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.7) !important;
+  border: 1.5px solid #000 !important;
+  background: transparent !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+
+/* Target the specific YouTube inner wrapper that restricts avatar image size.
+   YouTube sets max-width: 36px on .yt-spec-avatar-shape__image-wrapper —
+   we must override it specifically before the wildcard can fill the container. */
+html[data-ypp-card-style='immersive-glass'] .yt-spec-avatar-shape__image-wrapper,
+html[data-ypp-card-style='immersive-glass'] yt-avatar-shape,
+html[data-ypp-card-style='immersive-glass'] ytd-channel-avatar-element {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 50% !important; /* Circular */
+  overflow: hidden !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] .yt-spec-avatar-shape__image-wrapper img,
+html[data-ypp-card-style='immersive-glass'] yt-avatar-shape img,
+html[data-ypp-card-style='immersive-glass'] ytd-channel-avatar-element img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Wildcard fallback for all other avatar sub-elements */
+html[data-ypp-card-style='immersive-glass'] #avatar-link yt-img-shadow *,
+html[data-ypp-card-style='immersive-glass'] .ytSpecAvatarShapeHost *,
+html[data-ypp-card-style='immersive-glass'] .yt-spec-avatar-shape *,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelAvatar *,
+html[data-ypp-card-style='immersive-glass'] #channel-thumbnail yt-img-shadow * {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+/* ========================================================
+   6. GLOBAL MENU BUTTON (Top Right)
+   ======================================================== */
+
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-playlist-renderer,
+    body.ypp-search-list-mode ytd-radio-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  :is(#menu, ytd-menu-renderer),
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  opacity: 1 !important; /* Force visible */
+  display: flex !important; /* Ensure it's not display:none */
+  visibility: visible !important; /* Override YouTube native hide */
+}
+
+/* Restore native pointer events so YouTube's JS isn't confused by our overrides */
+html[data-ypp-card-style='immersive-glass'] :is(#menu, ytd-menu-renderer) :is(yt-icon-button, yt-button-shape),
+html[data-ypp-card-style='immersive-glass'] :is(#menu, ytd-menu-renderer) :is(yt-icon-button, yt-button-shape) button,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton {
+  pointer-events: auto !important;
+}
+
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-playlist-renderer,
+    body.ypp-search-list-mode ytd-radio-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  :is(#menu, ytd-menu-renderer) yt-icon,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton yt-icon,
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-playlist-renderer,
+    body.ypp-search-list-mode ytd-radio-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  :is(#menu, ytd-menu-renderer)
+  svg,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton svg {
+  color: #fff !important;
+  fill: #fff !important;
+  filter: drop-shadow(-1px -1px 0px #000) drop-shadow(1px -1px 0px #000)
+    drop-shadow(-1px 1px 0px #000) drop-shadow(1px 1px 0px #000)
+    drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.9)) !important;
+}
+
+/* Increase clickable area of the menu button */
+html[data-ypp-card-style='immersive-glass'] :is(#menu, ytd-menu-renderer) :is(yt-icon-button, yt-button-shape) button {
+  position: relative !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-playlist-renderer,
+    body.ypp-search-list-mode ytd-radio-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  :is(#menu, ytd-menu-renderer)
+  :is(yt-icon-button, yt-button-shape) button,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] :is(#menu, ytd-menu-renderer) :is(yt-icon-button, yt-button-shape) {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] :is(#menu, ytd-menu-renderer) :is(yt-icon-button, yt-button-shape) yt-interaction {
+  display: none !important;
+}
+
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-video-renderer,
+    body.ypp-search-list-mode ytd-playlist-renderer,
+    body.ypp-search-list-mode ytd-radio-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  :is(#menu, ytd-menu-renderer)
+  :is(yt-icon-button, yt-button-shape) button:hover,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton:hover {
+  background: rgba(0, 0, 0, 0.8) !important;
+  transform: scale(1.1) !important;
+}
+
+/* End menu styling */
+
+/* ========================================================
+   7. GLOBAL TYPOGRAPHY (Heavy Outlines)
+   ======================================================== */
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  #video-title,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelTitle,
+html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelTitle * {
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  line-height: 1.3 !important;
+
+  /* Strong black text border for visibility over any thumbnail */
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 8px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.7) !important;
+}
+
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  #metadata-line,
+html[data-ypp-card-style='immersive-glass'] .ytContentMetadataViewModelMetadataText,
+html[data-ypp-card-style='immersive-glass'] .ytContentMetadataViewModelMetadataText *,
+html[data-ypp-card-style='immersive-glass'] .ytContentMetadataViewModelDelimiter,
+html[data-ypp-card-style='immersive-glass']
+  :is(
+    ytd-rich-item-renderer,
+    body.ypp-search-grid-mode ytd-video-renderer,
+    ytd-compact-video-renderer,
+    ytd-grid-video-renderer
+  )
+  #channel-name
+  * {
+  color: #fff !important;
+  font-weight: 600 !important;
+
+  /* Black text border for metadata */
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* ========================================================
+   8. GLOBAL TIME BADGES & PROGRESS BAR
+   ======================================================== */
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays badge-shape,
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays ytd-thumbnail-overlay-time-status-renderer {
+  margin: 0 !important;
+  z-index: 10 !important;
+  pointer-events: auto !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 6px !important;
+  padding: 4px 6px !important;
+}
+
+/* Clear native inner background and padding to prevent multiple borders/layers */
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays badge-shape .badge-shape-wiz,
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays ytd-thumbnail-overlay-time-status-renderer[overlay-style="DEFAULT"],
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays ytd-thumbnail-overlay-time-status-renderer .badge-shape-wiz {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* De-duplicate timestamps by hiding badge-shape if the old time-status-renderer exists */
+html[data-ypp-card-style='immersive-glass']
+  #overlays:has(ytd-thumbnail-overlay-time-status-renderer)
+  badge-shape.badge-shape-wiz--thumbnail-default {
+  display: none !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays badge-shape *,
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays ytd-thumbnail-overlay-time-status-renderer * {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+/* 
+   Hide overlay icons (Save to Playlist/Watch Later/Folder Save) 
+   from Immersive Glass because they clash with the top layout 
+*/
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail-overlay-toggle-button-renderer,
+html[data-ypp-card-style='immersive-glass'] .ypp-folder-save-btn {
+  display: none !important;
+}
+
+html[data-ypp-card-style='immersive-glass'] ytd-thumbnail-overlay-resume-playback-renderer {
+  border-radius: 0 0 20px 20px !important;
+  overflow: hidden !important;
+}
+
+/* ========================================================
+   9. INLINE VIDEO PREVIEW FIXES
+   ======================================================== */
+
+/* Ensure the inline preview stays behind the details and menu so they don't disappear, but ABOVE the thumbnail */
+html[data-ypp-card-style='immersive-glass'] ytd-video-preview,
+html[data-ypp-card-style='immersive-glass'] yt-video-preview-view-model,
+html[data-ypp-card-style='immersive-glass'] #mouseover-overlay,
+html[data-ypp-card-style='immersive-glass'] #inline-preview-player {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+}
+
+/* Push the Mute and CC buttons down so they don't overlap the top-right menu button */
+html[data-ypp-card-style='immersive-glass'] ytd-inline-preview-ui .ytp-inline-preview-ui {
+  top: 48px !important;
+}
+
+/* Also target the outer container just in case YouTube uses a different wrapper for controls */
+html[data-ypp-card-style='immersive-glass'] ytd-inline-preview-ui {
+  padding-top: 48px !important;
+}

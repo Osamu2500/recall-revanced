@@ -1,0 +1,92 @@
+/* src/themes/theme-nord.css */
+/* ── DEEP NORD THEME ─────────────────────────────────────────────────── */
+:root {
+  --nord-bg: #2e3440;
+  --nord-bg-alt: #3b4252;
+  --nord-fg: #d8dee9;
+  --nord-fg-dark: #e5e9f0;
+  --nord-cyan: #88c0d0;
+  --nord-blue: #81a1c1;
+  --nord-magenta: #b48ead;
+  --nord-green: #a3be8c;
+  --nord-red: #bf616a;
+  --nord-orange: #d08770;
+  --nord-yellow: #ebcb8b;
+  --nord-border: #4c566a;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] {
+  background-color: var(--nord-bg) !important;
+  color: var(--nord-fg) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] * {
+  border-color: var(--nord-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] header,
+body[data-wr-enabled="true"][data-wr-theme="nord"] nav,
+body[data-wr-enabled="true"][data-wr-theme="nord"] .MuiDrawer-paper {
+  background-color: var(--nord-bg-alt) !important;
+  border-right: 1px solid var(--nord-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] header a,
+body[data-wr-enabled="true"][data-wr-theme="nord"] nav a,
+body[data-wr-enabled="true"][data-wr-theme="nord"] header button,
+body[data-wr-enabled="true"][data-wr-theme="nord"] nav button {
+  color: var(--nord-cyan) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror {
+  background-color: var(--nord-bg) !important;
+  color: var(--nord-fg) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror h1,
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror h2,
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror h3 {
+  color: var(--nord-blue) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror a {
+  color: var(--nord-cyan) !important;
+  text-decoration: underline;
+  text-decoration-color: var(--nord-blue) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror blockquote {
+  border-left: 4px solid var(--nord-blue) !important;
+  background-color: var(--nord-bg-alt) !important;
+  padding: 10px 15px !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror pre,
+body[data-wr-enabled="true"][data-wr-theme="nord"] .ProseMirror code {
+  background-color: var(--nord-bg-alt) !important;
+  color: var(--nord-green) !important;
+  border: 1px solid var(--nord-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] [class*="message"],
+body[data-wr-enabled="true"][data-wr-theme="nord"] [class*="bubble"] {
+  background-color: var(--nord-bg-alt) !important;
+  border: 1px solid var(--nord-border) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] [class*="card"],
+body[data-wr-enabled="true"][data-wr-theme="nord"] [class*="flashcard"] {
+  background-color: var(--nord-bg-alt) !important;
+  border: 1px solid var(--nord-border) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .MuiButton-root {
+  background-color: var(--nord-border) !important;
+  color: var(--nord-fg) !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] .MuiButton-root:hover {
+  background-color: var(--nord-blue) !important;
+  color: var(--nord-bg) !important;
+}

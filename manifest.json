@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "Wider Recall",
+  "version": "6.0.0",
+  "description": "Premium Glassmorphism UI, Wide Views, and Visual Command Palette for Recall.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://app.recall.it/*",
+    "https://app.getrecall.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.recall.it/*",
+        "https://app.getrecall.ai/*"
+      ],
+      "js": [
+        "src/content/core/selectors.js",
+        "src/content/core/router.js",
+        "src/content/core/state-manager.js",
+        "src/content/core/dom-observer.js",
+        "src/content/core/hotkeys.js",
+        "src/content/pages/home.js",
+        "src/content/pages/item.js",
+        "src/content/pages/spaced-repetition.js",
+        "src/content/pages/settings.js",
+        "src/content/pages/graph.js",
+        "src/content/pages/search.js",
+        "src/content/pages/chat.js",
+        "src/content/pages/review.js",
+        "src/content/features/bionic-reading.js",
+        "src/content/features/command-palette.js",
+        "src/content/features/cinematic-zen.js",
+        "src/content/features/media-tools.js",
+        "src/content/features/focus-mode.js",
+        "src/content/features/toc-minimap.js",
+        "src/content/features/code-tools.js",
+        "src/content/main.js"
+      ],
+      "css": [
+        "wider.css",
+        "src/themes/theme-spaced-grid.css",
+        "src/themes/theme-premium.css",
+        "src/themes/wider-features.css",
+        "src/themes/theme-dracula.css",
+        "src/themes/theme-tokyo.css",
+        "src/themes/theme-nord.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

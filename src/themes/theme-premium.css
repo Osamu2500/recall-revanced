@@ -1,0 +1,172 @@
+/* Recall Premium - Design System v2.0 (Ultra Premium) */
+/* Advanced Glassmorphism with Noise Textures & Deep Depth */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* === Refined Color Palette === */
+  /* Deep Space Backgrounds */
+  --rp-bg-deep: #030305;
+  --rp-bg-surface: #0a0a12;
+  --rp-bg-overlay: #141420;
+
+  /* Advanced Glass Materials */
+  --rp-glass-base: rgba(18, 18, 28, 0.65);
+  --rp-glass-highlight: rgba(255, 255, 255, 0.03);
+  --rp-glass-shadow: rgba(0, 0, 0, 0.2);
+
+  --rp-glass-border: rgba(255, 255, 255, 0.08);
+  --rp-glass-border-light: rgba(255, 255, 255, 0.12);
+
+  /* Luminous Accents */
+  --rp-primary: #8B5CF6;
+  --rp-secondary: #06B6D4;
+  --rp-tertiary: #EC4899;
+
+  --rp-gradient-main: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(6, 182, 212, 0.9));
+  --rp-gradient-glow: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(6, 182, 212, 0.4));
+  --rp-gradient-text: linear-gradient(to right, #C4B5FD, #67E8F9);
+
+  /* Typography */
+  --rp-font-display: 'Outfit', sans-serif;
+  --rp-font-body: 'Inter', sans-serif;
+  --rp-font-mono: 'JetBrains Mono', monospace;
+
+  /* Depth & Elevation */
+  --rp-shadow-1: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --rp-shadow-2: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  --rp-shadow-3: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+
+  /* Colored Glows */
+  --rp-glow-primary: 0 0 20px rgba(139, 92, 246, 0.3);
+  --rp-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
+
+  /* Animation Config */
+  --rp-ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --rp-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Global Reset & Base === */
+/* Only apply if premium theme is active (or by default if no other theme is active) */
+body[data-wr-enabled="true"] {
+  background-color: var(--rp-bg-deep) !important;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08), transparent 25%) !important;
+  background-attachment: fixed !important;
+  color: #ffffff !important;
+  font-family: var(--rp-font-body) !important;
+}
+
+/* === Ultra-Premium Glass Cards === */
+body[data-wr-enabled="true"] article,
+body[data-wr-enabled="true"] div[class*="MuiCard-root"],
+body[data-wr-enabled="true"] .rp-glass-panel {
+  background: var(--rp-glass-base) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border: 1px solid var(--rp-glass-border) !important;
+  box-shadow:
+    var(--rp-shadow-2),
+    inset 0 1px 0 0 var(--rp-glass-highlight) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s var(--rp-ease-smooth) !important;
+}
+
+body[data-wr-enabled="true"] article:hover,
+body[data-wr-enabled="true"] div[class*="MuiCard-root"]:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--rp-shadow-3), var(--rp-glow-primary) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* === Spotlight Tracking (Injected via JS) === */
+.re-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.re-spotlight::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.08) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.re-spotlight:hover::after {
+  opacity: 1;
+}
+
+/* === Component Base Styles === */
+body[data-wr-enabled="true"] button[class*="primary"] {
+  background: var(--rp-gradient-main) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  transition: all 0.3s var(--rp-ease-smooth) !important;
+}
+
+body[data-wr-enabled="true"] button[class*="primary"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 16px rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animations */
+@keyframes re-card-enter {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.re-card-enter {
+  animation: re-card-enter 0.6s var(--rp-ease-elastic) both;
+}
+
+/* Filter Bar Styles */
+#re-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-right: auto;
+  align-items: center;
+}
+.re-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--rp-font-body);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.re-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+.re-filter-btn.active {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #C4B5FD;
+}

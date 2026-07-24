@@ -1,0 +1,148 @@
+/* src/themes/theme-dracula.css */
+/* ── DEEP DRACULA THEME ────────────────────────────────────────────── */
+:root {
+  --drac-bg: #282a36;
+  --drac-current: #44475a;
+  --drac-fg: #f8f8f2;
+  --drac-comment: #6272a4;
+  --drac-cyan: #8be9fd;
+  --drac-green: #50fa7b;
+  --drac-orange: #ffb86c;
+  --drac-pink: #ff79c6;
+  --drac-purple: #bd93f9;
+  --drac-red: #ff5555;
+  --drac-yellow: #f1fa8c;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="dracula"] {
+  background-color: var(--drac-bg) !important;
+  color: var(--drac-fg) !important;
+}
+
+/* Base Overrides */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] * {
+  border-color: var(--drac-current) !important;
+}
+
+/* Headers & Nav */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] header,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] nav,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiDrawer-paper {
+  background-color: var(--drac-bg) !important;
+  border-right: 1px solid var(--drac-current) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] header a,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] nav a,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] header button,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] nav button {
+  color: var(--drac-cyan) !important;
+}
+
+/* Sidebar Active States */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] nav .active,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] nav [aria-selected="true"] {
+  background-color: var(--drac-current) !important;
+  color: var(--drac-pink) !important;
+  border-right: 3px solid var(--drac-pink) !important;
+}
+
+/* ProseMirror Editor (Item Page) */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .css-1pktq02 {
+  background-color: var(--drac-bg) !important;
+  color: var(--drac-fg) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror h1,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror h2,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror h3 {
+  color: var(--drac-purple) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror a {
+  color: var(--drac-pink) !important;
+  text-decoration: underline;
+  text-decoration-color: var(--drac-comment) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror blockquote {
+  border-left: 4px solid var(--drac-green) !important;
+  background-color: var(--drac-current) !important;
+  color: var(--drac-fg) !important;
+  padding: 10px 15px !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror pre,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror code {
+  background-color: #21222c !important;
+  color: var(--drac-yellow) !important;
+  border: 1px solid var(--drac-current) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .ProseMirror ul li::marker { color: var(--drac-cyan) !important; }
+
+/* Bionic Reading Support */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .wr-bionic {
+  color: var(--drac-cyan) !important;
+  text-shadow: 0 0 2px rgba(139, 233, 253, 0.4) !important;
+}
+
+/* Chat UI (AI Messages) */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="message"],
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="bubble"] {
+  background-color: var(--drac-current) !important;
+  color: var(--drac-fg) !important;
+  border: 1px solid var(--drac-comment) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] textarea {
+  background-color: var(--drac-bg) !important;
+  color: var(--drac-fg) !important;
+  border: 1px solid var(--drac-comment) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] textarea:focus {
+  border-color: var(--drac-pink) !important;
+  outline: none !important;
+}
+
+/* Spaced Repetition (Quiz) */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="card"],
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="flashcard"] {
+  background-color: var(--drac-current) !important;
+  border: 1px solid var(--drac-comment) !important;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [class*="card"]:hover {
+  border-color: var(--drac-purple) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] button[style*="background-color"] {
+  background-color: var(--drac-purple) !important;
+  color: #fff !important;
+}
+
+/* Buttons & Interactive Elements */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiButton-root,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiFab-root {
+  background-color: var(--drac-current) !important;
+  color: var(--drac-pink) !important;
+  border: 1px solid var(--drac-comment) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiButton-root:hover {
+  background-color: var(--drac-pink) !important;
+  color: var(--drac-bg) !important;
+}
+
+/* Modals & Dialogs */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiDialog-paper,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiMenu-paper {
+  background-color: var(--drac-bg) !important;
+  border: 1px solid var(--drac-current) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+}
+
+/* Graph View */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .react-flow {
+  background-color: var(--drac-bg) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .react-flow__node {
+  background-color: var(--drac-current) !important;
+  border-color: var(--drac-pink) !important;
+  color: var(--drac-fg) !important;
+}
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .react-flow__edge-path {
+  stroke: var(--drac-comment) !important;
+}
