@@ -1,32 +1,15 @@
 'use strict';
 
 /**
- * @fileoverview Wider Recall — Spaced Repetition Page Handler (v1.2)
- *
- * KEY INSIGHT (from live page analysis):
- * The /spaced-repetition page has TWO tabs:
- *   - "Review"    → Dashboard showing stats, streak, activity (no card grid)
- *   - "Questions" → A NATIVE card grid already rendered by Recall
- *
- * This module NO LONGER replaces the native grid DOM.
- * Instead it ENHANCES the existing native cards on the Questions tab with:
- *   - Glassmorphism styles
- *   - Entrance animations
- *   - Spotlight hover effect
- *   - Styled checkboxes
- *
- * This approach is far more stable because we're decorating existing elements,
- * not fighting React's reconciler with a parallel DOM tree.
+ * @fileoverview Wider Recall — Spaced Repetition Page Handler (v1.3)
  */
 
 window.WR_PAGES.spaced = {
   _observer: null,
   _tabObserver: null,
   _active: false,
-  _currentTab: null, // 'review' | 'questions'
-  _enhancedCards: new WeakSet(), // Track which cards already have our enhancements
-
-  // ─── Lifecycle ─────────────────────────────────────────────────────────────
+  _currentTab: null,
+  _enhancedCards: new WeakSet(),
 
   init() {
     this._active = true;
@@ -34,12 +17,9 @@ window.WR_PAGES.spaced = {
     this._detectTabAndApply();
     this._watchTabSwitches();
 
-    // Periodic check to catch delayed React renders
     this._fallbackTimer = setInterval(() => {
       if (this._active) this._detectTabAndApply();
-    }, 1200);
-
-    console.log('[WR Spaced] Initialized');
+    }, 1000);
   },
 
   cleanup() {
@@ -48,15 +28,8 @@ window.WR_PAGES.spaced = {
     if (this._observer)    { this._observer.disconnect();    this._observer    = null; }
     if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
     this._restoreAll();
-    console.log('[WR Spaced] Cleaned up');
   },
 
-  // ─── Tab Detection ──────────────────────────────────────────────────────────
-
-  /**
-   * Reads which tab is currently active by checking [role="tab"][aria-selected="true"]
-   * Returns 'questions', 'review', or null.
-   */
   _getActiveTab() {
     const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
     if (!activeTab) return null;
@@ -72,7 +45,6 @@ window.WR_PAGES.spaced = {
 
     const tab = this._getActiveTab();
     if (tab === this._currentTab) {
-      // Same tab — just apply enhancements to any new cards that appeared
       if (tab === 'questions') this._enhanceQuestionsTab();
       return;
     }
@@ -86,15 +58,11 @@ window.WR_PAGES.spaced = {
     }
   },
 
-  // ─── Tab Switch Watcher ─────────────────────────────────────────────────────
-
   _watchTabSwitches() {
     if (this._tabObserver) this._tabObserver.disconnect();
 
-    // Watch for aria-selected attribute changes on tab elements
     const tabList = document.querySelector('[role="tablist"]');
     if (!tabList) {
-      // Retry after a short delay — React may not have rendered the tabs yet
       setTimeout(() => { if (this._active) this._watchTabSwitches(); }, 500);
       return;
     }
@@ -110,18 +78,12 @@ window.WR_PAGES.spaced = {
     });
   },
 
-  // ─── Review Tab ────────────────────────────────────────────────────────────
-
   _onReviewTabActivated() {
-    // Clean up Questions tab enhancements
     this._restoreAll();
-    // The Review tab is the dashboard — no custom grid, just apply subtle polish
     this._enhanceReviewDashboard();
-    console.log('[WR Spaced] Review tab active');
   },
 
   _enhanceReviewDashboard() {
-    // Enhance the stat cards on the review dashboard
     const statCards = document.querySelectorAll(
       '[data-wr-page="spaced"] [class*="Card"], [data-wr-page="spaced"] article'
     );
@@ -133,18 +95,14 @@ window.WR_PAGES.spaced = {
     });
   },
 
-  // ─── Questions Tab ──────────────────────────────────────────────────────────
-
   _onQuestionsTabActivated() {
-    const isGridEnabled = this._isGridEnabled();
-    if (!isGridEnabled) {
+    if (!this._isGridEnabled()) {
       this._restoreAll();
       return;
     }
 
     this._enhanceQuestionsTab();
     this._watchForNewCards();
-    console.log('[WR Spaced] Questions tab active — enhancing native grid');
   },
 
   _isGridEnabled() {
@@ -154,76 +112,53 @@ window.WR_PAGES.spaced = {
     );
   },
 
-  /**
-   * Finds native card elements and applies our visual enhancements.
-   * We look for elements containing an image AND a question count text.
-   * We DO NOT manipulate their position, layout, or parent containers.
-   */
   _enhanceQuestionsTab() {
     if (!this._isGridEnabled()) {
       this._restoreAll();
       return;
     }
 
-    const cards = this._findNativeCards();
-    if (cards.length === 0) return;
+    // Find checkboxes in the main area to locate the list items
+    const checkboxes = Array.from(document.querySelectorAll('main input[type="checkbox"]'));
+    if (checkboxes.length === 0) return;
+
+    let container = null;
 
     let delay = 0;
-    cards.forEach((card) => {
-      if (this._enhancedCards.has(card)) return; // Already done
-      this._enhancedCards.add(card);
-
-      // Add glassmorphism + animation classes
-      card.classList.add('wr-spaced-card-enhanced');
-      card.style.animationDelay = `${delay}ms`;
-      delay = Math.min(delay + 40, 400);
-
-      // Spotlight mouse-tracking effect
-      this._addSpotlight(card);
-
-      // Style the native checkbox
-      this._styleNativeCheckbox(card);
-    });
-  },
-
-  /**
-   * Finds the native card elements on the Questions tab.
-   * Strategy: Find all elements with an image AND sibling text containing "question".
-   * We avoid looking for generated class names.
-   */
-  _findNativeCards() {
-    const candidates = [];
-
-    // Strategy 1: Any element that contains an img and a text node with "question"
-    const allImgContainers = document.querySelectorAll('img');
-    const seen = new Set();
-
-    allImgContainers.forEach(img => {
-      // Walk up to find the card container (usually 3-5 levels up)
-      let el = img.parentElement;
-      let depth = 0;
-      while (el && depth < 6 && el !== document.body) {
-        if (
-          el.textContent.toLowerCase().includes('question') &&
-          el.querySelector('img') &&
-          !seen.has(el) &&
-          // Exclude very large containers (the whole page)
-          el.children.length < 20
-        ) {
-          // This is likely a card
-          seen.add(el);
-          candidates.push(el);
-          break;
+    checkboxes.forEach((cb) => {
+      // The row/card is typically 3-4 levels up
+      let row = cb.parentElement;
+      for (let i = 0; i < 4; i++) {
+        if (row && row.parentElement && row.parentElement.tagName !== 'MAIN' && row.parentElement.tagName !== 'BODY') {
+          row = row.parentElement;
         }
-        el = el.parentElement;
-        depth++;
+      }
+
+      if (row && row.tagName !== 'MAIN') {
+        if (!container) container = row.parentElement;
+
+        if (!this._enhancedCards.has(row)) {
+          this._enhancedCards.add(row);
+          row.classList.add('wr-spaced-card-enhanced', 'wr-question-row');
+          row.style.animationDelay = `${delay}ms`;
+          delay = Math.min(delay + 40, 400);
+
+          this._addSpotlight(row);
+          this._styleNativeCheckbox(row, cb);
+        }
       }
     });
 
-    // Deduplicate — if a candidate is an ancestor of another, keep the smaller one
-    return candidates.filter(card => {
-      return !candidates.some(other => other !== card && card.contains(other));
-    });
+    // Tag the container and its headers
+    if (container) {
+      container.classList.add('wr-questions-container');
+      
+      // Hide the header row (usually the first child if it doesn't contain a checkbox)
+      const firstChild = container.firstElementChild;
+      if (firstChild && !firstChild.querySelector('input[type="checkbox"]')) {
+        firstChild.classList.add('wr-questions-header');
+      }
+    }
   },
 
   _addSpotlight(card) {
@@ -238,44 +173,41 @@ window.WR_PAGES.spaced = {
     });
   },
 
-  /**
-   * Styles the native checkbox inside a card row.
-   * We add a visual overlay instead of replacing the checkbox (which would
-   * break React's onChange handler).
-   */
-  _styleNativeCheckbox(card) {
-    const nativeCb = card.querySelector('input[type="checkbox"]');
-    if (!nativeCb || nativeCb.getAttribute('data-wr-styled')) return;
-
+  _styleNativeCheckbox(card, nativeCb) {
+    if (nativeCb.getAttribute('data-wr-styled')) return;
     nativeCb.setAttribute('data-wr-styled', 'true');
 
-    // Create a visual overlay that sits on top of the native checkbox
     const visualCb = document.createElement('div');
     visualCb.className = 'wr-cb-visual';
     visualCb.setAttribute('aria-hidden', 'true');
 
-    // Sync state
     const syncVisual = () => {
       visualCb.classList.toggle('wr-cb-checked', nativeCb.checked);
     };
     syncVisual();
 
-    // When visual is clicked, trigger the native checkbox (React-compatible)
     visualCb.addEventListener('click', (e) => {
       e.stopPropagation();
-      nativeCb.click(); // .click() fires React's synthetic event properly
+      nativeCb.click();
     });
 
-    // Watch for React state changes
     nativeCb.addEventListener('change', syncVisual);
 
-    // Hide native, insert visual overlay next to it
     nativeCb.style.cssText = 'position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;';
-    nativeCb.parentElement.style.position = 'relative';
+    
+    // Some checkboxes might be in flex containers that collapse if absolute, 
+    // so we ensure the parent maintains layout
+    if (nativeCb.parentElement) {
+      nativeCb.parentElement.style.position = 'relative';
+      nativeCb.parentElement.style.display = 'flex';
+      nativeCb.parentElement.style.alignItems = 'center';
+      nativeCb.parentElement.style.justifyContent = 'center';
+      nativeCb.parentElement.style.minWidth = '24px';
+      nativeCb.parentElement.style.minHeight = '24px';
+    }
+    
     nativeCb.after(visualCb);
   },
-
-  // ─── New Card Observer ───────────────────────────────────────────────────────
 
   _watchForNewCards() {
     if (this._observer) this._observer.disconnect();
@@ -295,22 +227,30 @@ window.WR_PAGES.spaced = {
     this._observer.observe(target, { childList: true, subtree: true });
   },
 
-  // ─── Cleanup / Restore ───────────────────────────────────────────────────────
-
   _restoreAll() {
-    // Remove all our enhancement classes from native elements
     document.querySelectorAll('.wr-spaced-card-enhanced').forEach(card => {
-      card.classList.remove('wr-spaced-card-enhanced');
+      card.classList.remove('wr-spaced-card-enhanced', 'wr-question-row');
       card.style.animationDelay = '';
     });
+    
+    document.querySelectorAll('.wr-questions-container').forEach(c => c.classList.remove('wr-questions-container'));
+    document.querySelectorAll('.wr-questions-header').forEach(c => c.classList.remove('wr-questions-header'));
+
     document.querySelectorAll('.wr-spaced-stat-card').forEach(card => {
       card.classList.remove('wr-spaced-stat-card');
     });
 
-    // Restore native checkboxes
     document.querySelectorAll('[data-wr-styled="true"]').forEach(cb => {
       cb.removeAttribute('data-wr-styled');
       cb.style.cssText = '';
+      if (cb.parentElement) {
+        cb.parentElement.style.position = '';
+        cb.parentElement.style.display = '';
+        cb.parentElement.style.alignItems = '';
+        cb.parentElement.style.justifyContent = '';
+        cb.parentElement.style.minWidth = '';
+        cb.parentElement.style.minHeight = '';
+      }
       const visual = cb.nextElementSibling;
       if (visual && visual.classList.contains('wr-cb-visual')) {
         visual.remove();
@@ -320,16 +260,32 @@ window.WR_PAGES.spaced = {
     this._enhancedCards = new WeakSet();
   },
 
-  // ─── CSS Injection ───────────────────────────────────────────────────────────
-
   _injectStyles() {
     if (document.getElementById('wr-spaced-styles')) return;
 
     const style = document.createElement('style');
     style.id = 'wr-spaced-styles';
     style.textContent = `
-      /* ── Enhanced native card on the Questions tab ──────────────────────── */
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced {
+      /* ── CSS Grid Transformation ────────────────────────────────────────── */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-questions-container {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        gap: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        align-items: start !important;
+        padding-bottom: 40px !important;
+      }
+
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-questions-header {
+        display: none !important;
+      }
+
+      /* ── Enhanced Card Styling ────────────────────────────────────────── */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
         position: relative !important;
         border-radius: 14px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -341,16 +297,35 @@ window.WR_PAGES.spaced = {
                     border-color 0.25s ease !important;
         overflow: hidden !important;
         animation: wr-card-enter 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) both !important;
+        padding: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
 
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced:hover {
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row:hover {
         transform: translateY(-5px) scale(1.01) !important;
         border-color: rgba(139, 92, 246, 0.45) !important;
         box-shadow: 0 16px 32px rgba(0,0,0,0.4), 0 0 20px rgba(139,92,246,0.15) !important;
       }
 
-      /* Spotlight radial gradient (mouse-tracked via JS --mx/--my) */
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced::before {
+      /* Fix images inside the row */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row img {
+        width: 100% !important;
+        height: 140px !important;
+        object-fit: cover !important;
+        border-radius: 8px !important;
+        margin-bottom: 12px !important;
+        display: block !important;
+      }
+      
+      /* Fix text wrapping inside the row */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row * {
+        white-space: normal !important;
+        overflow: visible !important;
+      }
+
+      /* Spotlight radial gradient */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row::before {
         content: '';
         position: absolute;
         inset: 0;
@@ -365,7 +340,7 @@ window.WR_PAGES.spaced = {
         opacity: 0;
         transition: opacity 0.3s;
       }
-      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-spaced-card-enhanced:hover::before {
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row:hover::before {
         opacity: 1;
       }
 
@@ -377,8 +352,6 @@ window.WR_PAGES.spaced = {
       /* ── Custom Checkbox Overlay ──────────────────────────────────────────── */
       .wr-cb-visual {
         position: absolute;
-        top: 10px;
-        left: 10px;
         width: 22px;
         height: 22px;
         border-radius: 6px;
@@ -393,6 +366,15 @@ window.WR_PAGES.spaced = {
         justify-content: center;
         transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
+      
+      /* Reposition checkbox wrapper inside the grid card */
+      body[data-wr-enabled="true"][data-wr-grid="true"] .wr-question-row > div:has(.wr-cb-visual) {
+        position: absolute !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 15 !important;
+      }
+
       .wr-cb-visual:hover {
         border-color: rgba(139, 92, 246, 0.8);
         background: rgba(0, 0, 0, 0.65);
