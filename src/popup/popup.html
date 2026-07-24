@@ -277,45 +277,12 @@
         <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
       </div>
 
-      <div class="section-title mt-20">Global Tools</div>
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Command Palette</span>
-          <span class="setting-desc">Enable Cmd+K menu</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="cmdCb" title="Command Palette"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Hotkeys</span>
-          <span class="setting-desc">Enable custom shortcuts</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="hotkeysCb" title="Hotkeys"><span class="slider"></span></label>
-      </div>
+
     </div>
 
     <!-- HOME PANEL -->
     <div id="panel-home" class="panel">
-      <div class="section-title">Home Feed Grid</div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Grid View</span>
-          <span class="setting-desc">Multi-column item grid on Home/Questions</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="gridCb" title="Grid View"><span class="slider"></span></label>
-      </div>
-
-      <div class="range-container">
-        <div class="range-header">
-          <span>Grid Columns</span>
-          <span id="gval" class="accent-val">3</span>
-        </div>
-        <input type="range" id="gridColsRange" min="2" max="5" step="1" value="3" title="Grid Columns">
-      </div>
-
-      <div class="section-title mt-20">Feed Animations</div>
+      <div class="section-title">Feed Animations</div>
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-title">Entrance Animations</span>
@@ -374,64 +341,22 @@
 
     <!-- REVIEW PANEL -->
     <div id="panel-review" class="panel">
-      <div class="section-title">Reading & Focus</div>
+      <div class="section-title">Review Questions Grid</div>
       
       <div class="setting-row">
         <div class="setting-info">
-          <span class="setting-title">Zen Mode</span>
-          <span class="setting-desc">Cinematic dynamic aura, hides UI</span>
+          <span class="setting-title">Grid View</span>
+          <span class="setting-desc">Multi-column item grid for Review Questions</span>
         </div>
-        <label class="toggle"><input type="checkbox" id="zenCb" title="Zen Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Focus Mode</span>
-          <span class="setting-desc">Proximity tracking paragraph highlight</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="focusCb" title="Focus Mode"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Bionic Reading</span>
-          <span class="setting-desc">Advanced NLP fixation points</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="bionicCb" title="Bionic Reading"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Text Wrap</span>
-          <span class="setting-desc">Wrap code blocks inside reviews</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="wrapCb" title="Text Wrap"><span class="slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="gridCb" title="Grid View"><span class="slider"></span></label>
       </div>
 
-      <div class="section-title mt-20">Review Navigation</div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Hide Outline</span>
-          <span class="setting-desc">Remove right table of contents</span>
+      <div class="range-container">
+        <div class="range-header">
+          <span>Grid Columns</span>
+          <span id="gval" class="accent-val">3</span>
         </div>
-        <label class="toggle"><input type="checkbox" id="hideOutlineCb" title="Hide Outline"><span class="slider"></span></label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Hover TOC</span>
-          <span class="setting-desc">Show outline on hover</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="tocHoverCb" title="Hover TOC"><span class="slider"></span></label>
-      </div>
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">TOC Minimap</span>
-          <span class="setting-desc">Canvas-based visual document map</span>
-        </div>
-        <label class="toggle"><input type="checkbox" id="tocCb" title="TOC Minimap"><span class="slider"></span></label>
+        <input type="range" id="gridColsRange" min="2" max="5" step="1" value="3" title="Grid Columns">
       </div>
 
       <div class="section-title mt-20">Review Media</div>
