@@ -343,10 +343,15 @@ window.WR_PAGES.spaced = {
       return;
     }
 
-    // The Review tab is a single flashcard. The Questions tab is a list of items.
-    // If we see multiple checkboxes, we are almost certainly on the Questions tab.
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    this.isQuestionsTab = checkboxes.length > 3;
+    // Use the active tab to determine if we are on the Questions tab
+    const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+    this.isQuestionsTab = activeTab && activeTab.textContent.toLowerCase().includes('questions');
+    
+    // Fallback: If we can't find the tab, look for the 'QUESTIONS' header in the table
+    if (!this.isQuestionsTab) {
+      const headers = Array.from(document.querySelectorAll('th, [role="columnheader"]'));
+      this.isQuestionsTab = headers.some(h => h.textContent.toLowerCase().includes('questions'));
+    }
     
     // Check again before injecting to prevent race conditions
     if (this.isQuestionsTab) {
@@ -357,45 +362,41 @@ window.WR_PAGES.spaced = {
   },
 
   findListContainerAndRows() {
-    const allCbs = Array.from(document.querySelectorAll('input[type="checkbox"]'));
-    if (allCbs.length < 2) return { container: null, rows: [] };
-
-    // Group checkboxes by their common container
-    // The true list container will have multiple direct children (the rows), each containing a checkbox.
-    let bestContainer = null;
-    let maxRows = 0;
+    // Find all rows (tr or role="row")
+    let allRows = Array.from(document.querySelectorAll('tr, [role="row"]'));
     
-    // Check all ancestors of all checkboxes
-    const candidates = new Set();
-    allCbs.forEach(cb => {
-      let p = cb.parentElement;
-      while (p && p !== document.body) {
-        candidates.add(p);
-        p = p.parentElement;
+    // If native rows aren't found, try finding elements that contain the checkbox + image structure
+    if (allRows.length === 0) {
+      const potentialCheckboxes = Array.from(document.querySelectorAll('input[type="checkbox"], [role="checkbox"]'));
+      if (potentialCheckboxes.length > 0) {
+        allRows = potentialCheckboxes.map(cb => cb.closest('div[class*="flex"], div[class*="grid"]')).filter(r => r && r.parentElement);
+      }
+    }
+
+    if (allRows.length < 2) return { container: null, rows: [] };
+
+    // Group rows by their common parent container
+    const parentMap = new Map();
+    allRows.forEach(row => {
+      if (row.parentElement) {
+        const count = parentMap.get(row.parentElement) || 0;
+        parentMap.set(row.parentElement, count + 1);
       }
     });
 
-    // Find the container with the most checkbox-containing children
-    for (let container of candidates) {
-      let rowCount = 0;
-      for (let child of container.children) {
-        if (child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox')) {
-          rowCount++;
-        }
-      }
-      if (rowCount > maxRows) {
-        maxRows = rowCount;
+    let bestContainer = null;
+    let maxRows = 0;
+    for (let [container, count] of parentMap.entries()) {
+      if (count > maxRows) {
+        maxRows = count;
         bestContainer = container;
       }
     }
 
-    if (!bestContainer || maxRows < 2) {
-      return { container: null, rows: [] };
-    }
+    if (!bestContainer || maxRows < 2) return { container: null, rows: [] };
 
-    // The rows are the children that contain a checkbox
     const rows = Array.from(bestContainer.children).filter(child => {
-      return child.querySelector('input[type="checkbox"]') || (child.tagName === 'INPUT' && child.type === 'checkbox');
+      return child.tagName === 'TR' || child.getAttribute('role') === 'row' || child.querySelector('input[type="checkbox"], [role="checkbox"]');
     });
     
     // Find a good wrapper to apply the drawer styling to
@@ -554,8 +555,15 @@ window.WR_PAGES.spaced = {
       const id = `wr-card-${safeTitle}`;
 
       // 4. Checkbox
-      const checkboxInput = row.querySelector('input[type="checkbox"]');
-      const isChecked = checkboxInput ? checkboxInput.checked : false;
+      const checkboxInput = row.querySelector('input[type="checkbox"], [role="checkbox"]');
+      let isChecked = false;
+      if (checkboxInput) {
+        if (checkboxInput.tagName === 'INPUT') {
+          isChecked = checkboxInput.checked;
+        } else {
+          isChecked = checkboxInput.getAttribute('aria-checked') === 'true';
+        }
+      }
 
       return {
         id: id,
@@ -716,14 +724,19 @@ window.WR_PAGES.spaced = {
 
   proxyCheckboxClick(card) {
     this.executeOnCard(card, (rowElement) => {
-      const originalCheckbox = rowElement.querySelector('input[type="checkbox"]');
+      const originalCheckbox = rowElement.querySelector('input[type="checkbox"], [role="checkbox"]');
       if (originalCheckbox) {
-        // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
-        if (nativeInputValueSetter) {
-          nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
-          originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+        if (originalCheckbox.tagName === 'INPUT') {
+          // React 16+ intercepts native setters. We must bypass it to trigger onChange programmatically.
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked").set;
+          if (nativeInputValueSetter) {
+            nativeInputValueSetter.call(originalCheckbox, !originalCheckbox.checked);
+            originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            originalCheckbox.click();
+          }
         } else {
+          // It's an aria checkbox, just click it
           originalCheckbox.click();
         }
       }
