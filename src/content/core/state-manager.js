@@ -10,7 +10,7 @@ window.WR_DEFAULTS = Object.freeze({
   width: 1100, wrap: true, hideSidebar: false, hideOutline: true, grid: true, gridCols: 3, typo: true, enabled: true,
   zen: false, media: true, tocHover: false, graph: true, hotkeys: true,
   bionic: false, cmd: true, lightbox: true, theme: 'default', focus: false, toc: false,
-  animations: true, spotlight: true, premiumUi: true
+  animations: true, spotlight: true, premiumUi: true, immersiveCards: true
 });
 
 window.WR_STATE = { ...window.WR_DEFAULTS };
@@ -81,7 +81,8 @@ window.WR_API = {
         ['data-wr-zen', window.WR_STATE.zen],
         ['data-wr-toc-hover', window.WR_STATE.tocHover],
         ['data-wr-graph', window.WR_STATE.graph],
-        ['data-wr-media', window.WR_STATE.media]
+        ['data-wr-media', window.WR_STATE.media],
+        ['data-wr-immersive-cards', window.WR_STATE.immersiveCards]
       ];
 
       attrs.forEach(([attr, val]) => {

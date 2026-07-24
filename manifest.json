@@ -44,7 +44,8 @@
         "src/themes/wider-features.css",
         "src/themes/theme-dracula.css",
         "src/themes/theme-tokyo.css",
-        "src/themes/theme-nord.css"
+        "src/themes/theme-nord.css",
+        "src/themes/theme-immersive-cards.css"
       ],
       "run_at": "document_end"
     }
