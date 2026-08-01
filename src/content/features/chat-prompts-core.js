@@ -82,6 +82,11 @@
       editorElement.focus();
       
       let finalText = text;
+      
+      // Auto-replace smart context variables
+      finalText = finalText.replace(/\[selection\]/gi, window.getSelection().toString() || '');
+      finalText = finalText.replace(/\[url\]/gi, window.location.href);
+
       const regex = /\[(.*?)\]/g;
       let match;
       while ((match = regex.exec(finalText)) !== null) {
@@ -136,6 +141,61 @@
         reader.readAsText(file);
       };
       input.click();
+    }
+
+    openEditorModal(promptObj, onSave) {
+      const existing = document.getElementById('wr-prompt-editor-modal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'wr-prompt-editor-modal';
+      modal.className = 'wr-modal-overlay';
+      
+      const isNew = !promptObj.id;
+      const initialText = promptObj.text || '';
+      
+      modal.innerHTML = `
+        <div class="wr-modal-content">
+          <div class="wr-modal-header">
+            <h3>${isNew ? 'Create Prompt' : 'Edit Prompt'}</h3>
+            <button class="wr-modal-close">&times;</button>
+          </div>
+          <div class="wr-modal-body">
+            <textarea id="wr-modal-textarea" placeholder="Write your prompt here...&#10;Use [variable] for fill-in-the-blanks.&#10;Use [selection] or [url] for auto-context.">${initialText}</textarea>
+          </div>
+          <div class="wr-modal-footer">
+            <button class="wr-btn wr-btn-secondary" id="wr-modal-cancel">Cancel</button>
+            <button class="wr-btn wr-btn-primary" id="wr-modal-save">Save Prompt</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      const textarea = modal.querySelector('#wr-modal-textarea');
+      // Set initial height to content if editing
+      if (!isNew) {
+         textarea.style.height = 'auto';
+         textarea.style.height = (textarea.scrollHeight) + 'px';
+      }
+      textarea.focus();
+      
+      const close = () => modal.remove();
+      
+      modal.querySelector('.wr-modal-close').onclick = close;
+      modal.querySelector('#wr-modal-cancel').onclick = close;
+      
+      modal.querySelector('#wr-modal-save').onclick = () => {
+        const val = textarea.value.trim();
+        if (val) {
+           onSave(val);
+           close();
+        }
+      };
+      
+      modal.onmousedown = (e) => {
+         if (e.target === modal) close();
+      };
     }
 
     // --- UI Rendering ---
@@ -523,12 +583,13 @@
           editBtn.innerHTML = svgEdit;
           editBtn.onclick = (e) => {
             e.stopPropagation();
-            const newText = prompt("Edit prompt text:", prompt.text);
-            if (newText && newText.trim() && newText.trim() !== prompt.text) {
-                prompt.text = newText.trim();
-                this.savePrompts();
-                this.renderAllPopovers();
-            }
+            this.openEditorModal(prompt, (newText) => {
+               if (newText !== prompt.text) {
+                  prompt.text = newText;
+                  this.savePrompts();
+                  this.renderAllPopovers();
+               }
+            });
           };
           actions.appendChild(editBtn);
 
@@ -651,39 +712,39 @@
       
       const input = document.createElement('input');
       input.type = 'text';
-      input.placeholder = 'New prompt...';
+      input.placeholder = 'Click to create rich-text prompt...';
       input.className = 'wr-prompts-input';
+      input.readOnly = true;
+      input.style.cursor = 'pointer';
       
       const addBtn = document.createElement('button');
       addBtn.className = 'wr-prompts-add-btn';
       addBtn.title = 'Add Prompt';
       addBtn.innerHTML = svgPlus;
-      addBtn.onclick = () => {
-        const val = input.value.trim();
-        if (val) {
-          let category = this.activeCategory;
-          // Support fast category creation via "Cat: text" format
-          if (val.includes(':') && val.split(':')[0].length < 15) {
-            const parts = val.split(':');
-            category = parts[0].trim();
-            input.value = parts.slice(1).join(':').trim();
-          }
-          this.promptsData.push({
-            id: 'prompt_' + Date.now(),
-            text: input.value.trim() || val,
-            category: category,
-            order: this.promptsData.length
-          });
-          // Ensure the category we just added to is active
-          this.activeCategory = category;
-          this.savePrompts();
-          this.renderAllPopovers();
-        }
+      
+      const handleAdd = () => {
+         this.openEditorModal({ text: '' }, (val) => {
+            let category = this.activeCategory;
+            // Support fast category creation via "Cat: text" format
+            if (val.includes(':') && val.split(':')[0].length < 15) {
+              const parts = val.split(':');
+              category = parts[0].trim();
+              val = parts.slice(1).join(':').trim();
+            }
+            this.promptsData.push({
+              id: 'prompt_' + Date.now(),
+              text: val,
+              category: category,
+              order: this.promptsData.length
+            });
+            this.activeCategory = category;
+            this.savePrompts();
+            this.renderAllPopovers();
+         });
       };
       
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addBtn.click();
-      });
+      input.onclick = handleAdd;
+      addBtn.onclick = handleAdd;
 
       addRow.appendChild(catSelectWrapper);
       addRow.appendChild(input);
