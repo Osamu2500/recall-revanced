@@ -217,6 +217,24 @@
         this.searchQuery = e.target.value.toLowerCase();
         this.renderAllPopovers();
       };
+      searchInput.addEventListener('keydown', (e) => {
+         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const items = Array.from(popover.querySelectorAll('.wr-prompt-item'));
+            if (items.length === 0) return;
+            
+            let focusedIdx = items.findIndex(el => el.classList.contains('focused'));
+            if (e.key === 'ArrowDown') focusedIdx = (focusedIdx + 1) % items.length;
+            else if (e.key === 'ArrowUp') focusedIdx = focusedIdx <= 0 ? items.length - 1 : focusedIdx - 1;
+            
+            items.forEach(el => el.classList.remove('focused'));
+            items[focusedIdx].classList.add('focused');
+            items[focusedIdx].scrollIntoView({ block: 'nearest' });
+         } else if (e.key === 'Enter') {
+            const focused = popover.querySelector('.wr-prompt-item.focused');
+            if (focused) focused.querySelector('.wr-prompt-text').click();
+         }
+      });
       searchRow.appendChild(searchInput);
       popover.appendChild(searchRow);
 
@@ -343,13 +361,30 @@
           };
           item.ondragover = (e) => {
             e.preventDefault();
-            item.classList.add('drag-over');
+            const bounding = item.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            if (e.clientY - offset > 0) {
+              item.style.borderBottom = '2px solid #f05622';
+              item.style.borderTop = '';
+            } else {
+              item.style.borderTop = '2px solid #f05622';
+              item.style.borderBottom = '';
+            }
           };
-          item.ondragleave = () => item.classList.remove('drag-over');
+          item.ondragleave = () => {
+            item.style.borderTop = '';
+            item.style.borderBottom = '';
+          };
           item.ondrop = (e) => {
             e.preventDefault();
-            item.classList.remove('drag-over');
-            this.handleDrop(e, cat, prompt.id);
+            item.style.borderTop = '';
+            item.style.borderBottom = '';
+            
+            const bounding = item.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            const insertAfter = (e.clientY - offset > 0);
+            
+            this.handleDrop(e, cat, prompt.id, insertAfter);
           };
 
           const handle = document.createElement('div');
@@ -384,8 +419,23 @@
           const actions = document.createElement('div');
           actions.className = 'wr-prompt-actions';
 
+          const editBtn = document.createElement('button');
+          editBtn.className = 'wr-prompt-edit wr-prompt-action-btn';
+          editBtn.title = 'Edit';
+          editBtn.innerHTML = svgEdit;
+          editBtn.onclick = (e) => {
+            e.stopPropagation();
+            const newText = prompt("Edit prompt text:", prompt.text);
+            if (newText && newText.trim() && newText.trim() !== prompt.text) {
+                prompt.text = newText.trim();
+                this.savePrompts();
+                this.renderAllPopovers();
+            }
+          };
+          actions.appendChild(editBtn);
+
           const delBtn = document.createElement('button');
-          delBtn.className = 'wr-prompt-del';
+          delBtn.className = 'wr-prompt-del wr-prompt-action-btn';
           delBtn.title = 'Delete';
           delBtn.innerHTML = svgTrash;
           delBtn.onclick = (e) => {
@@ -494,7 +544,7 @@
       }
     }
 
-    handleDrop(e, targetCategory, targetPromptId = null) {
+    handleDrop(e, targetCategory, targetPromptId = null, insertAfter = false) {
       if (!this.draggedItem) return;
       
       const draggedId = this.draggedItem.id;
@@ -508,12 +558,14 @@
 
       // Reorder array
       const item = this.promptsData.splice(draggedIndex, 1)[0];
+      
       if (targetIndex === -1) {
         // Appended to category
         this.promptsData.push(item);
       } else {
-        // Insert at target index
-        const insertAt = draggedIndex < targetIndex ? targetIndex : targetIndex;
+        // Re-find target index since splice might have shifted elements
+        const newTargetIndex = this.promptsData.findIndex(p => p.id === targetPromptId);
+        const insertAt = insertAfter ? newTargetIndex + 1 : newTargetIndex;
         this.promptsData.splice(insertAt, 0, item);
       }
       
