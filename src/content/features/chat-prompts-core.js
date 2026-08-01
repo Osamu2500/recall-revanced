@@ -55,58 +55,40 @@
     }
 
     updateCategories() {
-      const cats = new Set(this.promptsData.map(p => p.category));
-      (this.savedCategories || []).forEach(c => cats.add(c));
-      this.categories = Array.from(cats).sort();
-      if (!this.categories.includes('General')) this.categories.unshift('General');
+      // Preserve saved custom order
+      const cats = new Set(this.savedCategories || []);
+      // Add any dynamic ones found in prompts that aren't saved yet
+      this.promptsData.forEach(p => cats.add(p.category));
+      
+      this.categories = Array.from(cats);
+      // Ensure 'General' is always first
+      this.categories = this.categories.filter(c => c !== 'General');
+      this.categories.unshift('General');
+      
+      // Update saved categories so it includes newly discovered ones
+      this.savedCategories = [...this.categories];
     }
 
     // --- DOM Injection Logic ---
     injectText(editorElement, text) {
       editorElement.focus();
       
-      // If there is a variable placeholder like [something]
-      const varRegex = /\[(.*?)\]/;
-      const match = text.match(varRegex);
+      let finalText = text;
+      const regex = /\[(.*?)\]/g;
+      let match;
+      while ((match = regex.exec(finalText)) !== null) {
+         const val = prompt(`Fill in variable for [${match[1]}]:`);
+         if (val === null) return; // User cancelled
+         finalText = finalText.replace(match[0], val);
+         regex.lastIndex = 0; // Reset index since string length changed
+      }
       
       const dataTransfer = new DataTransfer();
-      dataTransfer.setData('text/plain', text);
+      dataTransfer.setData('text/plain', finalText);
       const pasteEvent = new ClipboardEvent('paste', {
         clipboardData: dataTransfer, bubbles: true, cancelable: true
       });
       editorElement.dispatchEvent(pasteEvent);
-
-      // If we find a variable placeholder, wait for render and select it (if possible natively)
-      // Usually, selecting text in a contenteditable requires Window.getSelection()
-      if (match) {
-        setTimeout(() => {
-          this.highlightTextInEditor(editorElement, match[0]);
-        }, 50);
-      }
-    }
-
-    highlightTextInEditor(editorElement, textToFind) {
-      // Basic approach to highlight the first instance of textToFind
-      const sel = window.getSelection();
-      // Only works reliably if we can traverse text nodes. Since React Slate handles its own selection,
-      // it might overwrite this, but it's a good effort fallback.
-      const findTextNode = (node) => {
-        if (node.nodeType === 3 && node.textContent.includes(textToFind)) return node;
-        for (let child of node.childNodes) {
-          const res = findTextNode(child);
-          if (res) return res;
-        }
-        return null;
-      };
-      const textNode = findTextNode(editorElement);
-      if (textNode) {
-        const range = document.createRange();
-        const start = textNode.textContent.indexOf(textToFind);
-        range.setStart(textNode, start);
-        range.setEnd(textNode, start + textToFind.length);
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
     }
 
     // --- Import / Export ---
@@ -157,6 +139,22 @@
       this.popovers.add(popover);
       this.renderPopoverContent(popover);
       document.body.appendChild(popover);
+      
+      // Slash Command Shortcut (/)
+      if (!chatInput.hasAttribute('data-slash-bound')) {
+         chatInput.setAttribute('data-slash-bound', 'true');
+         chatInput.addEventListener('keydown', (e) => {
+           if (e.key === '/' && popover.style.display !== 'flex') {
+             if (popover.associatedBtn) {
+                // Short timeout to allow the slash to be typed first
+                setTimeout(() => {
+                   popover.associatedBtn.click();
+                }, 10);
+             }
+           }
+         });
+      }
+      
       return popover;
     }
 
@@ -186,6 +184,7 @@
       const svgPlus = `<svg class="wr-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
       const svgFolderPlus = `<svg class="wr-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>`;
       const svgEdit = `<svg class="wr-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      const svgStar = `<svg class="wr-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
 
       // Header
       const header = document.createElement('div');
@@ -251,11 +250,19 @@
       list.className = 'wr-prompts-list';
 
       const filtered = this.promptsData.filter(p => p.text.toLowerCase().includes(this.searchQuery) || p.category.toLowerCase().includes(this.searchQuery));
+      
+      // Sort: Starred first, then by order
+      const sortedPrompts = [...filtered].sort((a, b) => {
+        const aStar = a.starred ? 1 : 0;
+        const bStar = b.starred ? 1 : 0;
+        if (aStar !== bStar) return bStar - aStar;
+        return (a.order || 0) - (b.order || 0);
+      });
 
       // Group by category
       const grouped = {};
       this.categories.forEach(c => grouped[c] = []);
-      filtered.forEach(p => {
+      sortedPrompts.forEach(p => {
         if (!grouped[p.category]) grouped[p.category] = [];
         grouped[p.category].push(p);
       });
@@ -427,6 +434,22 @@
           const actions = document.createElement('div');
           actions.className = 'wr-prompt-actions';
 
+          const starBtn = document.createElement('button');
+          starBtn.className = 'wr-prompt-star wr-prompt-action-btn';
+          starBtn.title = 'Favorite';
+          starBtn.innerHTML = svgStar;
+          if (prompt.starred) {
+            starBtn.style.fill = '#f05622';
+            starBtn.style.color = '#f05622';
+          }
+          starBtn.onclick = (e) => {
+            e.stopPropagation();
+            prompt.starred = !prompt.starred;
+            this.savePrompts();
+            this.renderAllPopovers();
+          };
+          actions.appendChild(starBtn);
+
           const editBtn = document.createElement('button');
           editBtn.className = 'wr-prompt-edit wr-prompt-action-btn';
           editBtn.title = 'Edit';
@@ -480,6 +503,61 @@
         opt.className = 'wr-custom-select-opt';
         if (c === this.activeCategory) opt.classList.add('selected');
         opt.textContent = c;
+        
+        // Folder Reordering
+        if (c !== 'General') {
+          opt.draggable = true;
+          opt.ondragstart = (e) => {
+            this.draggedCategory = c;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => opt.classList.add('dragging'), 0);
+          };
+          opt.ondragend = () => {
+            this.draggedCategory = null;
+            opt.classList.remove('dragging');
+          };
+          opt.ondragover = (e) => {
+            e.preventDefault();
+            const bounding = opt.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            if (e.clientY - offset > 0) {
+              opt.style.borderBottom = '2px solid #f05622';
+              opt.style.borderTop = '';
+            } else {
+              opt.style.borderTop = '2px solid #f05622';
+              opt.style.borderBottom = '';
+            }
+          };
+          opt.ondragleave = () => {
+            opt.style.borderTop = '';
+            opt.style.borderBottom = '';
+          };
+          opt.ondrop = (e) => {
+            e.preventDefault();
+            opt.style.borderTop = '';
+            opt.style.borderBottom = '';
+            
+            if (!this.draggedCategory || this.draggedCategory === c) return;
+            
+            const bounding = opt.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            const insertAfter = (e.clientY - offset > 0);
+            
+            const draggedIdx = this.savedCategories.indexOf(this.draggedCategory);
+            const targetIdx = this.savedCategories.indexOf(c);
+            
+            if (draggedIdx > -1 && targetIdx > -1) {
+              this.savedCategories.splice(draggedIdx, 1);
+              const newTargetIdx = this.savedCategories.indexOf(c);
+              const insertAt = insertAfter ? newTargetIdx + 1 : newTargetIdx;
+              this.savedCategories.splice(insertAt, 0, this.draggedCategory);
+              
+              this.savePrompts();
+              this.renderAllPopovers();
+            }
+          };
+        }
+
         opt.onclick = (e) => {
            e.stopPropagation();
            this.activeCategory = c;
