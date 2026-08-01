@@ -619,7 +619,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 .wr-prompts-input:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: #f05622;
 }
 
 .wr-prompts-pro {
@@ -646,11 +646,11 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   margin: 4px 0;
 }
 .wr-prompts-list::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(240, 86, 34, 0.4);
   border-radius: 4px;
 }
 .wr-prompts-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.8);
+  background: rgba(240, 86, 34, 0.8);
 }
 
 .wr-prompts-actions {
@@ -712,7 +712,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 
 .wr-prompts-search-input:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: #f05622;
   background: rgba(0, 0, 0, 0.4);
 }
 
@@ -729,7 +729,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   gap: 6px;
   font-size: 11px;
   text-transform: uppercase;
-  color: #8b5cf6;
+  color: #f05622;
   font-weight: 600;
   letter-spacing: 0.5px;
   padding: 4px 6px;
@@ -738,7 +738,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 .wr-cat-header-inner:hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(240, 86, 34, 0.1);
 }
 
 .wr-folder-icon {
@@ -823,7 +823,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 .wr-search-highlight {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(240, 86, 34, 0.4);
   color: #fff;
   border-radius: 2px;
 }
@@ -849,7 +849,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 .wr-prompts-add-btn {
-  background: #8b5cf6;
+  background: #f05622;
   color: #fff;
   border: none;
   width: 32px;
@@ -863,8 +863,27 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 .wr-prompts-add-btn:hover {
-  background: #7c3aed;
+  background: #d04a1b;
   transform: scale(1.05);
 }
+
+/* Drag and drop & variable styles */
+.wr-prompt-item.dragging {
+  opacity: 0.5;
+  background: rgba(240, 86, 34, 0.1);
+}
+
+.wr-prompt-item.drag-over {
+  border-top: 2px solid #f05622;
+}
+
+.wr-prompt-var {
+  color: #f48b6c;
+  font-weight: 500;
+  background: rgba(240, 86, 34, 0.15);
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
 
 
