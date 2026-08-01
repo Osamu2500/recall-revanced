@@ -1135,7 +1135,6 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
   z-index: 2147483647;
   display: flex;
   align-items: center;
@@ -1229,3 +1228,45 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 .wr-btn-primary:hover { background: #d04a1b; }
 @keyframes wr-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* V7: Empty State & Micro-Animations & Custom Grip */
+.wr-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #71717a;
+  text-align: center;
+  font-size: 13px;
+}
+.wr-empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #3f3f46;
+}
+.wr-prompt-action-btn {
+  transform: scale(1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s, color 0.15s;
+}
+.wr-prompt-action-btn:hover {
+  transform: scale(1.15);
+}
+.wr-resize-grip {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 10;
+}
+.wr-resize-grip svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}

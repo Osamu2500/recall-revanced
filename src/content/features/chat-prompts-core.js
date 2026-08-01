@@ -372,7 +372,7 @@
 
       Object.keys(grouped).forEach(cat => {
         if (grouped[cat].length === 0 && this.searchQuery) return; // Hide empty cats while searching
-        
+
         // Hide non-active categories unless we are searching
         if (!this.searchQuery && cat !== this.activeCategory) return;
 
@@ -604,11 +604,23 @@
             this.renderAllPopovers();
           };
           actions.appendChild(delBtn);
-          
           item.appendChild(actions);
           list.appendChild(item);
         });
       });
+      
+      if (filtered.length === 0) {
+         const emptyState = document.createElement('div');
+         emptyState.className = 'wr-empty-state';
+         emptyState.innerHTML = `
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+           </svg>
+           <div>No prompts found</div>
+         `;
+         list.appendChild(emptyState);
+      }
+      
       popover.appendChild(list);
 
       // Add new row
@@ -820,6 +832,12 @@
         const activeInput = popover.querySelector('.wr-prompts-search-input');
         if (activeInput && this.searchQuery) activeInput.focus();
       }
+      
+      // Add custom resizer grip
+      const grip = document.createElement('div');
+      grip.className = 'wr-resize-grip';
+      grip.innerHTML = `<svg viewBox="0 0 12 12"><path d="M10 2L2 10M10 6L6 10M10 10L9.9 10"/></svg>`;
+      popover.appendChild(grip);
     }
 
     handleDrop(e, targetCategory, targetPromptId = null, insertAfter = false) {
