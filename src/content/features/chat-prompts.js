@@ -53,23 +53,46 @@
     if (chatInput.hasAttribute('data-wr-prompts-init')) return;
     chatInput.setAttribute('data-wr-prompts-init', 'true');
 
-    // Find the row containing the action buttons ("@ Context", "Upload")
-    let buttonRow = null;
+    // Robustly find the row containing the "Upload" button/chip
+    let container = null;
     let current = chatInput;
-    for (let i = 0; i < 6; i++) {
+    
+    for (let i = 0; i < 8; i++) {
       if (!current) break;
-      const buttons = Array.from(current.querySelectorAll('button'));
-      const hasActionBtn = buttons.find(b => b.textContent && (b.textContent.includes('Context') || b.textContent.includes('Upload')));
       
-      if (hasActionBtn) {
-        buttonRow = hasActionBtn.parentElement;
-        break;
+      const elements = Array.from(current.querySelectorAll('*'));
+      // Find deepest element containing "Upload" text
+      const uploadEl = elements.find(el => {
+        return el.textContent && el.textContent.includes('Upload') &&
+               !Array.from(el.children).some(c => c.textContent && c.textContent.includes('Upload'));
+      });
+      
+      if (uploadEl) {
+        // Traverse up slightly to find the clickable chip wrapper
+        let node = uploadEl;
+        let uploadChip = null;
+        for (let j = 0; j < 4; j++) {
+          if (!node || node === current) break;
+          const style = window.getComputedStyle(node);
+          if (node.tagName === 'BUTTON' || node.getAttribute('role') === 'button' || node.className.includes('MuiChip') || (style && style.cursor === 'pointer')) {
+            uploadChip = node;
+            break;
+          }
+          node = node.parentElement;
+        }
+        
+        if (uploadChip && uploadChip.parentElement) {
+          container = uploadChip.parentElement;
+          break;
+        }
       }
       current = current.parentElement;
     }
 
-    // Fallback: Use the grandparent or parent if we can't find the button row
-    const container = buttonRow || chatInput.parentElement.parentElement || chatInput.parentElement;
+    // Fallback if not found
+    if (!container) {
+      container = chatInput.parentElement.parentElement || chatInput.parentElement;
+    }
     
     // We already marked the chatInput, but let's also mark the container so we don't duplicate
     if (container.hasAttribute('data-wr-prompts-injected')) return;
