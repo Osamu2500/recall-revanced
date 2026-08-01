@@ -50,11 +50,31 @@
   };
 
   function initChatPromptForTextarea(chatInput) {
-    // The container of the textarea is usually relative and houses the pills or action buttons
-    const container = chatInput.parentElement;
-    if (!container || container.hasAttribute('data-wr-prompts-init')) return;
+    if (chatInput.hasAttribute('data-wr-prompts-init')) return;
+    chatInput.setAttribute('data-wr-prompts-init', 'true');
+
+    // Find the row containing the action buttons ("@ Context", "Upload")
+    let buttonRow = null;
+    let current = chatInput;
+    for (let i = 0; i < 6; i++) {
+      if (!current) break;
+      const buttons = Array.from(current.querySelectorAll('button'));
+      const hasActionBtn = buttons.find(b => b.textContent && (b.textContent.includes('Context') || b.textContent.includes('Upload')));
+      
+      if (hasActionBtn) {
+        buttonRow = hasActionBtn.parentElement;
+        break;
+      }
+      current = current.parentElement;
+    }
+
+    // Fallback: Use the grandparent or parent if we can't find the button row
+    const container = buttonRow || chatInput.parentElement.parentElement || chatInput.parentElement;
     
-    container.setAttribute('data-wr-prompts-init', 'true');
+    // We already marked the chatInput, but let's also mark the container so we don't duplicate
+    if (container.hasAttribute('data-wr-prompts-injected')) return;
+    container.setAttribute('data-wr-prompts-injected', 'true');
+
     if (window.getComputedStyle(container).position === 'static') {
       container.style.position = 'relative';
     }
