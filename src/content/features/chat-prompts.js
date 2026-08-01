@@ -90,9 +90,20 @@
           node = node.parentElement;
         }
         
-        if (uploadChip && uploadChip.parentElement) {
-          container = uploadChip.parentElement;
-          break;
+        if (uploadChip) {
+          // Traverse up to find the actual flex row that groups these chips on the left
+          let row = uploadChip.parentElement;
+          while (row && row !== current) {
+            const style = window.getComputedStyle(row);
+            // We want a flex row, but NOT the outermost one that spreads everything apart (space-between)
+            if (style.display === 'flex' && !style.justifyContent.includes('space-between')) {
+              container = row;
+              break;
+            }
+            row = row.parentElement;
+          }
+          
+          if (container) break;
         }
       }
       current = current.parentElement;
