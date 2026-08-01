@@ -554,6 +554,9 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background: rgba(255,255,255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 
@@ -656,6 +659,12 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 .wr-prompts-actions {
   display: flex;
   gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.wr-prompts-header:hover .wr-prompts-actions {
+  opacity: 1;
 }
 
 .wr-cat-action-btn {
