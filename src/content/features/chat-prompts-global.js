@@ -1,5 +1,10 @@
 // src/content/features/chat-prompts-global.js
 (function() {
+  const hn = window.location.hostname;
+  if (hn === 'app.recall.it' || hn === 'app.getrecall.ai') {
+    return; // The main web app is handled by chat-prompts.js
+  }
+
   console.log('[Wider Recall] Global chat prompts script initialized on:', window.location.href);
   const STORAGE_KEY = 'wr_custom_prompts';
   let promptsData = [];

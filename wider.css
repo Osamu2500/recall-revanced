@@ -498,64 +498,75 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 .wr-prompts-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e4e4e7;
+  padding: 0px 12px;
+  border-radius: 16px;
   font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-left: 8px;
-  backdrop-filter: blur(4px);
   height: 28px;
   vertical-align: middle;
+  z-index: 100000;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 .wr-prompts-btn:hover {
-  background: rgba(139, 92, 246, 0.3);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
 }
 .wr-prompts-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  color: #a1a1aa;
 }
 
 .wr-prompts-popover {
   position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
-  width: 280px;
-  background: rgba(20, 20, 24, 0.95);
-  backdrop-filter: blur(12px);
+  width: 320px;
+  background: #18181b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 2147483647;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: wr-pop-up 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: bottom right;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 @keyframes wr-pop-up {
-  from { opacity: 0; transform: translateY(10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .wr-prompts-header {
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #a1a1aa;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: rgba(255,255,255, 0.02);
 }
 
 .wr-prompts-list {
   max-height: 250px;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
+}
+.wr-prompts-list::-webkit-scrollbar {
+  width: 6px;
+}
+.wr-prompts-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 
 .wr-prompt-item {
@@ -567,7 +578,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   transition: background 0.15s;
 }
 .wr-prompt-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
 }
 .wr-prompt-text {
   flex: 1;
@@ -580,15 +591,20 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 .wr-prompt-del {
   background: none;
   border: none;
-  color: #71717a;
-  font-size: 18px;
+  color: #52525b;
+  font-size: 16px;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 4px;
   line-height: 1;
-  transition: color 0.15s;
+  border-radius: 4px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .wr-prompt-del:hover {
   color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .wr-prompts-add-row {
@@ -596,29 +612,36 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   padding: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.2);
+  gap: 8px;
 }
 .wr-prompts-input {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px 0 0 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
   outline: none;
   font-size: 13px;
+  transition: border-color 0.2s;
+}
+.wr-prompts-input::placeholder {
+  color: #71717a;
 }
 .wr-prompts-input:focus {
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 .wr-prompts-add-btn {
-  background: rgba(139, 92, 246, 0.8);
-  color: #fff;
-  border: none;
-  padding: 0 12px;
-  border-radius: 0 6px 6px 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 18px;
+  transition: all 0.2s;
 }
 .wr-prompts-add-btn:hover {
-  background: rgb(139, 92, 246);
+  background: rgba(255, 255, 255, 0.15);
 }
