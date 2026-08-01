@@ -13,11 +13,15 @@
       this.draggedItem = null;
       this.collapsedCategories = new Set();
       this.activeCategory = 'General';
+      
+      // V5 state
+      this.selectedPrompts = new Set();
+      this.popoverSize = { width: null, height: null };
     }
 
     // --- State Management ---
     loadPrompts(callback) {
-      chrome.storage.local.get([this.STORAGE_KEY, this.OLD_STORAGE_KEY, 'wr_custom_categories'], (result) => {
+      chrome.storage.local.get([this.STORAGE_KEY, this.OLD_STORAGE_KEY, 'wr_custom_categories', 'wr_popover_size'], (result) => {
         if (result[this.STORAGE_KEY]) {
           this.promptsData = result[this.STORAGE_KEY];
         } else if (result[this.OLD_STORAGE_KEY]) {
@@ -39,6 +43,10 @@
         }
         
         this.savedCategories = result.wr_custom_categories || [];
+        if (result.wr_popover_size) {
+           this.popoverSize = result.wr_popover_size;
+        }
+        
         this.updateCategories();
         if (callback) callback();
       });
@@ -139,6 +147,29 @@
       this.popovers.add(popover);
       this.renderPopoverContent(popover);
       document.body.appendChild(popover);
+      
+      // Load saved dimensions
+      if (this.popoverSize && this.popoverSize.width) {
+        popover.style.width = this.popoverSize.width + 'px';
+        popover.style.height = this.popoverSize.height + 'px';
+      }
+      
+      // Save dimensions on resize
+      let resizeTimeout;
+      new ResizeObserver((entries) => {
+         for (let entry of entries) {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+               if (popover.style.display !== 'none') {
+                  this.popoverSize = {
+                     width: entry.contentRect.width,
+                     height: entry.contentRect.height
+                  };
+                  chrome.storage.local.set({ wr_popover_size: this.popoverSize });
+               }
+            }, 500);
+         }
+      }).observe(popover);
       
       // Slash Command Shortcut (/)
       if (!chatInput.hasAttribute('data-slash-bound')) {
@@ -249,8 +280,20 @@
       const list = document.createElement('div');
       list.className = 'wr-prompts-list';
 
-      const filtered = this.promptsData.filter(p => p.text.toLowerCase().includes(this.searchQuery) || p.category.toLowerCase().includes(this.searchQuery));
+      const isTagSearch = this.searchQuery.startsWith('#');
+      let searchWord = this.searchQuery;
+      if (isTagSearch) searchWord = this.searchQuery.substring(1);
       
+      const filtered = this.promptsData.filter(p => {
+         if (!this.searchQuery) return true;
+         if (isTagSearch) {
+            // Strict tag search: must have `#tag` exactly
+            const tagRegex = new RegExp(`(^|\\s)#${searchWord}(\\s|$)`, 'i');
+            return tagRegex.test(p.text);
+         } else {
+            return p.text.toLowerCase().includes(this.searchQuery) || p.category.toLowerCase().includes(this.searchQuery);
+         }
+      });
       // Sort: Starred first, then by order
       const sortedPrompts = [...filtered].sort((a, b) => {
         const aStar = a.starred ? 1 : 0;
@@ -402,6 +445,18 @@
             this.handleDrop(e, cat, prompt.id, insertAfter);
           };
 
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'wr-prompt-cb';
+          cb.checked = this.selectedPrompts.has(prompt.id);
+          cb.onclick = (e) => {
+             e.stopPropagation();
+             if (cb.checked) this.selectedPrompts.add(prompt.id);
+             else this.selectedPrompts.delete(prompt.id);
+             this.renderAllPopovers();
+          };
+          item.appendChild(cb);
+
           const handle = document.createElement('div');
           handle.className = 'wr-drag-handle';
           handle.innerHTML = svgDrag;
@@ -411,6 +466,18 @@
           textSpan.className = 'wr-prompt-text';
           
           let displayText = prompt.text;
+          
+          // Escape HTML first for safety
+          displayText = displayText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          
+          // Inline Markdown Rendering
+          displayText = displayText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+          displayText = displayText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+          displayText = displayText.replace(/`(.*?)`/g, '<code>$1</code>');
+          
+          // Tag rendering (#tag)
+          displayText = displayText.replace(/(^|\s)#(\w+)/g, '$1<span class="wr-prompt-tag">#$2</span>');
+          
           // Highlight variables
           displayText = displayText.replace(/\[(.*?)\]/g, '<span class="wr-prompt-var">[$1]</span>');
           
@@ -622,6 +689,70 @@
       addRow.appendChild(input);
       addRow.appendChild(addBtn);
       popover.appendChild(addRow);
+      
+      // Bulk Actions Bar
+      if (this.selectedPrompts.size > 0) {
+         const bulkBar = document.createElement('div');
+         bulkBar.className = 'wr-bulk-actions-bar';
+         
+         const countSpan = document.createElement('span');
+         countSpan.textContent = `${this.selectedPrompts.size} selected`;
+         
+         const actionsDiv = document.createElement('div');
+         
+         // Move Dropdown inside Bulk Bar
+         const moveSelect = document.createElement('select');
+         moveSelect.className = 'wr-bulk-move-select';
+         const defaultOpt = document.createElement('option');
+         defaultOpt.textContent = 'Move to...';
+         defaultOpt.value = '';
+         moveSelect.appendChild(defaultOpt);
+         this.categories.forEach(c => {
+             const opt = document.createElement('option');
+             opt.value = c;
+             opt.textContent = c;
+             moveSelect.appendChild(opt);
+         });
+         moveSelect.onchange = (e) => {
+             const targetCat = e.target.value;
+             if (targetCat) {
+                 this.promptsData.forEach(p => {
+                     if (this.selectedPrompts.has(p.id)) p.category = targetCat;
+                 });
+                 this.selectedPrompts.clear();
+                 this.savePrompts();
+                 this.renderAllPopovers();
+             }
+         };
+         
+         const delBulkBtn = document.createElement('button');
+         delBulkBtn.className = 'wr-bulk-del-btn';
+         delBulkBtn.textContent = 'Delete';
+         delBulkBtn.onclick = () => {
+             if (confirm(`Delete ${this.selectedPrompts.size} prompts?`)) {
+                 this.promptsData = this.promptsData.filter(p => !this.selectedPrompts.has(p.id));
+                 this.selectedPrompts.clear();
+                 this.savePrompts();
+                 this.renderAllPopovers();
+             }
+         };
+         
+         const cancelBtn = document.createElement('button');
+         cancelBtn.className = 'wr-bulk-cancel-btn';
+         cancelBtn.textContent = 'Cancel';
+         cancelBtn.onclick = () => {
+             this.selectedPrompts.clear();
+             this.renderAllPopovers();
+         };
+         
+         actionsDiv.appendChild(moveSelect);
+         actionsDiv.appendChild(delBulkBtn);
+         actionsDiv.appendChild(cancelBtn);
+         
+         bulkBar.appendChild(countSpan);
+         bulkBar.appendChild(actionsDiv);
+         popover.appendChild(bulkBar);
+      }
       
       // Maintain focus if typing
       if (popover.style.display === 'flex') {

@@ -528,6 +528,11 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 .wr-prompts-popover {
   position: absolute;
   width: 320px;
+  min-width: 260px;
+  min-height: 200px;
+  max-width: 800px;
+  max-height: 800px;
+  resize: both;
   background: #18181b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -1038,4 +1043,67 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 
+/* V5: Checkboxes & Bulk Actions */
+.wr-prompt-cb {
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #f05622;
+}
 
+.wr-bulk-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(240, 86, 34, 0.1);
+  border-top: 1px solid rgba(240, 86, 34, 0.2);
+  font-size: 12px;
+  color: #f05622;
+}
+.wr-bulk-actions-bar div {
+  display: flex;
+  gap: 8px;
+}
+.wr-bulk-move-select {
+  background: #18181b;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.wr-bulk-del-btn, .wr-bulk-cancel-btn {
+  background: #18181b;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.wr-bulk-del-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
+.wr-bulk-cancel-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* V5: Markdown & Tags */
+.wr-prompt-text strong {
+  font-weight: 700;
+  color: #fff;
+}
+.wr-prompt-text em {
+  font-style: italic;
+  opacity: 0.9;
+}
+.wr-prompt-text code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+}
+.wr-prompt-tag {
+  color: #3b82f6;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
