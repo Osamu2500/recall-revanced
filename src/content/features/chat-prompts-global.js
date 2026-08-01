@@ -114,6 +114,16 @@
          popover.remove(); // Remove from light DOM document.body
          const shadowTarget = rootNode.shadowRoot || rootNode;
          shadowTarget.appendChild(popover);
+         
+         // Inject wider.css into the Shadow DOM so our elements are styled
+         if (!shadowTarget.querySelector('#wr-prompts-css')) {
+            const link = document.createElement('link');
+            link.id = 'wr-prompts-css';
+            link.rel = 'stylesheet';
+            // Use chrome.runtime.getURL to load the extension's CSS file
+            link.href = chrome.runtime.getURL('wider.css');
+            shadowTarget.appendChild(link);
+         }
       }
 
       container.appendChild(btn);
