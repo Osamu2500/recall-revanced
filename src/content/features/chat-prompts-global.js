@@ -129,8 +129,6 @@
       container.appendChild(btn);
     }
 
-    // Process regular DOM
-    processRoot(document);
     // Process Shadow DOMs (like the Recall Widget)
     scanShadowDOM(document.body);
   }
