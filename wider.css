@@ -1179,13 +1179,40 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 .wr-modal-close:hover { color: #fff; }
 .wr-modal-body {
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.wr-modal-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+.wr-toolbar-btn {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.wr-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 #wr-modal-textarea {
   width: 100%;
   min-height: 120px;
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   padding: 12px;
   color: #e4e4e7;
   font-size: 13px;
@@ -1269,4 +1296,48 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 2;
   stroke-linecap: round;
+}
+
+/* V8: Toast Notifications & Markdown Toolbar */
+.wr-toast {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #27272a;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border: 1px solid #3f3f46;
+}
+.wr-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.wr-drag-handle {
+  cursor: grab;
+  color: #71717a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  opacity: 0.5;
+  transition: opacity 0.2s, color 0.2s;
+}
+.wr-drag-handle:hover {
+  opacity: 1;
+  color: #fff;
+}
+.wr-prompt-item.dragging {
+  opacity: 0.5;
+  background: rgba(255, 255, 255, 0.1);
 }

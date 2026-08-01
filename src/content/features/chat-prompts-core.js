@@ -87,21 +87,104 @@
       finalText = finalText.replace(/\[selection\]/gi, window.getSelection().toString() || '');
       finalText = finalText.replace(/\[url\]/gi, window.location.href);
 
-      const regex = /\[(.*?)\]/g;
-      let match;
-      while ((match = regex.exec(finalText)) !== null) {
-         const val = prompt(`Fill in variable for [${match[1]}]:`);
-         if (val === null) return; // User cancelled
-         finalText = finalText.replace(match[0], val);
-         regex.lastIndex = 0; // Reset index since string length changed
-      }
-      
-      const dataTransfer = new DataTransfer();
-      dataTransfer.setData('text/plain', finalText);
-      const pasteEvent = new ClipboardEvent('paste', {
-        clipboardData: dataTransfer, bubbles: true, cancelable: true
+      this.openVariableModal(finalText, (resolvedText) => {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.setData('text/plain', resolvedText);
+          const pasteEvent = new ClipboardEvent('paste', {
+            clipboardData: dataTransfer, bubbles: true, cancelable: true
+          });
+          editorElement.dispatchEvent(pasteEvent);
+          this.showToast("Prompt injected");
       });
-      editorElement.dispatchEvent(pasteEvent);
+    }
+
+    openVariableModal(text, onComplete) {
+       const matches = [...text.matchAll(/\[(.*?)\]/g)].map(m => m[1]);
+       const uniqueVars = [...new Set(matches)];
+       
+       if (uniqueVars.length === 0) {
+           onComplete(text);
+           return;
+       }
+       
+       const overlay = document.createElement('div');
+       overlay.className = 'wr-modal-overlay';
+       
+       const modal = document.createElement('div');
+       modal.className = 'wr-modal-content';
+       modal.style.width = '360px';
+       
+       const title = document.createElement('div');
+       title.className = 'wr-modal-header';
+       title.innerHTML = `<h3 style="margin: 0; font-size: 16px; color: #fff;">Fill in Variables</h3>`;
+       modal.appendChild(title);
+       
+       const inputs = {};
+       
+       uniqueVars.forEach((v, i) => {
+           const label = document.createElement('div');
+           label.style.marginBottom = '12px';
+           label.style.fontSize = '12px';
+           label.style.color = '#a1a1aa';
+           label.style.textTransform = 'uppercase';
+           label.style.fontWeight = '600';
+           label.textContent = v;
+           
+           const input = document.createElement('input');
+           input.className = 'wr-modal-textarea'; // Reuse textarea class for consistent styling but it's an input
+           input.style.minHeight = '36px';
+           input.style.height = '36px';
+           input.style.marginTop = '4px';
+           input.type = 'text';
+           input.placeholder = `Enter ${v}...`;
+           
+           inputs[v] = input;
+           
+           label.appendChild(input);
+           modal.appendChild(label);
+           
+           if (i === 0) {
+              setTimeout(() => input.focus(), 100);
+           }
+       });
+       
+       const actions = document.createElement('div');
+       actions.className = 'wr-modal-actions';
+       actions.style.marginTop = '24px';
+       
+       const cancelBtn = document.createElement('button');
+       cancelBtn.className = 'wr-btn-secondary';
+       cancelBtn.textContent = 'Cancel';
+       cancelBtn.onclick = () => overlay.remove();
+       
+       const injectBtn = document.createElement('button');
+       injectBtn.className = 'wr-btn-primary';
+       injectBtn.textContent = 'Inject';
+       injectBtn.onclick = () => {
+           let finalText = text;
+           uniqueVars.forEach(v => {
+               const val = inputs[v].value || '';
+               finalText = finalText.replace(new RegExp(`\\[${v}\\]`, 'g'), val);
+           });
+           overlay.remove();
+           onComplete(finalText);
+       };
+       
+       actions.appendChild(cancelBtn);
+       actions.appendChild(injectBtn);
+       modal.appendChild(actions);
+       
+       overlay.appendChild(modal);
+       document.body.appendChild(overlay);
+       
+       overlay.addEventListener('keydown', (e) => {
+           if (e.key === 'Enter') {
+               e.preventDefault();
+               injectBtn.click();
+           } else if (e.key === 'Escape') {
+               cancelBtn.click();
+           }
+       });
     }
 
     // --- Import / Export ---
@@ -161,6 +244,13 @@
             <button class="wr-modal-close">&times;</button>
           </div>
           <div class="wr-modal-body">
+            <div class="wr-modal-toolbar">
+               <button class="wr-toolbar-btn" data-wrap="**" title="Bold">B</button>
+               <button class="wr-toolbar-btn" data-wrap="*" title="Italic" style="font-style: italic;">I</button>
+               <button class="wr-toolbar-btn" data-wrap="\`" title="Code">&lt;/&gt;</button>
+               <button class="wr-toolbar-btn" data-wrap="[]" title="Add Variable">[var]</button>
+               <button class="wr-toolbar-btn" data-wrap="#" title="Add Tag">#</button>
+            </div>
             <textarea id="wr-modal-textarea" placeholder="Write your prompt here...&#10;Use [variable] for fill-in-the-blanks.&#10;Use [selection] or [url] for auto-context.">${initialText}</textarea>
           </div>
           <div class="wr-modal-footer">
@@ -179,6 +269,38 @@
          textarea.style.height = (textarea.scrollHeight) + 'px';
       }
       textarea.focus();
+      
+      modal.querySelectorAll('.wr-toolbar-btn').forEach(btn => {
+         btn.onclick = () => {
+             const wrap = btn.getAttribute('data-wrap');
+             const start = textarea.selectionStart;
+             const end = textarea.selectionEnd;
+             const text = textarea.value;
+             let selText = text.substring(start, end);
+             let injected = '';
+             
+             if (wrap === '[]') injected = `[${selText || 'variable'}]`;
+             else if (wrap === '#') injected = `#${selText || 'tag'}`;
+             else injected = `${wrap}${selText}${wrap}`;
+             
+             textarea.value = text.substring(0, start) + injected + text.substring(end);
+             
+             if (selText) {
+                textarea.selectionStart = textarea.selectionEnd = start + injected.length;
+             } else {
+                if (wrap === '[]') {
+                   textarea.selectionStart = start + 1;
+                   textarea.selectionEnd = start + 1 + 8; // 'variable'
+                } else if (wrap === '#') {
+                   textarea.selectionStart = start + 1;
+                   textarea.selectionEnd = start + 1 + 3; // 'tag'
+                } else {
+                   textarea.selectionStart = textarea.selectionEnd = start + wrap.length;
+                }
+             }
+             textarea.focus();
+         };
+      });
       
       const close = () => modal.remove();
       
@@ -351,7 +473,10 @@
             const tagRegex = new RegExp(`(^|\\s)#${searchWord}(\\s|$)`, 'i');
             return tagRegex.test(p.text);
          } else {
-            return p.text.toLowerCase().includes(this.searchQuery) || p.category.toLowerCase().includes(this.searchQuery);
+            const searchTerms = this.searchQuery.toLowerCase().split(/\s+/).filter(t => t);
+            const promptText = p.text.toLowerCase();
+            const categoryText = p.category.toLowerCase();
+            return searchTerms.every(term => promptText.includes(term) || categoryText.includes(term));
          }
       });
       // Sort: Starred first, then by order
@@ -509,10 +634,31 @@
           cb.type = 'checkbox';
           cb.className = 'wr-prompt-cb';
           cb.checked = this.selectedPrompts.has(prompt.id);
+          cb.dataset.promptId = prompt.id;
           cb.onclick = (e) => {
              e.stopPropagation();
-             if (cb.checked) this.selectedPrompts.add(prompt.id);
-             else this.selectedPrompts.delete(prompt.id);
+             
+             if (e.shiftKey && this.lastCheckedCb) {
+                 const checkboxes = Array.from(popover.querySelectorAll('.wr-prompt-cb'));
+                 const idx1 = checkboxes.indexOf(this.lastCheckedCb);
+                 const idx2 = checkboxes.indexOf(cb);
+                 if (idx1 > -1 && idx2 > -1) {
+                     const start = Math.min(idx1, idx2);
+                     const end = Math.max(idx1, idx2);
+                     const checkValue = cb.checked;
+                     for (let i = start; i <= end; i++) {
+                         checkboxes[i].checked = checkValue;
+                         const pId = checkboxes[i].dataset.promptId;
+                         if (checkValue) this.selectedPrompts.add(pId);
+                         else this.selectedPrompts.delete(pId);
+                     }
+                 }
+             } else {
+                 if (cb.checked) this.selectedPrompts.add(prompt.id);
+                 else this.selectedPrompts.delete(prompt.id);
+             }
+             
+             this.lastCheckedCb = cb;
              this.renderAllPopovers();
           };
           item.appendChild(cb);
@@ -574,6 +720,7 @@
             prompt.starred = !prompt.starred;
             this.savePrompts();
             this.renderAllPopovers();
+            this.showToast(prompt.starred ? "Prompt starred" : "Prompt unstarred");
           };
           actions.appendChild(starBtn);
 
@@ -588,6 +735,7 @@
                   prompt.text = newText;
                   this.savePrompts();
                   this.renderAllPopovers();
+                  this.showToast("Prompt updated");
                }
             });
           };
@@ -602,6 +750,7 @@
             this.promptsData = this.promptsData.filter(p => p.id !== prompt.id);
             this.savePrompts();
             this.renderAllPopovers();
+            this.showToast("Prompt deleted");
           };
           actions.appendChild(delBtn);
           item.appendChild(actions);
@@ -752,6 +901,7 @@
             this.activeCategory = category;
             this.savePrompts();
             this.renderAllPopovers();
+            this.showToast("Prompt saved");
          });
       };
       
@@ -789,12 +939,14 @@
          moveSelect.onchange = (e) => {
              const targetCat = e.target.value;
              if (targetCat) {
+                 const count = this.selectedPrompts.size;
                  this.promptsData.forEach(p => {
                      if (this.selectedPrompts.has(p.id)) p.category = targetCat;
                  });
                  this.selectedPrompts.clear();
                  this.savePrompts();
                  this.renderAllPopovers();
+                 this.showToast(`Moved ${count} prompts to ${targetCat}`);
              }
          };
          
@@ -802,11 +954,13 @@
          delBulkBtn.className = 'wr-bulk-del-btn';
          delBulkBtn.textContent = 'Delete';
          delBulkBtn.onclick = () => {
-             if (confirm(`Delete ${this.selectedPrompts.size} prompts?`)) {
+             const count = this.selectedPrompts.size;
+             if (confirm(`Delete ${count} prompts?`)) {
                  this.promptsData = this.promptsData.filter(p => !this.selectedPrompts.has(p.id));
                  this.selectedPrompts.clear();
                  this.savePrompts();
                  this.renderAllPopovers();
+                 this.showToast(`Deleted ${count} prompts`);
              }
          };
          
@@ -958,6 +1112,24 @@
         window.addEventListener('scroll', updateAllPositions, { passive: true });
         window.addEventListener('resize', updateAllPositions, { passive: true });
       }
+    }
+
+    showToast(msg) {
+        this.popovers.forEach(popover => {
+            let toast = popover.querySelector('.wr-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'wr-toast';
+                popover.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.classList.add('show');
+            
+            if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+            toast.hideTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        });
     }
   };
 })();
