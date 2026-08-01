@@ -42,39 +42,81 @@
       const chatInput = findChatInput(rootNode);
       if (!chatInput) return;
       if (chatInput.hasAttribute('data-wr-prompts-init')) return;
-
-      const chatInputContainer = rootNode.querySelector('#chat-input-container');
-      if (!chatInputContainer) return;
-
-      let summaryRow = null;
-      // In the widget, the input container has a first child wrapper.
-      if (chatInputContainer.firstElementChild && chatInputContainer.firstElementChild.firstElementChild) {
-        summaryRow = chatInputContainer.firstElementChild.firstElementChild;
-      }
-      
-      if (!summaryRow) {
-        summaryRow = chatInputContainer;
-      }
-
-      if (summaryRow.hasAttribute('data-wr-prompts-injected')) return;
-      
       chatInput.setAttribute('data-wr-prompts-init', 'true');
-      summaryRow.setAttribute('data-wr-prompts-injected', 'true');
 
-      if (window.getComputedStyle(summaryRow).position === 'static') {
-        summaryRow.style.position = 'relative';
+      // Robustly find the row containing the "Upload" or "Context" button/chip
+      let container = null;
+      let current = chatInput;
+      
+      for (let i = 0; i < 8; i++) {
+        if (!current || !current.querySelectorAll) break;
+        
+        const elements = Array.from(current.querySelectorAll('*'));
+        const targetEl = elements.find(el => {
+          const text = el.textContent || '';
+          const match = text.includes('Upload') || text.includes('Context');
+          return match && !Array.from(el.children).some(c => c.textContent && (c.textContent.includes('Upload') || c.textContent.includes('Context')));
+        });
+        
+        if (targetEl) {
+          let node = targetEl;
+          let uploadChip = null;
+          for (let j = 0; j < 4; j++) {
+            if (!node || node === current) break;
+            const style = window.getComputedStyle(node);
+            if (node.tagName === 'BUTTON' || node.getAttribute('role') === 'button' || node.className.includes('MuiChip') || (style && style.cursor === 'pointer')) {
+              uploadChip = node;
+              break;
+            }
+            node = node.parentElement;
+          }
+          
+          if (uploadChip) {
+            // Traverse up to find the actual flex row that groups these chips on the left
+            let row = uploadChip.parentElement;
+            while (row && row !== current) {
+              const style = window.getComputedStyle(row);
+              if (style.display === 'flex' && !style.justifyContent.includes('space-between')) {
+                container = row;
+                break;
+              }
+              row = row.parentElement;
+            }
+            
+            if (container) break;
+          }
+        }
+        current = current.parentElement;
+      }
+
+      // Fallback if not found
+      if (!container) {
+        container = chatInput.parentElement.parentElement || chatInput.parentElement;
+      }
+      
+      if (container.hasAttribute('data-wr-prompts-injected')) return;
+      container.setAttribute('data-wr-prompts-injected', 'true');
+
+      if (window.getComputedStyle(container).position === 'static') {
+        container.style.position = 'relative';
       }
 
       // Use shared PromptLibraryUI to create elements and bind logic
       const btn = window.wrPromptUIGlobal.createTriggerButton();
-      
-      // Some specific adjustments for the global widget styling
-      btn.style.marginLeft = '12px';
-      
       const popover = window.wrPromptUIGlobal.createPopover(chatInput);
+      
+      // The popover needs to be in the same root context for ShadowDOM portaling
+      // so we override the default Light DOM portaling.
       window.wrPromptUIGlobal.bindPopoverToButton(btn, popover);
+      
+      // Override default document.body attachment for Shadow DOM
+      if (rootNode.shadowRoot || rootNode.host) {
+         popover.remove(); // Remove from light DOM document.body
+         const shadowTarget = rootNode.shadowRoot || rootNode;
+         shadowTarget.appendChild(popover);
+      }
 
-      summaryRow.appendChild(btn);
+      container.appendChild(btn);
     }
 
     // Process regular DOM
