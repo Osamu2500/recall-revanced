@@ -406,19 +406,45 @@
       const addRow = document.createElement('div');
       addRow.className = 'wr-prompts-add-row';
       
-      const catSelect = document.createElement('select');
-      catSelect.className = 'wr-prompts-cat-select';
+      // Custom Dropdown UI
+      const catSelectWrapper = document.createElement('div');
+      catSelectWrapper.className = 'wr-custom-select';
+      
+      const catSelectValue = document.createElement('div');
+      catSelectValue.className = 'wr-custom-select-val';
+      catSelectValue.innerHTML = `<span>${this.activeCategory}</span> ${svgChevron}`;
+      
+      const catSelectMenu = document.createElement('div');
+      catSelectMenu.className = 'wr-custom-select-menu';
+      
       this.categories.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
+        const opt = document.createElement('div');
+        opt.className = 'wr-custom-select-opt';
+        if (c === this.activeCategory) opt.classList.add('selected');
         opt.textContent = c;
-        catSelect.appendChild(opt);
+        opt.onclick = (e) => {
+           e.stopPropagation();
+           this.activeCategory = c;
+           this.renderAllPopovers();
+        };
+        catSelectMenu.appendChild(opt);
       });
-      catSelect.value = this.activeCategory;
-      catSelect.onchange = (e) => {
-        this.activeCategory = e.target.value;
-        this.renderAllPopovers();
+      
+      catSelectWrapper.appendChild(catSelectValue);
+      catSelectWrapper.appendChild(catSelectMenu);
+      
+      catSelectValue.onclick = (e) => {
+         e.stopPropagation();
+         const isOpen = catSelectMenu.classList.contains('show');
+         document.querySelectorAll('.wr-custom-select-menu').forEach(m => m.classList.remove('show'));
+         if (!isOpen) catSelectMenu.classList.add('show');
       };
+
+      popover.addEventListener('click', (e) => {
+         if (!catSelectWrapper.contains(e.target)) {
+             catSelectMenu.classList.remove('show');
+         }
+      });
       
       const input = document.createElement('input');
       input.type = 'text';
@@ -432,7 +458,7 @@
       addBtn.onclick = () => {
         const val = input.value.trim();
         if (val) {
-          let category = catSelect.value;
+          let category = this.activeCategory;
           // Support fast category creation via "Cat: text" format
           if (val.includes(':') && val.split(':')[0].length < 15) {
             const parts = val.split(':');
@@ -456,7 +482,7 @@
         if (e.key === 'Enter') addBtn.click();
       });
 
-      addRow.appendChild(catSelect);
+      addRow.appendChild(catSelectWrapper);
       addRow.appendChild(input);
       addRow.appendChild(addBtn);
       popover.appendChild(addRow);

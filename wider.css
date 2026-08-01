@@ -658,6 +658,20 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   gap: 8px;
 }
 
+.wr-cat-action-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #f05622;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
 .wr-btn-icon {
   background: transparent;
   border: none;
@@ -837,16 +851,75 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   align-items: center;
 }
 
-.wr-prompts-cat-select {
+/* Custom Dropdown UI */
+.wr-custom-select {
+  position: relative;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e4e4e7;
   border-radius: 16px;
-  padding: 6px 10px;
   font-size: 12px;
-  max-width: 100px;
   cursor: pointer;
+  min-width: 100px;
+  max-width: 130px;
+  user-select: none;
 }
+.wr-custom-select-val {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.wr-custom-select-val span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wr-custom-select-val svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.wr-custom-select-menu {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 1000;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  max-height: 150px;
+  overflow-y: auto;
+}
+.wr-custom-select-menu.show {
+  display: block;
+}
+.wr-custom-select-opt {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wr-custom-select-opt:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.wr-custom-select-opt.selected {
+  color: #f05622;
+  background: rgba(240, 86, 34, 0.1);
+}
+
+.wr-custom-select-menu::-webkit-scrollbar { width: 4px; }
+.wr-custom-select-menu::-webkit-scrollbar-track { background: transparent; }
+.wr-custom-select-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 2px; }
 
 .wr-prompts-add-btn {
   background: #f05622;
