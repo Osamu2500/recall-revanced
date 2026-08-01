@@ -912,6 +912,9 @@
         this.popovers.forEach(p => { if (p !== popover) p.style.display = 'none'; });
 
         if (popover.style.display === 'none') {
+          // Clear search query when opening
+          this.searchQuery = '';
+          
           this.loadPrompts(() => {
             this.renderPopoverContent(popover);
             
