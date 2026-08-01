@@ -40,24 +40,28 @@
   window.WR_InitChatPrompts = function() {
     if (!window.WR_STATE || !window.WR_STATE.enabled) return;
     
-    // Find the chat textarea
+    // Find all chat textareas
     const textareas = document.querySelectorAll('textarea');
-    let chatInput = null;
     for (const ta of textareas) {
       if (ta.placeholder && (ta.placeholder.toLowerCase().includes('ask anything') || ta.placeholder.includes('@'))) {
-        chatInput = ta;
-        break;
+        initChatPromptForTextarea(ta);
       }
     }
+  };
 
-    if (!chatInput) return;
-    
+  function initChatPromptForTextarea(chatInput) {
     // The container of the textarea is usually relative and houses the pills or action buttons
     const container = chatInput.parentElement;
     if (!container || container.hasAttribute('data-wr-prompts-init')) return;
     
     container.setAttribute('data-wr-prompts-init', 'true');
-    container.style.position = 'relative';
+    if (window.getComputedStyle(container).position === 'static') {
+      container.style.position = 'relative';
+    }
+
+    // Clean up old popovers if any for this specific container? 
+    // Actually, React re-renders might orphan old popovers in document.body.
+    // We handle cleanup by relying on the global click listener or general cleanup.
 
     // Create the toggle button
     const btn = document.createElement('button');
@@ -137,24 +141,67 @@
       popover.appendChild(addRow);
     }
 
-    btn.onclick = (e) => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      loadPrompts(() => {
-        renderPrompts();
-        const isVisible = popover.style.display === 'block';
-        popover.style.display = isVisible ? 'none' : 'block';
-      });
-    };
+      
+      // Close other open popovers if any
+      const allPopovers = document.querySelectorAll('.wr-prompts-popover');
+      allPopovers.forEach(p => { if (p !== popover) p.style.display = 'none'; });
 
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!popover.contains(e.target) && !btn.contains(e.target)) {
+      if (popover.style.display === 'none') {
+        loadPrompts(() => {
+          renderPrompts();
+          
+          popover.style.visibility = 'hidden';
+          popover.style.display = 'flex';
+          
+          // Force layout calculation
+          const popoverHeight = popover.offsetHeight;
+          const popoverWidth = popover.offsetWidth;
+          const btnRect = btn.getBoundingClientRect();
+          
+          // Position it absolutely on the MAIN document (Portal technique)
+          popover.style.position = 'absolute';
+          
+          let targetTop = btnRect.top + window.scrollY - popoverHeight - 8;
+          const targetLeft = btnRect.right + window.scrollX - popoverWidth;
+          
+          // Smart collision detection
+          if (targetTop < window.scrollY) {
+            targetTop = btnRect.bottom + window.scrollY + 8;
+            popover.style.transformOrigin = 'top right';
+          } else {
+            popover.style.transformOrigin = 'bottom right';
+          }
+          
+          popover.style.top = targetTop + 'px';
+          popover.style.left = targetLeft + 'px';
+          
+          popover.style.visibility = 'visible';
+        });
+      } else {
         popover.style.display = 'none';
       }
     });
 
+    // Close when clicking outside
+    if (!document.wrPromptsListenerAddedWeb) {
+      document.wrPromptsListenerAddedWeb = true;
+      document.addEventListener('click', (e) => {
+        const path = e.composedPath();
+        const popovers = document.querySelectorAll('.wr-prompts-popover');
+        
+        popovers.forEach(p => {
+          if (!path.includes(p) && !path.some(node => node.classList && node.classList.contains('wr-prompts-btn'))) {
+            p.style.display = 'none';
+          }
+        });
+      });
+    }
+
     container.appendChild(btn);
-    container.appendChild(popover);
-  };
+    // Portaling the popover to the Light DOM
+    document.body.appendChild(popover);
+  }
 })();
