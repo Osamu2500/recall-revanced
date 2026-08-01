@@ -11,6 +11,7 @@
       this.searchQuery = "";
       this.popovers = new Set();
       this.draggedItem = null;
+      this.collapsedCategories = new Set();
     }
 
     // --- State Management ---
@@ -159,14 +160,24 @@
     renderPopoverContent(popover) {
       popover.innerHTML = '';
       
+      // SVG Assets
+      const svgExport = `<svg class="wr-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
+      const svgImport = `<svg class="wr-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+      const svgSearch = `<svg class="wr-icon-svg wr-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+      const svgFolder = `<svg class="wr-icon-svg wr-folder-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+      const svgChevron = `<svg class="wr-icon-svg wr-chevron-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+      const svgDrag = `<svg class="wr-icon-svg" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`;
+      const svgTrash = `<svg class="wr-icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+      const svgPlus = `<svg class="wr-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+
       // Header
       const header = document.createElement('div');
       header.className = 'wr-prompts-header';
       header.innerHTML = `
         <span>Prompt Library</span>
         <div class="wr-prompts-actions">
-          <button class="wr-btn-icon" id="wr-export-btn" title="Export JSON">📤</button>
-          <button class="wr-btn-icon" id="wr-import-btn" title="Import JSON">📥</button>
+          <button class="wr-btn-icon" id="wr-export-btn" title="Export JSON">${svgExport}</button>
+          <button class="wr-btn-icon" id="wr-import-btn" title="Import JSON">${svgImport}</button>
         </div>
       `;
       popover.appendChild(header);
@@ -177,6 +188,8 @@
       // Search Bar
       const searchRow = document.createElement('div');
       searchRow.className = 'wr-prompts-search-row';
+      searchRow.innerHTML = svgSearch;
+      
       const searchInput = document.createElement('input');
       searchInput.type = 'text';
       searchInput.placeholder = 'Search prompts...';
@@ -206,15 +219,34 @@
       Object.keys(grouped).forEach(cat => {
         if (grouped[cat].length === 0 && this.searchQuery) return; // Hide empty cats while searching
 
+        const isCollapsed = this.collapsedCategories.has(cat) && !this.searchQuery;
+
         const catHeader = document.createElement('div');
         catHeader.className = 'wr-prompts-cat-header';
-        catHeader.textContent = cat;
-        catHeader.dataset.category = cat;
         
+        const inner = document.createElement('div');
+        inner.className = 'wr-cat-header-inner' + (isCollapsed ? ' collapsed' : '');
+        inner.innerHTML = `${svgFolder} <span>${cat}</span> ${svgChevron}`;
+        catHeader.appendChild(inner);
+        
+        catHeader.onclick = () => {
+          if (this.searchQuery) return; // Disabled while searching
+          if (this.collapsedCategories.has(cat)) this.collapsedCategories.delete(cat);
+          else this.collapsedCategories.add(cat);
+          this.renderAllPopovers();
+        };
+
         // Setup Drag & Drop for category header (Drop target)
-        catHeader.ondragover = (e) => e.preventDefault();
-        catHeader.ondrop = (e) => this.handleDrop(e, cat);
+        catHeader.ondragover = (e) => { e.preventDefault(); inner.style.background = 'rgba(139, 92, 246, 0.2)'; };
+        catHeader.ondragleave = (e) => { inner.style.background = ''; };
+        catHeader.ondrop = (e) => {
+          inner.style.background = '';
+          this.handleDrop(e, cat);
+        };
+        
         list.appendChild(catHeader);
+
+        if (isCollapsed) return; // Skip rendering items if collapsed
 
         grouped[cat].sort((a, b) => a.order - b.order).forEach(prompt => {
           const item = document.createElement('div');
@@ -225,7 +257,8 @@
           item.ondragstart = (e) => {
             this.draggedItem = prompt;
             e.dataTransfer.effectAllowed = 'move';
-            item.classList.add('dragging');
+            // setTimeout prevents the drag image from disappearing in some browsers
+            setTimeout(() => item.classList.add('dragging'), 0);
           };
           item.ondragend = () => {
             this.draggedItem = null;
@@ -242,27 +275,51 @@
             this.handleDrop(e, cat, prompt.id);
           };
 
+          const handle = document.createElement('div');
+          handle.className = 'wr-drag-handle';
+          handle.innerHTML = svgDrag;
+          item.appendChild(handle);
+
           const textSpan = document.createElement('span');
           textSpan.className = 'wr-prompt-text';
-          // Highlight variables visually
-          textSpan.innerHTML = prompt.text.replace(/\[(.*?)\]/g, '<span class="wr-prompt-var">[$1]</span>');
+          
+          let displayText = prompt.text;
+          // Highlight variables
+          displayText = displayText.replace(/\[(.*?)\]/g, '<span class="wr-prompt-var">[$1]</span>');
+          
+          // Highlight search matches
+          if (this.searchQuery) {
+             const regex = new RegExp(`(${this.searchQuery})`, 'gi');
+             // We only replace outside of tags to prevent breaking the var spans
+             displayText = displayText.replace(/(?![^<]*>)(.*?)(?=<|$)/g, (match) => {
+               return match.replace(regex, '<span class="wr-search-highlight">$1</span>');
+             });
+          }
+          
+          textSpan.innerHTML = displayText;
+          
           textSpan.onclick = () => {
             this.injectText(popover.chatInput, prompt.text);
             popover.style.display = 'none';
           };
+          item.appendChild(textSpan);
+
+          const actions = document.createElement('div');
+          actions.className = 'wr-prompt-actions';
 
           const delBtn = document.createElement('button');
           delBtn.className = 'wr-prompt-del';
-          delBtn.innerHTML = '×';
+          delBtn.title = 'Delete';
+          delBtn.innerHTML = svgTrash;
           delBtn.onclick = (e) => {
             e.stopPropagation();
             this.promptsData = this.promptsData.filter(p => p.id !== prompt.id);
             this.savePrompts();
             this.renderAllPopovers();
           };
-
-          item.appendChild(textSpan);
-          item.appendChild(delBtn);
+          actions.appendChild(delBtn);
+          
+          item.appendChild(actions);
           list.appendChild(item);
         });
       });
@@ -288,7 +345,8 @@
       
       const addBtn = document.createElement('button');
       addBtn.className = 'wr-prompts-add-btn';
-      addBtn.textContent = '+';
+      addBtn.title = 'Add Prompt';
+      addBtn.innerHTML = svgPlus;
       addBtn.onclick = () => {
         const val = input.value.trim();
         if (val) {

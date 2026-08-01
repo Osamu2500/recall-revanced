@@ -633,14 +633,246 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   border-color: #8b5cf6;
 }
 
-/* --- Pro Features --- */
 .wr-prompts-pro {
-  width: 320px;
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wr-prompts-list {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for list */
+.wr-prompts-list::-webkit-scrollbar {
+  width: 6px;
+}
+.wr-prompts-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.wr-prompts-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.wr-prompts-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .wr-prompts-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+}
+
+.wr-btn-icon {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.wr-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.wr-icon-svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.wr-prompts-search-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.wr-search-icon {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a1a1aa;
+  pointer-events: none;
+}
+
+.wr-prompts-search-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 10px 8px 32px;
+  color: #e4e4e7;
+  font-size: 13px;
+  transition: border-color 0.2s;
+}
+
+.wr-prompts-search-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.wr-prompts-cat-header {
+  padding: 8px 12px 4px 12px;
+  margin-top: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wr-cat-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8b5cf6;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.wr-cat-header-inner:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.wr-folder-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.wr-chevron-icon {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.wr-cat-header-inner.collapsed .wr-chevron-icon {
+  transform: rotate(-90deg);
+}
+
+.wr-prompt-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.wr-prompt-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wr-drag-handle {
+  color: #52525b;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.wr-drag-handle:hover {
+  color: #a1a1aa;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wr-prompt-item.dragging .wr-drag-handle {
+  cursor: grabbing;
+}
+
+.wr-prompt-text {
+  flex-grow: 1;
+  color: #e4e4e7;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.wr-prompt-actions {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.wr-prompt-item:hover .wr-prompt-actions {
+  opacity: 1;
+}
+
+.wr-prompt-del {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wr-prompt-del:hover {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+.wr-search-highlight {
+  background: rgba(139, 92, 246, 0.4);
+  color: #fff;
+  border-radius: 2px;
+}
+
+.wr-prompts-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  align-items: center;
+}
+
+.wr-prompts-cat-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+  border-radius: 16px;
+  padding: 6px 10px;
+  font-size: 12px;
+  max-width: 100px;
+  cursor: pointer;
+}
+
+.wr-prompts-add-btn {
+  background: #8b5cf6;
+  color: #fff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.wr-prompts-add-btn:hover {
+  background: #7c3aed;
+  transform: scale(1.05);
 }
 
 .wr-btn-icon {
