@@ -1,0 +1,160 @@
+// src/content/features/chat-prompts.js
+
+(function() {
+  let promptsData = [];
+  const STORAGE_KEY = 'wr_custom_prompts';
+  
+  // Load prompts
+  function loadPrompts(callback) {
+    chrome.storage.local.get([STORAGE_KEY], (result) => {
+      promptsData = result[STORAGE_KEY] || [
+        "Summarize this in 3 bullet points.",
+        "Explain this like I'm 5.",
+        "What are the key takeaways?"
+      ];
+      if (callback) callback();
+    });
+  }
+
+  function savePrompts() {
+    chrome.storage.local.set({ [STORAGE_KEY]: promptsData });
+  }
+
+  // Inject text into React/Vue controlled textarea
+  function injectText(textarea, text) {
+    textarea.focus();
+    
+    // Check if we can use execCommand
+    const success = document.execCommand('insertText', false, text);
+    
+    if (!success) {
+      // Fallback for React 15/16+
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+      nativeInputValueSetter.call(textarea, textarea.value + (textarea.value ? '\n' : '') + text);
+      
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      textarea.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
+  window.WR_InitChatPrompts = function() {
+    if (!window.WR_STATE || !window.WR_STATE.enabled) return;
+    
+    // Find the chat textarea
+    const textareas = document.querySelectorAll('textarea');
+    let chatInput = null;
+    for (const ta of textareas) {
+      if (ta.placeholder && (ta.placeholder.toLowerCase().includes('ask anything') || ta.placeholder.includes('@'))) {
+        chatInput = ta;
+        break;
+      }
+    }
+
+    if (!chatInput) return;
+    
+    // The container of the textarea is usually relative and houses the pills or action buttons
+    const container = chatInput.parentElement;
+    if (!container || container.hasAttribute('data-wr-prompts-init')) return;
+    
+    container.setAttribute('data-wr-prompts-init', 'true');
+    container.style.position = 'relative';
+
+    // Create the toggle button
+    const btn = document.createElement('button');
+    btn.className = 'wr-prompts-btn';
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v6"></path><path d="M9 10h6"></path></svg> <span>Prompts</span>`;
+    
+    // Create the popover modal
+    const popover = document.createElement('div');
+    popover.className = 'wr-prompts-popover';
+    popover.style.display = 'none';
+
+    function renderPrompts() {
+      popover.innerHTML = '';
+      
+      const header = document.createElement('div');
+      header.className = 'wr-prompts-header';
+      header.textContent = 'Quick Prompts';
+      popover.appendChild(header);
+
+      const list = document.createElement('div');
+      list.className = 'wr-prompts-list';
+      
+      promptsData.forEach((promptText, index) => {
+        const item = document.createElement('div');
+        item.className = 'wr-prompt-item';
+        
+        const textSpan = document.createElement('span');
+        textSpan.className = 'wr-prompt-text';
+        textSpan.textContent = promptText;
+        textSpan.onclick = () => {
+          injectText(chatInput, promptText);
+          popover.style.display = 'none';
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'wr-prompt-del';
+        delBtn.innerHTML = '×';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          promptsData.splice(index, 1);
+          savePrompts();
+          renderPrompts();
+        };
+
+        item.appendChild(textSpan);
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+      popover.appendChild(list);
+
+      const addRow = document.createElement('div');
+      addRow.className = 'wr-prompts-add-row';
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'New prompt...';
+      input.className = 'wr-prompts-input';
+      
+      const addBtn = document.createElement('button');
+      addBtn.className = 'wr-prompts-add-btn';
+      addBtn.textContent = '+';
+      addBtn.onclick = () => {
+        const val = input.value.trim();
+        if (val) {
+          promptsData.push(val);
+          savePrompts();
+          renderPrompts();
+        }
+      };
+      
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addBtn.click();
+      });
+
+      addRow.appendChild(input);
+      addRow.appendChild(addBtn);
+      popover.appendChild(addRow);
+    }
+
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      loadPrompts(() => {
+        renderPrompts();
+        const isVisible = popover.style.display === 'block';
+        popover.style.display = isVisible ? 'none' : 'block';
+      });
+    };
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!popover.contains(e.target) && !btn.contains(e.target)) {
+        popover.style.display = 'none';
+      }
+    });
+
+    container.appendChild(btn);
+    container.appendChild(popover);
+  };
+})();

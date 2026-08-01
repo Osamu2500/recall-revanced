@@ -91,6 +91,7 @@ const _pageObserver = new MutationObserver(() => {
       if (typeof window.WR_InitMinimap    === 'function') window.WR_InitMinimap();
       if (typeof window.WR_InitCodeTools  === 'function') window.WR_InitCodeTools();
       if (typeof window.WR_EnhanceCards   === 'function') window.WR_EnhanceCards();
+      if (typeof window.WR_InitChatPrompts === 'function') window.WR_InitChatPrompts();
     } catch (e) {
       console.warn('[WR] MutationObserver callback error:', e);
     }

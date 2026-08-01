@@ -5,6 +5,7 @@
   "description": "Premium Glassmorphism UI, Wide Views, and Visual Command Palette for Recall.",
   "permissions": ["storage", "tabs"],
   "host_permissions": [
+    "<all_urls>",
     "https://app.recall.it/*",
     "https://app.getrecall.ai/*"
   ],
@@ -31,6 +32,7 @@
         "src/content/pages/review.js",
         "src/content/features/media-tools.js",
         "src/content/features/code-tools.js",
+        "src/content/features/chat-prompts.js",
         "src/content/main.js"
       ],
       "css": [
@@ -43,6 +45,11 @@
         "src/themes/theme-nord.css",
         "src/themes/theme-immersive-cards.css"
       ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/features/chat-prompts-global.js"],
       "run_at": "document_end"
     }
   ],
