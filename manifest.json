@@ -32,6 +32,7 @@
         "src/content/pages/review.js",
         "src/content/features/media-tools.js",
         "src/content/features/code-tools.js",
+        "src/content/features/chat-prompts-core.js",
         "src/content/features/chat-prompts.js",
         "src/content/main.js"
       ],
@@ -49,7 +50,10 @@
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content/features/chat-prompts-global.js"],
+      "js": [
+        "src/content/features/chat-prompts-core.js",
+        "src/content/features/chat-prompts-global.js"
+      ],
       "run_at": "document_end"
     }
   ],
