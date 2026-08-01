@@ -12,6 +12,7 @@
       this.popovers = new Set();
       this.draggedItem = null;
       this.collapsedCategories = new Set();
+      this.activeCategory = 'General';
     }
 
     // --- State Management ---
@@ -235,6 +236,9 @@
 
       Object.keys(grouped).forEach(cat => {
         if (grouped[cat].length === 0 && this.searchQuery) return; // Hide empty cats while searching
+        
+        // Hide non-active categories unless we are searching
+        if (!this.searchQuery && cat !== this.activeCategory) return;
 
         const isCollapsed = this.collapsedCategories.has(cat) && !this.searchQuery;
 
@@ -286,6 +290,9 @@
                 this.collapsedCategories.delete(cat);
                 this.collapsedCategories.add(trimmed);
               }
+              if (this.activeCategory === cat) {
+                this.activeCategory = trimmed;
+              }
               this.savePrompts();
               this.renderAllPopovers();
             }
@@ -297,6 +304,9 @@
               this.savedCategories = this.savedCategories.filter(c => c !== cat);
               this.promptsData = this.promptsData.filter(p => p.category !== cat);
               if (this.collapsedCategories.has(cat)) this.collapsedCategories.delete(cat);
+              if (this.activeCategory === cat) {
+                this.activeCategory = 'General';
+              }
               this.savePrompts();
               this.renderAllPopovers();
             }
@@ -404,6 +414,11 @@
         opt.textContent = c;
         catSelect.appendChild(opt);
       });
+      catSelect.value = this.activeCategory;
+      catSelect.onchange = (e) => {
+        this.activeCategory = e.target.value;
+        this.renderAllPopovers();
+      };
       
       const input = document.createElement('input');
       input.type = 'text';
@@ -430,6 +445,8 @@
             category: category,
             order: this.promptsData.length
           });
+          // Ensure the category we just added to is active
+          this.activeCategory = category;
           this.savePrompts();
           this.renderAllPopovers();
         }
