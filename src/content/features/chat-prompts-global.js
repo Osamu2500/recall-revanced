@@ -125,7 +125,7 @@
             shadowTarget.appendChild(link);
          }
 
-         // Override positioning for widget context
+         // Override positioning for widget context with smart clipping detection
          btn.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -133,9 +133,22 @@
             if (!isShowing) {
                popover.style.display = 'flex';
                popover.style.left = '0px';
-               popover.style.top = 'auto';
-               popover.style.bottom = '100%';
-               popover.style.marginBottom = '10px';
+               
+               const rect = btn.getBoundingClientRect();
+               if (rect.top < 350) {
+                 // Not enough space above, flip downwards
+                 popover.style.bottom = 'auto';
+                 popover.style.top = '100%';
+                 popover.style.marginTop = '10px';
+                 popover.style.marginBottom = '0px';
+               } else {
+                 // Open upwards normally
+                 popover.style.top = 'auto';
+                 popover.style.bottom = '100%';
+                 popover.style.marginBottom = '10px';
+                 popover.style.marginTop = '0px';
+               }
+               
                window.wrPromptUIGlobal.renderAllPopovers();
             } else {
                popover.style.display = 'none';

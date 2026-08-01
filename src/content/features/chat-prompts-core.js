@@ -161,6 +161,14 @@
     }
 
     renderAllPopovers() {
+      // Garbage collection: remove dead popovers to prevent memory leaks
+      for (const p of this.popovers) {
+        const root = p.getRootNode();
+        const isAttached = document.contains(p) || (root instanceof ShadowRoot && document.contains(root.host));
+        if (!isAttached) {
+          this.popovers.delete(p);
+        }
+      }
       this.popovers.forEach(p => this.renderPopoverContent(p));
     }
 
@@ -581,7 +589,33 @@
       return btn;
     }
 
+    updatePosition(popover) {
+      if (!popover.associatedBtn || popover.style.display !== 'flex') return;
+      // Skip if popover is positioned relatively in a container (e.g. inside the Widget)
+      if (popover.style.bottom === '100%' || popover.style.top === '100%') return;
+      
+      const btn = popover.associatedBtn;
+      const popoverHeight = popover.offsetHeight;
+      const popoverWidth = popover.offsetWidth;
+      const btnRect = btn.getBoundingClientRect();
+      
+      popover.style.position = 'absolute';
+      let targetTop = btnRect.top + window.scrollY - popoverHeight - 8;
+      const targetLeft = btnRect.right + window.scrollX - popoverWidth;
+      
+      if (targetTop < window.scrollY) {
+        targetTop = btnRect.bottom + window.scrollY + 8;
+        popover.style.transformOrigin = 'top right';
+      } else {
+        popover.style.transformOrigin = 'bottom right';
+      }
+      
+      popover.style.top = targetTop + 'px';
+      popover.style.left = targetLeft + 'px';
+    }
+
     bindPopoverToButton(btn, popover) {
+      popover.associatedBtn = btn;
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -596,24 +630,8 @@
             popover.style.visibility = 'hidden';
             popover.style.display = 'flex';
             
-            // Positioning
-            const popoverHeight = popover.offsetHeight;
-            const popoverWidth = popover.offsetWidth;
-            const btnRect = btn.getBoundingClientRect();
+            this.updatePosition(popover);
             
-            popover.style.position = 'absolute';
-            let targetTop = btnRect.top + window.scrollY - popoverHeight - 8;
-            const targetLeft = btnRect.right + window.scrollX - popoverWidth;
-            
-            if (targetTop < window.scrollY) {
-              targetTop = btnRect.bottom + window.scrollY + 8;
-              popover.style.transformOrigin = 'top right';
-            } else {
-              popover.style.transformOrigin = 'bottom right';
-            }
-            
-            popover.style.top = targetTop + 'px';
-            popover.style.left = targetLeft + 'px';
             popover.style.visibility = 'visible';
             
             // Focus search
@@ -629,6 +647,7 @@
     setupGlobalClickListener() {
       if (!window.WR_PromptsGlobalListenerAdded) {
         window.WR_PromptsGlobalListenerAdded = true;
+        
         document.addEventListener('click', (e) => {
           const path = e.composedPath();
           this.popovers.forEach(p => {
@@ -637,6 +656,16 @@
             }
           });
         });
+
+        // Update active popover positions on scroll/resize for the main web app
+        const updateAllPositions = () => {
+          this.popovers.forEach(p => {
+             if (p.style.display === 'flex') this.updatePosition(p);
+          });
+        };
+        
+        window.addEventListener('scroll', updateAllPositions, { passive: true });
+        window.addEventListener('resize', updateAllPositions, { passive: true });
       }
     }
   };
