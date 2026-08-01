@@ -20,31 +20,39 @@
     chrome.storage.local.set({ [STORAGE_KEY]: promptsData });
   }
 
-  // Inject text into React/Vue controlled textarea
-  function injectText(textarea, text) {
-    textarea.focus();
+  // Inject text into React/Vue controlled textarea or Slate.js contenteditable
+  function injectText(editorElement, text) {
+    editorElement.focus();
     
-    // Check if we can use execCommand
-    const success = document.execCommand('insertText', false, text);
+    // Modern React editors (like Slate.js) ignore direct DOM modifications 
+    // because their internal state doesn't update.
+    // The most reliable way to inject text is to simulate a paste event.
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', text);
     
-    if (!success) {
-      // Fallback for React 15/16+
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
-      nativeInputValueSetter.call(textarea, textarea.value + (textarea.value ? '\n' : '') + text);
-      
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      textarea.dispatchEvent(new Event('change', { bubbles: true }));
-    }
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true
+    });
+    
+    editorElement.dispatchEvent(pasteEvent);
   }
 
   window.WR_InitChatPrompts = function() {
     if (!window.WR_STATE || !window.WR_STATE.enabled) return;
     
-    // Find all chat textareas
-    const textareas = document.querySelectorAll('textarea');
-    for (const ta of textareas) {
-      if (ta.placeholder && (ta.placeholder.toLowerCase().includes('ask anything') || ta.placeholder.includes('@'))) {
-        initChatPromptForTextarea(ta);
+    // Find all chat editors (Slate.js contenteditable or textareas)
+    const editors = document.querySelectorAll('[data-slate-editor="true"], [contenteditable="true"], textarea');
+    
+    for (const editor of editors) {
+      // For textarea, check placeholder. For contenteditable, we can assume it's a chat input if it's inside #chat-input-container or similar
+      const isChat = editor.id === 'chat-input' || 
+                     editor.closest('#chat-input-container, [data-chat-input-container="true"]') ||
+                     (editor.placeholder && (editor.placeholder.toLowerCase().includes('ask anything') || editor.placeholder.includes('@')));
+                     
+      if (isChat) {
+        initChatPromptForTextarea(editor);
       }
     }
   };
@@ -61,15 +69,16 @@
       if (!current) break;
       
       const elements = Array.from(current.querySelectorAll('*'));
-      // Find deepest element containing "Upload" text
-      const uploadEl = elements.find(el => {
-        return el.textContent && el.textContent.includes('Upload') &&
-               !Array.from(el.children).some(c => c.textContent && c.textContent.includes('Upload'));
+      // Find deepest element containing "Upload" or "Context" text
+      const targetEl = elements.find(el => {
+        const text = el.textContent || '';
+        const match = text.includes('Upload') || text.includes('Context');
+        return match && !Array.from(el.children).some(c => c.textContent && (c.textContent.includes('Upload') || c.textContent.includes('Context')));
       });
       
-      if (uploadEl) {
+      if (targetEl) {
         // Traverse up slightly to find the clickable chip wrapper
-        let node = uploadEl;
+        let node = targetEl;
         let uploadChip = null;
         for (let j = 0; j < 4; j++) {
           if (!node || node === current) break;
