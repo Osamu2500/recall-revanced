@@ -112,9 +112,9 @@
       // Override default document.body attachment for Shadow DOM
       if (rootNode.shadowRoot || rootNode.host) {
          popover.remove(); // Remove from light DOM document.body
-         const shadowTarget = rootNode.shadowRoot || rootNode;
-         shadowTarget.appendChild(popover);
+         container.appendChild(popover);
          
+         const shadowTarget = rootNode.shadowRoot || rootNode;
          // Inject wider.css into the Shadow DOM so our elements are styled
          if (!shadowTarget.querySelector('#wr-prompts-css')) {
             const link = document.createElement('link');
@@ -124,6 +124,23 @@
             link.href = chrome.runtime.getURL('wider.css');
             shadowTarget.appendChild(link);
          }
+
+         // Override positioning for widget context
+         btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isShowing = popover.style.display === 'flex';
+            if (!isShowing) {
+               popover.style.display = 'flex';
+               popover.style.left = '0px';
+               popover.style.top = 'auto';
+               popover.style.bottom = '100%';
+               popover.style.marginBottom = '10px';
+               window.wrPromptUIGlobal.renderAllPopovers();
+            } else {
+               popover.style.display = 'none';
+            }
+         };
       }
 
       container.appendChild(btn);
