@@ -501,12 +501,12 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   justify-content: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   color: #e4e4e7;
-  padding: 0px 12px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 400;
+  padding: 0px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-left: 8px;
