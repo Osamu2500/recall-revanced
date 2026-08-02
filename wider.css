@@ -529,7 +529,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   position: absolute;
   width: 320px;
   min-width: 260px;
-  min-height: 200px;
+  min-height: 400px;
   max-width: 800px;
   max-height: 800px;
   resize: both;
@@ -638,7 +638,8 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
 }
 
 .wr-prompts-list {
-  max-height: 220px;
+  flex: 1;
+  min-height: 150px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 2px;
