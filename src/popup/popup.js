@@ -26,31 +26,23 @@ const UI = {
   presetBtns: document.querySelectorAll('.pb'),
   themeBtns: document.querySelectorAll('.theme-btn'),
   pageLabel: $('pageLabel'),
-  pageDot: $('pageDot'),
+  pageDot:   $('pageDot'),
+  statusDot: $('statusDot'),
   widthRange: $('widthRange'),
   wvalEl: $('wval'),
   gridColsRange: $('gridColsRange'),
   gvalEl: $('gval'),
   checkboxes: {
-    enabled: $('enabledCb'),
-    wrap: $('wrapCb'),
-    hideSidebar: $('hideSidebarCb'),
-    hideOutline: $('hideOutlineCb'),
-    grid: $('gridCb'),
-    typo: $('typoCb'),
-    zen: $('zenCb'),
-    media: $('mediaCb'),
-    tocHover: $('tocHoverCb'),
-    graph: $('graphCb'),
-    hotkeys: $('hotkeysCb'),
-    bionic: $('bionicCb'),
-    cmd: $('cmdCb'),
-    lightbox: $('lightboxCb'),
-    focus: $('focusCb'),
-    toc: $('tocCb'),
-    animations: $('animationsCb'),
-    spotlight: $('spotlightCb'),
-    premiumUi: $('premiumUiCb'),
+    enabled:        $('enabledCb'),
+    hideSidebar:    $('hideSidebarCb'),
+    grid:           $('gridCb'),
+    typo:           $('typoCb'),
+    media:          $('mediaCb'),
+    graph:          $('graphCb'),
+    lightbox:       $('lightboxCb'),
+    animations:     $('animationsCb'),
+    spotlight:      $('spotlightCb'),
+    premiumUi:      $('premiumUiCb'),
     immersiveCards: $('immersiveCardsCb')
   }
 };
@@ -104,6 +96,11 @@ function syncUI() {
   
   // Toggle global disabled state visual
   document.body.classList.toggle('off', !currentState.enabled);
+
+  // Sync status dot in header
+  if (UI.statusDot) {
+    UI.statusDot.classList.toggle('inactive', !currentState.enabled);
+  }
 }
 
 /**
@@ -124,11 +121,12 @@ function broadcastState() {
     // Send full state update
     chrome.tabs.sendMessage(activeTab.id, { type: 'WIDER_RECALL_UPDATE', ...currentState });
     
-    // Request page type for the bottom-left indicator
+    // Request page type for the footer indicator
     chrome.tabs.sendMessage(activeTab.id, { type: 'WIDER_RECALL_GETPAGE' }, res => {
       if (chrome.runtime.lastError || !res) return;
       if (UI.pageLabel) UI.pageLabel.textContent = res.page;
-      if (UI.pageDot) UI.pageDot.style.background = res.page === 'Unknown page' ? '#555' : '#2ecc71';
+      if (UI.pageDot)   UI.pageDot.textContent = res.page === 'Unknown page' ? '—' : res.page;
+      if (UI.statusDot) UI.statusDot.style.background = res.page === 'Unknown page' ? '#555' : '#22c55e';
     });
   });
 }
@@ -207,10 +205,17 @@ function initPopup() {
     chrome.tabs.sendMessage(activeTab.id, { type: 'WIDER_RECALL_GETPAGE' }, res => {
       if (chrome.runtime.lastError || !res) {
         if (UI.pageLabel) UI.pageLabel.textContent = 'app.recall.it';
+        if (UI.pageDot)   UI.pageDot.textContent = '—';
         return;
       }
       if (UI.pageLabel) UI.pageLabel.textContent = res.page;
-      if (UI.pageDot) UI.pageDot.style.background = res.page === 'Unknown page' ? '#555' : '#2ecc71';
+      if (UI.pageDot)   UI.pageDot.textContent = res.page;
+      if (UI.statusDot) {
+        UI.statusDot.style.background = res.page === 'Unknown page' ? '#555' : '#22c55e';
+        if (res.page !== 'Unknown page') {
+          UI.statusDot.style.boxShadow = '0 0 6px rgba(34,197,94,0.6)';
+        }
+      }
     });
   });
 

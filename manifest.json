@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Wider Recall",
+  "name": "Recall Revanced",
   "version": "6.0.0",
   "description": "Premium Glassmorphism UI, Wide Views, and Visual Command Palette for Recall.",
   "permissions": ["storage", "tabs"],
