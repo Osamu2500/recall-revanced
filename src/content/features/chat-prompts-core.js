@@ -13,10 +13,11 @@
       this.draggedItem = null;
       this.collapsedCategories = new Set();
       this.activeCategory = 'General';
-      
-      // V5 state
       this.selectedPrompts = new Set();
       this.popoverSize = { width: null, height: null };
+      // V9 state
+      this._undoStack = []; // { prompts, timeout } for undo-delete
+      this._searchDebounce = null; // debounce timer for search
     }
 
     getModalRoot() {
@@ -31,9 +32,78 @@
     closeModal(modalEl) {
       if (modalEl && modalEl.remove) modalEl.remove();
       const overlay = document.getElementById('wr-prompts-overlay-container');
-      if (overlay) {
-        overlay.style.pointerEvents = 'none';
-      }
+      if (overlay) overlay.style.pointerEvents = 'none';
+    }
+
+    // V9: Custom styled text-input modal (replaces window.prompt)
+    openTextInputModal({ title, label, placeholder, defaultValue = '', confirmText = 'Save', onConfirm }) {
+      const overlay = document.createElement('div');
+      overlay.className = 'wr-modal-overlay';
+      const modal = document.createElement('div');
+      modal.className = 'wr-modal-content wr-dialog-sm';
+      modal.innerHTML = `
+        <div class="wr-modal-header">
+          <h3>${title}</h3>
+          <button class="wr-modal-close">&times;</button>
+        </div>
+        <div class="wr-modal-body wr-dialog-body">
+          ${label ? `<label class="wr-dialog-label">${label}</label>` : ''}
+          <input class="wr-dialog-input" type="text" placeholder="${placeholder || ''}" value="${defaultValue.replace(/"/g, '&quot;')}" />
+        </div>
+        <div class="wr-modal-footer">
+          <button class="wr-btn wr-btn-secondary" id="wr-dialog-cancel">Cancel</button>
+          <button class="wr-btn wr-btn-primary" id="wr-dialog-confirm">${confirmText}</button>
+        </div>
+      `;
+      overlay.appendChild(modal);
+      this.getModalRoot().appendChild(overlay);
+      const inputEl = modal.querySelector('.wr-dialog-input');
+      const close = () => this.closeModal(overlay);
+      modal.querySelector('.wr-modal-close').onclick = close;
+      modal.querySelector('#wr-dialog-cancel').onclick = close;
+      modal.querySelector('#wr-dialog-confirm').onclick = () => {
+        const val = inputEl.value.trim();
+        if (val) { close(); onConfirm(val); }
+      };
+      overlay.onmousedown = (e) => { if (e.target === overlay) close(); };
+      overlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); modal.querySelector('#wr-dialog-confirm').click(); }
+        else if (e.key === 'Escape') close();
+      });
+      setTimeout(() => { inputEl.focus(); inputEl.select(); }, 50);
+    }
+
+    // V9: Custom styled confirm modal (replaces window.confirm)
+    openConfirmModal({ title, message, confirmText = 'Delete', danger = true, onConfirm }) {
+      const overlay = document.createElement('div');
+      overlay.className = 'wr-modal-overlay';
+      const modal = document.createElement('div');
+      modal.className = 'wr-modal-content wr-dialog-sm';
+      modal.innerHTML = `
+        <div class="wr-modal-header">
+          <h3>${title}</h3>
+          <button class="wr-modal-close">&times;</button>
+        </div>
+        <div class="wr-modal-body wr-dialog-body">
+          <p class="wr-dialog-message">${message}</p>
+        </div>
+        <div class="wr-modal-footer">
+          <button class="wr-btn wr-btn-secondary" id="wr-dialog-cancel">Cancel</button>
+          <button class="wr-btn ${danger ? 'wr-btn-danger' : 'wr-btn-primary'}" id="wr-dialog-confirm">${confirmText}</button>
+        </div>
+      `;
+      overlay.appendChild(modal);
+      this.getModalRoot().appendChild(overlay);
+      const close = () => this.closeModal(overlay);
+      modal.querySelector('.wr-modal-close').onclick = close;
+      modal.querySelector('#wr-dialog-cancel').onclick = close;
+      modal.querySelector('#wr-dialog-confirm').onclick = () => { close(); onConfirm(); };
+      overlay.onmousedown = (e) => { if (e.target === overlay) close(); };
+      overlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); modal.querySelector('#wr-dialog-confirm').click(); }
+        else if (e.key === 'Escape') close();
+      });
+      setTimeout(() => modal.querySelector('#wr-dialog-confirm').focus(), 50);
     }
 
     // --- State Management ---
@@ -451,12 +521,20 @@
       popover.appendChild(header);
       
       header.querySelector('#wr-add-cat-btn').onclick = () => {
-        const catName = prompt("Enter new folder name:");
-        if (catName && catName.trim()) {
-          this.savedCategories.push(catName.trim());
-          this.savePrompts();
-          this.renderAllPopovers();
-        }
+        this.openTextInputModal({
+          title: 'New Folder',
+          label: 'Folder name',
+          placeholder: 'e.g. Writing, Coding...',
+          confirmText: 'Create',
+          onConfirm: (catName) => {
+            if (!this.savedCategories.includes(catName)) {
+              this.savedCategories.push(catName);
+            }
+            this.activeCategory = catName;
+            this.savePrompts();
+            this.renderAllPopovers();
+          }
+        });
       };
       header.querySelector('#wr-export-btn').onclick = () => this.exportPrompts();
       header.querySelector('#wr-import-btn').onclick = () => this.importPrompts();
@@ -472,8 +550,15 @@
       searchInput.className = 'wr-prompts-search-input';
       searchInput.value = this.searchQuery;
       searchInput.oninput = (e) => {
-        this.searchQuery = e.target.value.toLowerCase();
-        this.renderAllPopovers();
+        const val = e.target.value.toLowerCase();
+        clearTimeout(this._searchDebounce);
+        this._searchDebounce = setTimeout(() => {
+          this.searchQuery = val;
+          this.renderAllPopovers();
+          // Re-focus after re-render
+          const si = popover.querySelector('.wr-prompts-search-input');
+          if (si) { si.value = val; si.focus(); }
+        }, 80);
       };
       searchInput.addEventListener('keydown', (e) => {
          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -574,41 +659,54 @@
           
           editBtn.onclick = (e) => {
             e.stopPropagation();
-            const newName = prompt("Enter new folder name:", cat);
-            if (newName && newName.trim() && newName.trim() !== cat) {
-              const trimmed = newName.trim();
-              const sIdx = this.savedCategories.indexOf(cat);
-              if (sIdx !== -1) this.savedCategories[sIdx] = trimmed;
-              else this.savedCategories.push(trimmed);
-              
-              this.promptsData.forEach(p => {
-                if (p.category === cat) p.category = trimmed;
-              });
-              
-              if (this.collapsedCategories.has(cat)) {
-                this.collapsedCategories.delete(cat);
-                this.collapsedCategories.add(trimmed);
+            this.openTextInputModal({
+              title: 'Rename Folder',
+              label: 'New folder name',
+              placeholder: cat,
+              defaultValue: cat,
+              confirmText: 'Rename',
+              onConfirm: (trimmed) => {
+                if (trimmed === cat) return;
+                const sIdx = this.savedCategories.indexOf(cat);
+                if (sIdx !== -1) this.savedCategories[sIdx] = trimmed;
+                else this.savedCategories.push(trimmed);
+                this.promptsData.forEach(p => { if (p.category === cat) p.category = trimmed; });
+                if (this.collapsedCategories.has(cat)) {
+                  this.collapsedCategories.delete(cat);
+                  this.collapsedCategories.add(trimmed);
+                }
+                if (this.activeCategory === cat) this.activeCategory = trimmed;
+                this.savePrompts();
+                this.renderAllPopovers();
               }
-              if (this.activeCategory === cat) {
-                this.activeCategory = trimmed;
-              }
-              this.savePrompts();
-              this.renderAllPopovers();
-            }
+            });
           };
           
           delBtn.onclick = (e) => {
             e.stopPropagation();
-            if (confirm(`Delete folder "${cat}" and all its prompts?`)) {
-              this.savedCategories = this.savedCategories.filter(c => c !== cat);
-              this.promptsData = this.promptsData.filter(p => p.category !== cat);
-              if (this.collapsedCategories.has(cat)) this.collapsedCategories.delete(cat);
-              if (this.activeCategory === cat) {
-                this.activeCategory = 'General';
+            const deletedPrompts = this.promptsData.filter(p => p.category === cat);
+            const deletedCat = cat;
+            this.openConfirmModal({
+              title: 'Delete Folder',
+              message: `Delete <strong>${cat}</strong> and all ${deletedPrompts.length} prompt(s) in it?`,
+              confirmText: 'Delete',
+              danger: true,
+              onConfirm: () => {
+                this.savedCategories = this.savedCategories.filter(c => c !== deletedCat);
+                this.promptsData = this.promptsData.filter(p => p.category !== deletedCat);
+                if (this.collapsedCategories.has(deletedCat)) this.collapsedCategories.delete(deletedCat);
+                if (this.activeCategory === deletedCat) this.activeCategory = 'General';
+                this.savePrompts();
+                this.renderAllPopovers();
+                this.showUndoToast(`Deleted folder "${deletedCat}"`, () => {
+                  this.promptsData.push(...deletedPrompts);
+                  this.savedCategories.push(deletedCat);
+                  this.activeCategory = deletedCat;
+                  this.savePrompts();
+                  this.renderAllPopovers();
+                });
               }
-              this.savePrompts();
-              this.renderAllPopovers();
-            }
+            });
           };
         }
 
@@ -725,13 +823,17 @@
           // Highlight variables
           displayText = displayText.replace(/\[(.*?)\]/g, '<span class="wr-prompt-var">[$1]</span>');
           
-          // Highlight search matches
+          // Highlight search matches — safe escaping prevents ReDoS
           if (this.searchQuery) {
-             const regex = new RegExp(`(${this.searchQuery})`, 'gi');
-             // We only replace outside of tags to prevent breaking the var spans
-             displayText = displayText.replace(/(?![^<]*>)(.*?)(?=<|$)/g, (match) => {
-               return match.replace(regex, '<span class="wr-search-highlight">$1</span>');
-             });
+            const escaped = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escaped})`, 'gi');
+            // Walk text nodes inside the HTML to highlight safely without breaking span tags
+            const highlightNode = (html) => {
+              return html.replace(/>([^<]+)</g, (match, text) => {
+                return '>' + text.replace(regex, '<span class="wr-search-highlight">$1</span>') + '<';
+              });
+            };
+            displayText = highlightNode(displayText);
           }
           
           textSpan.innerHTML = displayText;
@@ -785,10 +887,16 @@
           delBtn.innerHTML = svgTrash;
           delBtn.onclick = (e) => {
             e.stopPropagation();
-            this.promptsData = this.promptsData.filter(p => p.id !== prompt.id);
+            const deleted = prompt;
+            const deletedIdx = this.promptsData.findIndex(p => p.id === deleted.id);
+            this.promptsData = this.promptsData.filter(p => p.id !== deleted.id);
             this.savePrompts();
             this.renderAllPopovers();
-            this.showToast("Prompt deleted");
+            this.showUndoToast('Prompt deleted', () => {
+              this.promptsData.splice(deletedIdx, 0, deleted);
+              this.savePrompts();
+              this.renderAllPopovers();
+            });
           };
           actions.appendChild(delBtn);
           item.appendChild(actions);
@@ -903,11 +1011,12 @@
          if (!isOpen) catSelectMenu.classList.add('show');
       };
 
-      popover.addEventListener('click', (e) => {
-         if (!catSelectWrapper.contains(e.target)) {
-             catSelectMenu.classList.remove('show');
-         }
-      });
+         // Scope dropdown close to this popover only
+         popover.addEventListener('click', (e) => {
+             if (!catSelectWrapper.contains(e.target)) {
+                 catSelectMenu.classList.remove('show');
+             }
+         });
       
       const input = document.createElement('input');
       input.type = 'text';
@@ -984,7 +1093,7 @@
                  this.selectedPrompts.clear();
                  this.savePrompts();
                  this.renderAllPopovers();
-                 this.showToast(`Moved ${count} prompts to ${targetCat}`);
+                 this.showToast(`Moved ${count} prompt${count > 1 ? 's' : ''} to ${targetCat}`);
              }
          };
          
@@ -993,13 +1102,29 @@
          delBulkBtn.textContent = 'Delete';
          delBulkBtn.onclick = () => {
              const count = this.selectedPrompts.size;
-             if (confirm(`Delete ${count} prompts?`)) {
+             const deletedItems = this.promptsData.filter(p => this.selectedPrompts.has(p.id));
+             const deletedIndices = deletedItems.map(d => this.promptsData.findIndex(p => p.id === d.id));
+             this.openConfirmModal({
+               title: 'Delete Prompts',
+               message: `Permanently delete <strong>${count}</strong> selected prompt${count > 1 ? 's' : ''}?`,
+               confirmText: 'Delete All',
+               danger: true,
+               onConfirm: () => {
                  this.promptsData = this.promptsData.filter(p => !this.selectedPrompts.has(p.id));
                  this.selectedPrompts.clear();
                  this.savePrompts();
                  this.renderAllPopovers();
-                 this.showToast(`Deleted ${count} prompts`);
-             }
+                 this.showUndoToast(`Deleted ${count} prompt${count > 1 ? 's' : ''}`, () => {
+                   // Restore in original positions
+                   deletedItems.forEach((item, i) => {
+                     const idx = Math.min(deletedIndices[i], this.promptsData.length);
+                     this.promptsData.splice(idx, 0, item);
+                   });
+                   this.savePrompts();
+                   this.renderAllPopovers();
+                 });
+               }
+             });
          };
          
          const cancelBtn = document.createElement('button');
@@ -1079,18 +1204,22 @@
       const popoverWidth = popover.offsetWidth;
       const btnRect = btn.getBoundingClientRect();
       
-      popover.style.position = 'absolute';
-      let targetTop = btnRect.top + window.scrollY - popoverHeight - 8;
-      const targetLeft = btnRect.right + window.scrollX - popoverWidth;
+      // Use position: fixed + viewport coords so popover never drifts on scroll
+      popover.style.position = 'fixed';
       
-      if (targetTop < window.scrollY) {
-        targetTop = btnRect.bottom + window.scrollY + 8;
+      let targetTop = btnRect.top - popoverHeight - 8;
+      const targetLeft = Math.max(4, btnRect.right - popoverWidth);
+      
+      if (targetTop < 8) {
+        targetTop = btnRect.bottom + 8;
         popover.style.transformOrigin = 'top right';
       } else {
         popover.style.transformOrigin = 'bottom right';
       }
-      
-      popover.style.top = targetTop + 'px';
+
+      // Clamp to viewport
+      const clampedTop = Math.min(targetTop, window.innerHeight - popoverHeight - 8);
+      popover.style.top = Math.max(8, clampedTop) + 'px';
       popover.style.left = targetLeft + 'px';
     }
 
@@ -1165,13 +1294,37 @@
                 toast.className = 'wr-toast';
                 popover.appendChild(toast);
             }
-            toast.textContent = msg;
+            toast.innerHTML = `<span>${msg}</span>`;
             toast.classList.add('show');
-            
+            toast.onclick = null; // Clear any previous undo handler
             if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
             toast.hideTimeout = setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        });
+    }
+
+    showUndoToast(msg, onUndo) {
+        this.popovers.forEach(popover => {
+            let toast = popover.querySelector('.wr-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'wr-toast';
+                popover.appendChild(toast);
+            }
+            toast.innerHTML = `<span>${msg}</span><button class="wr-toast-undo">Undo</button>`;
+            toast.classList.add('show');
+            if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+            const undoBtn = toast.querySelector('.wr-toast-undo');
+            undoBtn.onclick = (e) => {
+                e.stopPropagation();
+                clearTimeout(toast.hideTimeout);
+                toast.classList.remove('show');
+                onUndo();
+            };
+            toast.hideTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
         });
     }
   };

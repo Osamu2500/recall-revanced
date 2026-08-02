@@ -1256,7 +1256,56 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   color: white;
 }
 .wr-btn-primary:hover { background: #d04a1b; }
-@keyframes wr-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.wr-btn-danger {
+  background: #dc2626;
+  color: white;
+}
+.wr-btn-danger:hover { background: #b91c1c; }
+
+/* V9: Custom Dialog Styles */
+.wr-dialog-sm {
+  max-width: 360px !important;
+  width: 360px !important;
+}
+.wr-dialog-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wr-dialog-label {
+  font-size: 12px;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.wr-dialog-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e4e4e7;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.wr-dialog-input:focus {
+  outline: none;
+  border-color: #f05622;
+}
+.wr-dialog-message {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.wr-dialog-message strong {
+  color: #e4e4e7;
+}
+@keyframes wr-fade-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 
 /* V7: Empty State & Micro-Animations & Custom Grip */
 .wr-empty-state {
@@ -1317,10 +1366,31 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   border: 1px solid #3f3f46;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
 }
 .wr-toast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+  pointer-events: auto;
+}
+.wr-toast-undo {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #f05622;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.wr-toast-undo:hover {
+  background: rgba(240, 86, 34, 0.15);
+  border-color: #f05622;
 }
 
 .wr-drag-handle {
