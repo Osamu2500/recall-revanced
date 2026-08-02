@@ -19,12 +19,29 @@
       this.popoverSize = { width: null, height: null };
     }
 
+    getModalRoot() {
+      const overlay = document.getElementById('wr-prompts-overlay-container');
+      if (overlay && overlay.shadowRoot) {
+        overlay.style.pointerEvents = 'auto';
+        return overlay.shadowRoot;
+      }
+      return document.body;
+    }
+
+    closeModal(modalEl) {
+      if (modalEl && modalEl.remove) modalEl.remove();
+      const overlay = document.getElementById('wr-prompts-overlay-container');
+      if (overlay) {
+        overlay.style.pointerEvents = 'none';
+      }
+    }
+
     // --- State Management ---
     loadPrompts(callback) {
       chrome.storage.local.get([this.STORAGE_KEY, this.OLD_STORAGE_KEY, 'wr_custom_categories', 'wr_popover_size'], (result) => {
-        if (result[this.STORAGE_KEY]) {
+        if (result[this.STORAGE_KEY] && Array.isArray(result[this.STORAGE_KEY])) {
           this.promptsData = result[this.STORAGE_KEY];
-        } else if (result[this.OLD_STORAGE_KEY]) {
+        } else if (result[this.OLD_STORAGE_KEY] && Array.isArray(result[this.OLD_STORAGE_KEY])) {
           // Migration from old flat array to v2 structure
           this.promptsData = result[this.OLD_STORAGE_KEY].map((text, i) => ({
             id: 'prompt_' + Date.now() + '_' + i,
@@ -88,12 +105,24 @@
       finalText = finalText.replace(/\[url\]/gi, window.location.href);
 
       this.openVariableModal(finalText, (resolvedText) => {
-          const dataTransfer = new DataTransfer();
-          dataTransfer.setData('text/plain', resolvedText);
-          const pasteEvent = new ClipboardEvent('paste', {
-            clipboardData: dataTransfer, bubbles: true, cancelable: true
-          });
-          editorElement.dispatchEvent(pasteEvent);
+          if (editorElement.tagName === 'TEXTAREA' || editorElement.tagName === 'INPUT') {
+            const start = editorElement.selectionStart || 0;
+            const end = editorElement.selectionEnd || 0;
+            if (typeof editorElement.setRangeText === 'function') {
+              editorElement.setRangeText(resolvedText, start, end, 'end');
+            } else {
+              editorElement.value = editorElement.value.substring(0, start) + resolvedText + editorElement.value.substring(end);
+            }
+            editorElement.dispatchEvent(new Event('input', { bubbles: true }));
+            editorElement.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.setData('text/plain', resolvedText);
+            const pasteEvent = new ClipboardEvent('paste', {
+              clipboardData: dataTransfer, bubbles: true, cancelable: true
+            });
+            editorElement.dispatchEvent(pasteEvent);
+          }
           this.showToast("Prompt injected");
       });
     }
@@ -155,7 +184,7 @@
        const cancelBtn = document.createElement('button');
        cancelBtn.className = 'wr-btn-secondary';
        cancelBtn.textContent = 'Cancel';
-       cancelBtn.onclick = () => overlay.remove();
+       cancelBtn.onclick = () => this.closeModal(overlay);
        
        const injectBtn = document.createElement('button');
        injectBtn.className = 'wr-btn-primary';
@@ -164,9 +193,9 @@
            let finalText = text;
            uniqueVars.forEach(v => {
                const val = inputs[v].value || '';
-               finalText = finalText.replace(new RegExp(`\\[${v}\\]`, 'g'), val);
+               finalText = finalText.split(`[${v}]`).join(val);
            });
-           overlay.remove();
+           this.closeModal(overlay);
            onComplete(finalText);
        };
        
@@ -175,7 +204,7 @@
        modal.appendChild(actions);
        
        overlay.appendChild(modal);
-       document.body.appendChild(overlay);
+       this.getModalRoot().appendChild(overlay);
        
        overlay.addEventListener('keydown', (e) => {
            if (e.key === 'Enter') {
@@ -209,10 +238,17 @@
           try {
             const imported = JSON.parse(event.target.result);
             if (Array.isArray(imported)) {
-              // Merge
+              // Merge with validation
               const currentIds = new Set(this.promptsData.map(p => p.id));
               imported.forEach(p => {
-                if (!currentIds.has(p.id)) this.promptsData.push(p);
+                if (p && typeof p.text === 'string' && p.text.trim()) {
+                  const id = p.id || ('prompt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+                  const category = p.category || 'General';
+                  if (!currentIds.has(id)) {
+                    this.promptsData.push({ ...p, id, category });
+                    currentIds.add(id);
+                  }
+                }
               });
               this.savePrompts();
               this.renderAllPopovers();
@@ -227,8 +263,8 @@
     }
 
     openEditorModal(promptObj, onSave) {
-      const existing = document.getElementById('wr-prompt-editor-modal');
-      if (existing) existing.remove();
+      const existing = this.getModalRoot().querySelector('#wr-prompt-editor-modal');
+      if (existing) this.closeModal(existing);
 
       const modal = document.createElement('div');
       modal.id = 'wr-prompt-editor-modal';
@@ -260,7 +296,7 @@
         </div>
       `;
       
-      document.body.appendChild(modal);
+      this.getModalRoot().appendChild(modal);
       
       const textarea = modal.querySelector('#wr-modal-textarea');
       // Set initial height to content if editing
@@ -302,7 +338,7 @@
          };
       });
       
-      const close = () => modal.remove();
+      const close = () => this.closeModal(modal);
       
       modal.querySelector('.wr-modal-close').onclick = close;
       modal.querySelector('#wr-modal-cancel').onclick = close;
@@ -376,7 +412,9 @@
       for (const p of this.popovers) {
         const root = p.getRootNode();
         const isAttached = document.contains(p) || (root instanceof ShadowRoot && document.contains(root.host));
-        if (!isAttached) {
+        const isBtnConnected = !p.associatedBtn || p.associatedBtn.isConnected;
+        if (!isAttached || !isBtnConnected) {
+          if (p.remove) p.remove();
           this.popovers.delete(p);
         }
       }
@@ -1102,10 +1140,15 @@
           });
         });
 
-        // Update active popover positions on scroll/resize for the main web app
+        // Update active popover positions on scroll/resize with rAF throttle
+        let rafId = null;
         const updateAllPositions = () => {
-          this.popovers.forEach(p => {
-             if (p.style.display === 'flex') this.updatePosition(p);
+          if (rafId) return;
+          rafId = requestAnimationFrame(() => {
+            rafId = null;
+            this.popovers.forEach(p => {
+               if (p.style.display === 'flex') this.updatePosition(p);
+            });
           });
         };
         

@@ -1142,6 +1142,7 @@ body[data-wr-enabled="true"][data-wr-theme="monokai"] .ProseMirror b { color: #a
   justify-content: center;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   animation: wr-fade-in 0.2s ease;
+  pointer-events: auto;
 }
 .wr-modal-content {
   background: #18181b;
