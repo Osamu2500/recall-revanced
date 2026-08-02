@@ -112,48 +112,88 @@
       // Override default document.body attachment for Shadow DOM
       if (rootNode.shadowRoot || rootNode.host) {
          popover.remove(); // Remove from light DOM document.body
-         container.appendChild(popover);
          
          const shadowTarget = rootNode.shadowRoot || rootNode;
-         // Inject wider.css into the Shadow DOM so our elements are styled
+         // Inject wider.css into the widget's Shadow DOM so the button is styled
          if (!shadowTarget.querySelector('#wr-prompts-css')) {
             const link = document.createElement('link');
             link.id = 'wr-prompts-css';
             link.rel = 'stylesheet';
-            // Use chrome.runtime.getURL to load the extension's CSS file
             link.href = chrome.runtime.getURL('wider.css');
             shadowTarget.appendChild(link);
          }
+         
+         // Create a dedicated overlay container for the popover in the main document to avoid clipping
+         let overlayContainer = document.getElementById('wr-prompts-overlay-container');
+         if (!overlayContainer) {
+             overlayContainer = document.createElement('div');
+             overlayContainer.id = 'wr-prompts-overlay-container';
+             overlayContainer.style.position = 'fixed';
+             overlayContainer.style.top = '0';
+             overlayContainer.style.left = '0';
+             overlayContainer.style.width = '100%';
+             overlayContainer.style.height = '100%';
+             overlayContainer.style.pointerEvents = 'none';
+             overlayContainer.style.zIndex = '2147483647';
+             document.body.appendChild(overlayContainer);
+             
+             const shadow = overlayContainer.attachShadow({mode: 'open'});
+             const link = document.createElement('link');
+             link.rel = 'stylesheet';
+             link.href = chrome.runtime.getURL('wider.css');
+             shadow.appendChild(link);
+             
+             const popoverWrapper = document.createElement('div');
+             popoverWrapper.id = 'wr-popovers-wrapper';
+             popoverWrapper.style.pointerEvents = 'auto';
+             shadow.appendChild(popoverWrapper);
+         }
+         
+         const shadowWrapper = overlayContainer.shadowRoot.getElementById('wr-popovers-wrapper');
+         shadowWrapper.appendChild(popover);
 
-         // Override positioning for widget context with smart clipping detection
+         // Override positioning for widget context with absolute viewport coordinates
          btn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isShowing = popover.style.display === 'flex';
-            if (!isShowing) {
-               popover.style.display = 'flex';
-               popover.style.left = '0px';
-               
-               const rect = btn.getBoundingClientRect();
-               if (rect.top < 350) {
-                 // Not enough space above, flip downwards
-                 popover.style.bottom = 'auto';
-                 popover.style.top = '100%';
-                 popover.style.marginTop = '10px';
-                 popover.style.marginBottom = '0px';
-               } else {
-                 // Open upwards normally
-                 popover.style.top = 'auto';
-                 popover.style.bottom = '100%';
-                 popover.style.marginBottom = '10px';
-                 popover.style.marginTop = '0px';
-               }
-               
-               window.wrPromptUIGlobal.renderAllPopovers();
-            } else {
-               popover.style.display = 'none';
-            }
+             e.preventDefault();
+             e.stopPropagation();
+             const isShowing = popover.style.display === 'flex';
+             if (!isShowing) {
+                popover.style.display = 'flex';
+                popover.style.position = 'fixed';
+                popover.style.margin = '0';
+                
+                const rect = btn.getBoundingClientRect();
+                if (rect.top < 350) {
+                  popover.style.top = (rect.bottom + 10) + 'px';
+                  popover.style.bottom = 'auto';
+                  popover.style.transformOrigin = 'top right';
+                } else {
+                  popover.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+                  popover.style.top = 'auto';
+                  popover.style.transformOrigin = 'bottom right';
+                }
+                
+                if (rect.left > window.innerWidth / 2) {
+                  popover.style.right = (window.innerWidth - rect.right) + 'px';
+                  popover.style.left = 'auto';
+                } else {
+                  popover.style.left = rect.left + 'px';
+                  popover.style.right = 'auto';
+                  popover.style.transformOrigin = rect.top < 350 ? 'top left' : 'bottom left';
+                }
+                
+                window.wrPromptUIGlobal.renderAllPopovers();
+                
+                const searchInput = popover.querySelector('.wr-prompts-search-input');
+                if (searchInput) searchInput.focus();
+             } else {
+                popover.style.display = 'none';
+             }
          };
+         
+         window.addEventListener('scroll', () => {
+             if (popover.style.display === 'flex') popover.style.display = 'none';
+         }, { passive: true });
       }
 
       container.appendChild(btn);
