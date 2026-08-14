@@ -56,8 +56,8 @@ window.WR_ChatMultiSelect = {
        return;
     }
 
-    // Find all links that point to a specific chat anywhere on the page
-    const allLinks = Array.from(document.querySelectorAll('a[href*="/chat/"]'));
+    // Find all links that point to a specific chat inside the sidebar only
+    const allLinks = Array.from(document.querySelectorAll('nav a[href*="/chat/"]'));
     
     // Filter to likely chat rows
     const chatLinks = allLinks.filter(el => {
@@ -127,7 +127,7 @@ window.WR_ChatMultiSelect = {
       bar.classList.add('wr-bulk-bar-visible');
       bar.querySelector('.wr-bulk-count').textContent = `${count} chat${count !== 1 ? 's' : ''} selected`;
       
-      const allLinksCount = Array.from(document.querySelectorAll('a[href*="/chat/"]')).filter(el => {
+      const allLinksCount = Array.from(document.querySelectorAll('nav a[href*="/chat/"]')).filter(el => {
           const href = el.getAttribute('href') || '';
           return href !== '/chat' && href !== '/chat/';
       }).length;
@@ -180,7 +180,7 @@ window.WR_ChatMultiSelect = {
   },
 
   selectAllChats(select) {
-      const allLinks = Array.from(document.querySelectorAll('a[href*="/chat/"]')).filter(el => {
+      const allLinks = Array.from(document.querySelectorAll('nav a[href*="/chat/"]')).filter(el => {
           const href = el.getAttribute('href') || '';
           if (href === '/chat' || href === '/chat/') return false;
           return true;
