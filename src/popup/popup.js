@@ -9,7 +9,7 @@ const DEFAULTS = Object.freeze({
   width: 1100, wrap: true, hideSidebar: false, hideOutline: true, grid: true, gridCols: 3, typo: true, enabled: true,
   zen: false, media: true, tocHover: false, graph: true, hotkeys: true,
   bionic: false, cmd: true, lightbox: true, theme: 'default', focus: false, toc: false,
-  animations: true, spotlight: true, premiumUi: true, immersiveCards: true
+  animations: true, spotlight: true, premiumUi: true, immersiveCards: true, chatMultiSelect: true
 });
 
 /**
@@ -43,7 +43,8 @@ const UI = {
     animations:     $('animationsCb'),
     spotlight:      $('spotlightCb'),
     premiumUi:      $('premiumUiCb'),
-    immersiveCards: $('immersiveCardsCb')
+    immersiveCards: $('immersiveCardsCb'),
+    chatMultiSelect:$('chatMultiSelectCb')
   }
 };
 
