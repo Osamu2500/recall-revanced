@@ -100,25 +100,52 @@ body[data-wr-chat-multi-select="false"] .wr-chat-bulk-bar {
   position: relative;
 }
 
-.wr-chat-checkbox {
+/* CSS-only checkbox using pseudo-elements */
+[data-wr-multi-select-init] > a::before {
+  content: '';
   position: absolute;
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
-  opacity: 0;
-  cursor: pointer;
   width: 14px;
   height: 14px;
-  margin: 0;
-  pointer-events: none; /* Let hover work on the row first */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: transparent;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  pointer-events: none;
 }
 
-[data-wr-multi-select-init]:hover .wr-chat-checkbox,
-.wr-chat-checkbox:checked,
-[data-wr-multi-select-init].wr-chat-selected .wr-chat-checkbox {
+[data-wr-multi-select-init] > a::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-60%) rotate(45deg);
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  z-index: 11;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+[data-wr-multi-select-init]:hover > a::before,
+[data-wr-multi-select-init].wr-chat-selected > a::before {
   opacity: 1;
-  pointer-events: auto;
+}
+
+[data-wr-multi-select-init].wr-chat-selected > a::before {
+  background: #3b82f6; /* Blue selection */
+  border-color: #3b82f6;
+}
+
+[data-wr-multi-select-init].wr-chat-selected > a::after {
+  opacity: 1;
 }
 
 /* Push the link content over a bit to make room when checkbox is visible */
@@ -130,6 +157,7 @@ body[data-wr-chat-multi-select="false"] .wr-chat-bulk-bar {
 
 [data-wr-multi-select-init] > a {
   transition: padding 0.2s ease;
+  position: relative; /* Ensure pseudo-elements are positioned relative to the link */
 }
 
 /* Hide original chat icon when checkbox is visible (optional, to save space) */

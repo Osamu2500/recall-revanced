@@ -75,25 +75,22 @@ window.WR_ChatMultiSelect = {
       if (row.hasAttribute('data-wr-multi-select-init')) return;
       
       row.setAttribute('data-wr-multi-select-init', 'true');
-      
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.className = 'wr-chat-checkbox';
-      cb.addEventListener('click', (e) => e.stopPropagation());
-      cb.addEventListener('change', (e) => {
-        this.toggleSelection(row, link, cb.checked);
-      });
-      
-      row.style.position = 'relative';
-      if (row.firstChild) {
-        row.insertBefore(cb, row.firstChild);
-      } else {
-        row.appendChild(cb);
-      }
-      
       const id = link.getAttribute('href');
+      
+      // Intercept clicks on the far left side using capture phase
+      link.addEventListener('click', (e) => {
+        const rect = link.getBoundingClientRect();
+        // 36 pixels is a safe hit area for the CSS checkbox
+        if (e.clientX - rect.left < 36) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const isSelected = this.selectedChats.has(id);
+          this.toggleSelection(row, link, !isSelected);
+        }
+      }, true);
+      
       if (this.selectedChats.has(id)) {
-        cb.checked = true;
         row.classList.add('wr-chat-selected');
       }
     });
@@ -188,15 +185,13 @@ window.WR_ChatMultiSelect = {
       
       allLinks.forEach(link => {
           const row = link.closest('div, li') || link;
-          const cb = row.querySelector('.wr-chat-checkbox');
-          if (cb) {
-              if (select && !cb.checked) {
-                  cb.checked = true;
-                  this.toggleSelection(row, link, true);
-              } else if (!select && cb.checked) {
-                  cb.checked = false;
-                  this.toggleSelection(row, link, false);
-              }
+          const id = link.getAttribute('href');
+          const isSelected = this.selectedChats.has(id);
+          
+          if (select && !isSelected) {
+              this.toggleSelection(row, link, true);
+          } else if (!select && isSelected) {
+              this.toggleSelection(row, link, false);
           }
       });
   },
