@@ -40,9 +40,29 @@ window.WR_API = {
   },
   
   /**
-   * Extracts the unique item ID from the URL if viewing a specific note.
-   * @returns {string|null} The item ID or null.
+   * Safely simulates a native click sequence for React components
    */
+  ghostClick(el) {
+      if (!el) return false;
+      el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      return true;
+  },
+
+  /**
+   * Safely simulates a native hover sequence for React components
+   */
+  ghostHover(el) {
+      if (!el) return false;
+      for (const evt of ['pointerenter', 'mouseover', 'mouseenter', 'mousemove']) {
+          el.dispatchEvent(new MouseEvent(evt, { bubbles: true, cancelable: true, view: window }));
+      }
+      return true;
+  },
+
   getItemId() {
     const match = window.location.pathname.match(/\/item\/([a-zA-Z0-9-]+)/);
     return match ? match[1] : null;

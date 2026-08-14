@@ -60,12 +60,7 @@ function _showSidebar() {
   });
 }
 
-// Polling fallback (1s) — primarily for cases where React re-renders wipe out our state
-setInterval(() => {
-  if (window.WR_STATE && window.WR_STATE.enabled && window.WR_EnforceDomState) {
-    window.WR_EnforceDomState();
-  }
-}, 1500);
+// Polling fallback removed to prevent React layout thrashing.
 
 // MutationObserver — re-apply settings when React unmounts/remounts large DOM sections
 let _mutationDebounce = null;
@@ -129,9 +124,14 @@ window.WR_EnhanceCards = function () {
 
 // Start observing
 if (document.body) {
-  _pageObserver.observe(document.body, { childList: true, subtree: true, attributes: false });
+  _pageObserver.observe(document.body, { 
+    childList: true, 
+    subtree: true,
+    attributes: false,
+    characterData: false
+  });
 } else {
   document.addEventListener('DOMContentLoaded', () => {
-    _pageObserver.observe(document.body, { childList: true, subtree: true, attributes: false });
+    _pageObserver.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
   });
 }

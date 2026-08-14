@@ -78,10 +78,6 @@ window.WR_HOME_CARDS = {
     this.active = true;
     
     this.startObservation();
-    
-    this._fallbackInterval = setInterval(() => {
-      if (this.active) this.checkAndInject();
-    }, 1000);
   },
   
   cleanup() {
@@ -92,9 +88,6 @@ window.WR_HOME_CARDS = {
       this.imageObservers = [];
     }
     document.querySelectorAll('.wr-home-grid-container').forEach(el => el.remove());
-    if (this._fallbackInterval) {
-      clearInterval(this._fallbackInterval);
-    }
     this.restoreOriginalUI();
   },
 
@@ -233,6 +226,8 @@ window.WR_HOME_CARDS = {
                       customImg.src = newImgEl.src;
                    }
                    imgObserver.disconnect();
+                   const idx = this.imageObservers.indexOf(imgObserver);
+                   if (idx > -1) this.imageObservers.splice(idx, 1);
                 }
              });
              imgObserver.observe(row, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });

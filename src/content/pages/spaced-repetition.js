@@ -276,11 +276,6 @@ window.WR_PAGES.spaced = {
     document.body.appendChild(this.syncIndicator);
 
     this.startObservation();
-    
-    // Periodic fallback check in case of SPA transitions missing mutations
-    this._fallbackInterval = setInterval(() => {
-      if (this.active) this.checkAndInject();
-    }, 1000);
   },
   
   cleanup() {
@@ -291,9 +286,6 @@ window.WR_PAGES.spaced = {
     }
     if (this.syncIndicator && this.syncIndicator.parentNode) {
       this.syncIndicator.parentNode.removeChild(this.syncIndicator);
-    }
-    if (this._fallbackInterval) {
-      clearInterval(this._fallbackInterval);
     }
     
     this.restoreOriginalUI();

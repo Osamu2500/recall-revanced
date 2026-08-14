@@ -201,27 +201,7 @@ window.WR_ChatMultiSelect = {
       });
   },
 
-  ghostHover(el) {
-      if (!el) return;
-      for (const evt of ['pointerenter', 'mouseover', 'mouseenter', 'mousemove']) {
-          el.dispatchEvent(new MouseEvent(evt, { bubbles: true, cancelable: true, view: window }));
-      }
-  },
 
-  ghostClick(el) {
-      if (!el) return false;
-      
-      // A standard native click sequence is perfectly reliable in React 17+ 
-      // as long as bubbles is true. Doing .click() AND dispatchEvent can cause a double-click
-      // which instantly closes the popup menu we are trying to open!
-      el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, view: window }));
-      el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-      el.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, cancelable: true, view: window }));
-      el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-      
-      return true;
-  },
 
   async performBulkAction(action) {
     if (action !== 'delete') return;
@@ -239,8 +219,10 @@ window.WR_ChatMultiSelect = {
       const row = link.closest('div, li') || link;
       
       // Simulate ghost hover
-      this.ghostHover(link);
-      this.ghostHover(row);
+      if (window.WR_API) {
+          window.WR_API.ghostHover(link);
+          window.WR_API.ghostHover(row);
+      }
       
       await new Promise(r => setTimeout(r, 200));
 
@@ -311,7 +293,7 @@ window.WR_ChatMultiSelect = {
         });
         
         if (confirmBtn) {
-            this.ghostClick(confirmBtn);
+            if (window.WR_API) window.WR_API.ghostClick(confirmBtn);
             await new Promise(r => setTimeout(r, 400));
         } else {
             console.log("[WR] Confirm button not found (might not require confirmation)");
