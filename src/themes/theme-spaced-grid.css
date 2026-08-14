@@ -57,9 +57,9 @@ body[data-wr-enabled="true"] .wr-original-questions-table {
 }
 
 .wr-grid-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.15);
+  transform: translateY(-10px) rotateX(5deg) rotateY(-5deg) scale(1.03);
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow: -10px 15px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(139, 92, 246, 0.3);
 }
 
 .wr-grid-card.wr-selected {

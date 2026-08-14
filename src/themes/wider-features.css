@@ -59,6 +59,14 @@ body.wr-focus-mode-active .ProseMirror > .wr-focus-highlight {
   color: #fff;
   padding-left: 5px;
 }
+.wr-toc-link.active {
+  color: #fff;
+  font-weight: bold;
+  padding-left: 8px;
+  border-left: 2px solid #8b5cf6;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
 .wr-toc-h1 { font-weight: bold; }
 .wr-toc-h2 { margin-left: 10px; opacity: 0.9; }
 .wr-toc-h3 { margin-left: 20px; font-size: 12px; opacity: 0.7; }
