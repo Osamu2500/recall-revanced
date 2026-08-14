@@ -58,6 +58,19 @@ body[data-wr-enabled="true"] {
   font-family: var(--rp-font-body) !important;
 }
 
+/* ── UNIVERSAL LAYOUT COVERAGE ─────────────────────────────────────── */
+body[data-wr-enabled="true"] #root,
+body[data-wr-enabled="true"] main,
+body[data-wr-enabled="true"] [role="main"],
+body[data-wr-enabled="true"] .MuiContainer-root,
+body[data-wr-enabled="true"] .MuiBox-root {
+  background-color: transparent !important;
+}
+
+body[data-wr-enabled="true"] .MuiPaper-root {
+  background: var(--rp-bg-overlay);
+}
+
 /* === Ultra-Premium Glass Cards === */
 body[data-wr-enabled="true"] article,
 body[data-wr-enabled="true"] div[class*="MuiCard-root"],

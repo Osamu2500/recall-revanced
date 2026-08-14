@@ -24,6 +24,26 @@ body[data-wr-enabled="true"][data-wr-theme="dracula"] * {
   border-color: var(--drac-current) !important;
 }
 
+/* ── UNIVERSAL LAYOUT COVERAGE ─────────────────────────────────────── */
+body[data-wr-enabled="true"][data-wr-theme="dracula"] #root,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] main,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [role="main"],
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiContainer-root,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiBox-root {
+  background-color: transparent !important;
+}
+
+body[data-wr-enabled="true"][data-wr-theme="dracula"] .MuiPaper-root {
+  background-color: var(--drac-current);
+}
+
+body[data-wr-enabled="true"][data-wr-theme="dracula"] input,
+body[data-wr-enabled="true"][data-wr-theme="dracula"] [contenteditable="true"] {
+  background-color: var(--drac-bg) !important;
+  color: var(--drac-fg) !important;
+  border: 1px solid var(--drac-comment) !important;
+}
+
 /* Headers & Nav */
 body[data-wr-enabled="true"][data-wr-theme="dracula"] header,
 body[data-wr-enabled="true"][data-wr-theme="dracula"] nav,

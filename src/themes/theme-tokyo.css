@@ -90,3 +90,37 @@ body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiButton-root:hover {
   background-color: var(--tokyo-blue) !important;
   color: var(--tokyo-bg) !important;
 }
+
+/* ── UNIVERSAL LAYOUT COVERAGE ─────────────────────────────────────── */
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] #root,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] main,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [role="main"],
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiContainer-root,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiBox-root {
+  background-color: transparent !important;
+}
+
+/* Fix for specific chat input area which might be deeply nested */
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] textarea,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] input,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [contenteditable="true"] {
+  background-color: var(--tokyo-bg-alt) !important;
+  color: var(--tokyo-fg) !important;
+  border: 1px solid var(--tokyo-border) !important;
+  border-radius: 8px;
+}
+
+/* Modals, Dialogs, Dropdowns */
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiDialog-paper,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiPopover-paper,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiMenu-paper,
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] [role="dialog"] {
+  background-color: var(--tokyo-bg-alt) !important;
+  border: 1px solid var(--tokyo-border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+}
+
+/* Re-enforce card backgrounds since Box-root is transparent */
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] .MuiPaper-root {
+  background-color: var(--tokyo-bg-alt);
+}
