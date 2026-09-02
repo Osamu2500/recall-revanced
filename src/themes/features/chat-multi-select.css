@@ -1,0 +1,151 @@
+/*
+ * Wider Recall - Chat Multi-Select
+ * Styles the custom bulk selection checkboxes and action bar for chat items.
+ */
+
+/* Hide everything if disabled */
+body[data-wr-chat-multi-select="false"] .wr-chat-checkbox-wrap,
+body[data-wr-chat-multi-select="false"] .wr-chat-bulk-bar {
+  display: none !important;
+}
+
+[data-wr-multi-select-init] {
+  position: relative;
+}
+
+/* CSS-only checkbox using pseudo-elements */
+[data-wr-multi-select-init] > a::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: transparent;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  pointer-events: none;
+}
+
+[data-wr-multi-select-init] > a::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-60%) rotate(45deg);
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  z-index: 11;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+[data-wr-multi-select-init]:hover > a::before,
+[data-wr-multi-select-init].wr-chat-selected > a::before {
+  opacity: 1;
+}
+
+[data-wr-multi-select-init].wr-chat-selected > a::before {
+  background: #3b82f6; /* Blue selection */
+  border-color: #3b82f6;
+}
+
+[data-wr-multi-select-init].wr-chat-selected > a::after {
+  opacity: 1;
+}
+
+/* Push the link content over a bit to make room when checkbox is visible */
+[data-wr-multi-select-init]:hover > a,
+[data-wr-multi-select-init].wr-chat-selected > a {
+  padding-left: 28px !important;
+  transition: padding 0.2s ease;
+}
+
+[data-wr-multi-select-init] > a {
+  transition: padding 0.2s ease;
+  position: relative; /* Ensure pseudo-elements are positioned relative to the link */
+}
+
+/* Hide original chat icon when checkbox is visible */
+[data-wr-multi-select-init]:hover > a svg:first-child,
+[data-wr-multi-select-init].wr-chat-selected > a svg:first-child {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+[data-wr-multi-select-init] > a svg:first-child {
+  transition: opacity 0.2s ease;
+}
+
+/* Bulk Action Bar */
+.wr-chat-bulk-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 250px;
+  background: rgba(20, 20, 25, 0.95);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.wr-chat-bulk-bar.wr-bulk-bar-visible {
+  display: flex;
+}
+
+.wr-bulk-count {
+  font-size: 12px;
+  color: #ccc;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.wr-bulk-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.wr-bulk-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  flex: 1;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.wr-bulk-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.wr-bulk-btn.wr-bulk-btn-danger {
+  background: rgba(255, 50, 50, 0.15);
+  border-color: rgba(255, 50, 50, 0.3);
+  color: #ff8888;
+}
+
+.wr-bulk-btn.wr-bulk-btn-danger:hover {
+  background: rgba(255, 50, 50, 0.3);
+  border-color: rgba(255, 50, 50, 0.5);
+}

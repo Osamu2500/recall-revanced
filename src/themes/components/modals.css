@@ -1,0 +1,67 @@
+/*
+ * Wider Recall - Contextual Modals Styles
+ * Upgrades MUI Dialogs to a glassmorphic aesthetic.
+ */
+
+/* General Dialog Overlays */
+[role="dialog"]:not(:has(input[type="search"])) .MuiPaper-root {
+  background-color: var(--bg-surface) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3) !important;
+  padding: 8px !important;
+  animation: wr-dialog-enter 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+[role="dialog"] h1,
+[role="dialog"] h2,
+[role="dialog"] h3 {
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-weight: 600 !important;
+}
+
+[role="dialog"] p,
+[role="dialog"] span {
+  color: var(--text-secondary) !important;
+}
+
+/* Modals Buttons */
+[role="dialog"] button {
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+[role="dialog"] button:active {
+  transform: scale(0.96) !important;
+}
+
+/* Form Inputs inside Modals */
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select {
+  background-color: var(--bg-base) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+[role="dialog"] input:focus,
+[role="dialog"] textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2) !important;
+  outline: none !important;
+}
+
+@keyframes wr-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

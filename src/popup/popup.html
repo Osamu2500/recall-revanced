@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recall Revanced Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- ── Left Sidebar ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">
+          <!-- Double RR Logo on Orange Background -->
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+            <defs>
+              <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff7347"/>
+                <stop offset="50%" stop-color="#f05622"/>
+                <stop offset="100%" stop-color="#cc3b0a"/>
+              </linearGradient>
+              <filter id="rShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="2" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity="0.45"/>
+              </filter>
+            </defs>
+            <!-- Orange Background Squircle -->
+            <rect width="100" height="100" rx="24" fill="url(#logoBg)"/>
+            <!-- Back R (Dark Obsidian / Shadow R) -->
+            <g transform="translate(6, 8)">
+              <path fill-rule="evenodd" d="M 25 18 L 55 18 C 72 18, 78 26, 78 36 C 78 46, 70 52, 58 54 L 78 82 L 58 82 L 42 56 L 41 56 L 41 82 L 25 82 Z M 41 32 L 41 43 L 53 43 C 59 43, 62 40, 62 37 C 62 34, 59 32, 53 32 Z" fill="#141416" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-linejoin="round"/>
+            </g>
+            <!-- Front R (Pure Bright White) -->
+            <g transform="translate(-6, -4)" filter="url(#rShadow)">
+              <path fill-rule="evenodd" d="M 25 18 L 55 18 C 72 18, 78 26, 78 36 C 78 46, 70 52, 58 54 L 78 82 L 58 82 L 42 56 L 41 56 L 41 82 L 25 82 Z M 41 32 L 41 43 L 53 43 C 59 43, 62 40, 62 37 C 62 34, 59 32, 53 32 Z" fill="#ffffff"/>
+            </g>
+          </svg>
+        </div>
+        <div class="header-title">
+          <span class="header-name">Recall Revanced</span>
+          <span class="header-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="pageLabel">app.recall.it</span>
+          </span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-target="panel-appearance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Appearance
+        </div>
+        <div class="nav-item" data-target="panel-layout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Layout &amp; Feed
+        </div>
+        <div class="nav-item" data-target="panel-cards">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="10" height="10"/></svg>
+          Cards
+        </div>
+        <div class="nav-item" data-target="panel-review">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Review
+        </div>
+        <div class="nav-item" data-target="panel-graph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="4" cy="19" r="2"/><circle cx="20" cy="19" r="2"/><line x1="12" y1="7" x2="5.5" y2="17"/><line x1="12" y1="7" x2="18.5" y2="17"/><line x1="5.5" y1="19" x2="18.5" y2="19"/></svg>
+          Graph
+        </div>
+        <div class="nav-item" data-target="panel-chats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Chats
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <label class="power-toggle">
+          <input type="checkbox" id="enabledCb" title="Toggle Extension">
+          <span class="power-slider"></span>
+        </label>
+        <div class="footer-version">v1.2</div>
+      </div>
+    </aside>
+
+    <!-- ── Main Content ──────────────────────────────────────── -->
+    <main class="content main-content">
+      <div class="panels">
+        
+        <!-- APPEARANCE PANEL -->
+        <div id="panel-appearance" class="panel active">
+          <div class="panel-header">
+            <h2>Appearance</h2>
+            <p>Customize the look and feel of the app.</p>
+          </div>
+
+          <div class="section-title">Color Themes</div>
+          <div class="themes-grid">
+            <button class="theme-btn" data-theme="default">Recall</button>
+            <button class="theme-btn" data-theme="notion">Notion</button>
+            <button class="theme-btn" data-theme="obsidian">Obsidian</button>
+            <button class="theme-btn" data-theme="cyberpunk">Cyberpunk</button>
+            <button class="theme-btn" data-theme="dracula">Dracula</button>
+            <button class="theme-btn" data-theme="tokyo">Tokyo</button>
+            <button class="theme-btn" data-theme="nord">Nord</button>
+            <button class="theme-btn" data-theme="catppuccin">Catppuccin</button>
+            <button class="theme-btn" data-theme="solarized-dark">Solarized</button>
+            <button class="theme-btn" data-theme="matrix">Matrix</button>
+            <button class="theme-btn" data-theme="monokai">Monokai</button>
+          </div>
+
+          <div class="section-title mt">UI Settings</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Glassmorphism UI <span class="badge badge-new">New</span></span>
+              <span class="setting-desc">Frosted glass UI panels everywhere</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="premiumUiCb" title="Premium UI"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Typography Fixes</span>
+              <span class="setting-desc">Better fonts &amp; spacing across the app</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="typoCb" title="Typography Fixes"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Focus Mode / Zen</span>
+              <span class="setting-desc">Dim distractions when writing</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="zenCb" title="Focus Mode"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- LAYOUT & FEED PANEL -->
+        <div id="panel-layout" class="panel">
+          <div class="panel-header">
+            <h2>Layout &amp; Feed</h2>
+            <p>Adjust core layout and home feed behaviors.</p>
+          </div>
+
+          <div class="section-title">Global Layout</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Hide Sidebar</span>
+              <span class="setting-desc">Auto-hide left navigation globally</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="hideSidebarCb" title="Hide Sidebar"><span class="slider"></span></label>
+          </div>
+
+          <div class="section-title mt">Layout Width</div>
+          <div class="range-block">
+            <div class="range-header">
+              <span class="range-label">Max Width</span>
+              <span class="range-value" id="wval">1100px</span>
+            </div>
+            <input type="range" id="widthRange" min="800" max="3000" step="100" value="1100" title="Max Width">
+          </div>
+          <div class="presets-grid mb-16">
+            <button class="pb" data-w="900">Narrow (900px)</button>
+            <button class="pb" data-w="1100">Default (1100px)</button>
+            <button class="pb" data-w="1400">Wide (1400px)</button>
+            <button class="pb" data-w="3000">Full Width</button>
+          </div>
+
+          <div class="section-title mt">Feed Animations</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Entrance Animations</span>
+              <span class="setting-desc">Staggered load animations for feed items</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="animationsCb" title="Animations"><span class="slider"></span></label>
+          </div>
+
+          <div class="section-title mt">Reading Aids</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Table of Contents</span>
+              <span class="setting-desc">Floating minimap outline</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="tocCb" title="Table of Contents"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- CARDS PANEL -->
+        <div id="panel-cards" class="panel">
+          <div class="panel-header">
+            <h2>Cards</h2>
+            <p>Customize the display of knowledge cards.</p>
+          </div>
+
+          <div class="section-title">Card Aesthetics</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Immersive Glass Cards <span class="badge badge-new">New</span></span>
+              <span class="setting-desc">Full-bleed thumbnail backgrounds on cards</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="immersiveCardsCb" title="Immersive Cards"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Card Spotlight Hover</span>
+              <span class="setting-desc">Mouse-tracking glow effect on cards</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="spotlightCb" title="Spotlight"><span class="slider"></span></label>
+          </div>
+
+          <div class="section-title mt">Card Media</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Image Lightbox</span>
+              <span class="setting-desc">Click images to zoom in on card details</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="lightboxCb" title="Image Lightbox"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- REVIEW PANEL -->
+        <div id="panel-review" class="panel">
+          <div class="panel-header">
+            <h2>Review</h2>
+            <p>Settings for the spaced repetition review grid.</p>
+          </div>
+
+          <div class="section-title">Review Questions Grid</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Grid View</span>
+              <span class="setting-desc">Multi-column item grid for Review Questions</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="gridCb" title="Grid View"><span class="slider"></span></label>
+          </div>
+
+          <div class="range-block mt-10">
+            <div class="range-header">
+              <span class="range-label">Grid Columns</span>
+              <span class="range-value" id="gval">3</span>
+            </div>
+            <input type="range" id="gridColsRange" min="2" max="5" step="1" value="3" title="Grid Columns">
+          </div>
+
+          <div class="section-title mt">Review Media</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Media Tools</span>
+              <span class="setting-desc">Picture-in-Picture &amp; Speed controls</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="mediaCb" title="Media Tools"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- GRAPH PANEL -->
+        <div id="panel-graph" class="panel">
+          <div class="panel-header">
+            <h2>Graph</h2>
+            <p>Enhance the Knowledge Graph.</p>
+          </div>
+
+          <div class="section-title">Graph Engine</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Graph Tools</span>
+              <span class="setting-desc">Advanced force-directed physics engine hooks</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="graphCb" title="Graph Tools"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- CHATS PANEL -->
+        <div id="panel-chats" class="panel">
+          <div class="panel-header">
+            <h2>Chats</h2>
+            <p>Supercharge the Chat experience.</p>
+          </div>
+
+          <div class="section-title">Chat Aesthetics</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Chat Multi-Select <span class="badge badge-new">New</span></span>
+              <span class="setting-desc">Bulk select and delete chats</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="chatMultiSelectCb" title="Chat Multi-Select"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row disabled-row">
+            <div class="setting-info">
+              <span class="setting-title">Chat Bubble Styling <span class="badge badge-soon">Soon</span></span>
+              <span class="setting-desc">Custom markdown rendering for chat</span>
+            </div>
+            <label class="toggle"><input type="checkbox" title="Chat Bubble Styling" disabled><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Code Tools</span>
+              <span class="setting-desc">Copy buttons on code blocks</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="codeToolsCb" title="Code Tools"><span class="slider"></span></label>
+          </div>
+        </div>
+
+      </div><!-- /.panels -->
+    </main>
+  </div><!-- /.app-container -->
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -227,8 +227,8 @@ html[data-ypp-card-style='immersive-glass']
   padding: 16px !important;
   margin: 0 !important;
   background: transparent !important;
-  backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   pointer-events: auto !important;
 }
 
@@ -369,6 +369,7 @@ html[data-ypp-card-style='immersive-glass']
   padding: 16px !important;
   margin: 0 !important;
   background: transparent !important;
+  -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   pointer-events: none !important;
   z-index: 2 !important;
@@ -1075,8 +1076,8 @@ html[data-ypp-card-style='immersive-glass'] .ytLockupMetadataViewModelMenuButton
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
   transition: all 0.2s ease !important;
   box-shadow: none !important;
   border: none !important;
@@ -1181,8 +1182,8 @@ html[data-ypp-card-style='immersive-glass'] ytd-thumbnail #overlays ytd-thumbnai
   z-index: 10 !important;
   pointer-events: auto !important;
   background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 6px !important;
   padding: 4px 6px !important;

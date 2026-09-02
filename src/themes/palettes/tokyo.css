@@ -16,6 +16,17 @@
 }
 
 body[data-wr-enabled="true"][data-wr-theme="tokyo"] {
+  --bg-surface: var(--tokyo-bg-alt);
+  --bg-base: var(--tokyo-bg);
+  --accent: var(--tokyo-magenta);
+  --accent-glow: rgba(187, 154, 247, 0.4);
+  --accent-rgb: 187, 154, 247;
+  --border-color: var(--tokyo-border);
+  --text-primary: var(--tokyo-fg);
+  --text-secondary: var(--tokyo-fg-dark);
+}
+
+body[data-wr-enabled="true"][data-wr-theme="tokyo"] {
   background-color: var(--tokyo-bg) !important;
   color: var(--tokyo-fg) !important;
 }

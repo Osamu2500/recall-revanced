@@ -68,12 +68,19 @@
         const path = window.location.pathname;
         let page = 'Unknown page';
         
-        if (path.includes('/item/')) {
-          page = 'Item Detail';
-        } else if (path.includes('/spaced-repetition')) {
-          page = 'Spaced Repetition';
-        } else if (path === '/' || path === '') {
-          page = 'Home / Grid';
+        // Use the router's current page if available
+        if (window.WR_Router && window.WR_Router.currentPageId) {
+          const id = window.WR_Router.currentPageId;
+          // Capitalize first letter for display
+          page = id.charAt(0).toUpperCase() + id.slice(1);
+          if (id === 'spaced') page = 'Spaced Repetition';
+          if (id === 'item') page = 'Item Detail';
+          if (id === 'home') page = 'Home / Grid';
+        } else {
+          // Fallback logic
+          if (path.includes('/item/')) page = 'Item Detail';
+          else if (path.includes('/spaced-repetition')) page = 'Spaced Repetition';
+          else if (path === '/' || path === '') page = 'Home / Grid';
         }
         
         sendResponse({ page });

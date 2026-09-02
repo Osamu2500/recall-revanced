@@ -1,0 +1,43 @@
+/*
+ * Wider Recall - Item Page Styles
+ * Listen Mode & Floating Audio Player
+ */
+
+/* Scope strictly to the item page */
+body.wr-page-item {
+  /* Scope wrapper */
+}
+
+/* Floating PiP Audio Player for Listen Mode */
+body.wr-page-item .listen-mode-player,
+body.wr-page-item audio {
+  position: fixed !important;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: var(--bg-surface);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 99px;
+  padding: 12px 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1), opacity 0.3s ease;
+}
+
+body.wr-page-item .listen-mode-player:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+/* Transcript Highlighting */
+body.wr-page-item .transcript-highlight.active {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-left: 4px solid var(--accent);
+  padding-left: 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}

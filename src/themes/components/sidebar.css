@@ -1,0 +1,57 @@
+/*
+ * Wider Recall - Sidebar Navigation Styles
+ * Enhances hover states, icons, and the active-tab indicator.
+ */
+
+/* Target the navigation sidebar based on our selector */
+nav:not(#toc_wrap):not(:has(#toc_wrap)) {
+  background-color: var(--bg-surface) !important;
+  border-right: 1px solid var(--border-color) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02) !important;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Sidebar Links */
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a {
+  position: relative !important;
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease !important;
+  color: var(--text-secondary) !important;
+}
+
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a:hover {
+  background-color: var(--hover-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Active Link Indicator (Glowing effect) */
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a[aria-current="page"],
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a.active {
+  background-color: rgba(var(--accent-rgb), 0.1) !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+}
+
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a[aria-current="page"]::before,
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a.active::before {
+  content: '' !important;
+  position: absolute !important;
+  left: -8px !important;
+  top: 15% !important;
+  height: 70% !important;
+  width: 4px !important;
+  background-color: var(--accent) !important;
+  border-radius: 0 4px 4px 0 !important;
+  box-shadow: 2px 0 8px var(--accent-glow) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Sidebar Icons */
+nav:not(#toc_wrap):not(:has(#toc_wrap)) svg {
+  transition: transform 0.3s ease, color 0.3s ease !important;
+}
+
+nav:not(#toc_wrap):not(:has(#toc_wrap)) a:hover svg {
+  transform: scale(1.1) !important;
+}

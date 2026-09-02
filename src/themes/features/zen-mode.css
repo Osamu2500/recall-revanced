@@ -1,0 +1,23 @@
+/*
+ * Wider Recall - Hover Focus Mode
+ * Dims inactive content inside the ProseMirror editor when Focus Mode is enabled.
+ */
+
+body[data-wr-zen="true"] .ProseMirror > * {
+  transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+}
+
+/* Dim all elements when hovering inside the container, except the one being hovered */
+body[data-wr-zen="true"] .ProseMirror:hover > *:not(:hover) {
+  opacity: 0.2 !important;
+  filter: blur(1px) !important;
+}
+
+/* Highlight the specific hovered element */
+body[data-wr-zen="true"] .ProseMirror > *:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: scale(1.02);
+  z-index: 10;
+  position: relative;
+}

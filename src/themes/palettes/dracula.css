@@ -15,6 +15,17 @@
 }
 
 body[data-wr-enabled="true"][data-wr-theme="dracula"] {
+  --bg-surface: var(--drac-current);
+  --bg-base: var(--drac-bg);
+  --accent: var(--drac-pink);
+  --accent-glow: rgba(255, 121, 198, 0.4);
+  --accent-rgb: 255, 121, 198;
+  --border-color: var(--drac-comment);
+  --text-primary: var(--drac-fg);
+  --text-secondary: var(--drac-cyan);
+}
+
+body[data-wr-enabled="true"][data-wr-theme="dracula"] {
   background-color: var(--drac-bg) !important;
   color: var(--drac-fg) !important;
 }

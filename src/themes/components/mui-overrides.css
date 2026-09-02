@@ -1,0 +1,67 @@
+/*
+ * Wider Recall - MUI Overrides
+ * Upgrades generic Material-UI elements (Tooltips, Snackbars, Skeletons)
+ */
+
+/* Tooltips */
+body[data-wr-enabled="true"] .MuiTooltip-tooltip {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+body[data-wr-enabled="true"] .MuiTooltip-arrow {
+  color: var(--bg-surface) !important;
+}
+
+body[data-wr-enabled="true"] .MuiTooltip-arrow::before {
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Toasts / Snackbars */
+body[data-wr-enabled="true"] .MuiSnackbar-root .MuiPaper-root,
+body[data-wr-enabled="true"] .MuiAlert-root {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--border-color) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(12px) !important;
+  align-items: center !important;
+}
+
+body[data-wr-enabled="true"] .MuiAlert-icon {
+  color: var(--accent) !important;
+}
+
+body[data-wr-enabled="true"] .MuiAlert-action button {
+  color: var(--text-secondary) !important;
+}
+
+body[data-wr-enabled="true"] .MuiAlert-action button:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Loading States (Skeletons) */
+body[data-wr-enabled="true"] .MuiSkeleton-root {
+  background-color: rgba(var(--accent-rgb, 139, 92, 246), 0.1) !important;
+  animation: wr-skeleton-pulse 1.5s ease-in-out infinite alternate !important;
+}
+
+@keyframes wr-skeleton-pulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Loading Spinners */
+body[data-wr-enabled="true"] .MuiCircularProgress-root {
+  color: var(--accent) !important;
+}

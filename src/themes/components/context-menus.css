@@ -1,0 +1,62 @@
+/*
+ * Wider Recall - Context Menus
+ * Upgrades MUI Menus, Dropdowns, and Menu Items
+ */
+
+/* Menu Popover Container */
+body[data-wr-enabled="true"] .MuiMenu-paper,
+body[data-wr-enabled="true"] .MuiPopover-paper {
+  background-color: var(--bg-surface) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+  overflow: hidden !important;
+}
+
+/* Menu Items List */
+body[data-wr-enabled="true"] .MuiMenu-list {
+  padding: 8px !important;
+}
+
+/* Individual Menu Items */
+body[data-wr-enabled="true"] .MuiMenuItem-root {
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+  padding: 10px 16px !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important; /* Override MUI default selected background */
+}
+
+body[data-wr-enabled="true"] .MuiMenuItem-root:last-child {
+  margin-bottom: 0 !important;
+}
+
+body[data-wr-enabled="true"] .MuiMenuItem-root:hover,
+body[data-wr-enabled="true"] .MuiMenuItem-root.Mui-focusVisible,
+body[data-wr-enabled="true"] .MuiMenuItem-root.Mui-selected,
+body[data-wr-enabled="true"] .MuiMenuItem-root.Mui-selected:hover {
+  background-color: var(--hover-color) !important;
+  transform: scale(0.98) !important;
+  color: var(--accent) !important;
+}
+
+/* Remove MUI ripple effect for a cleaner UI */
+body[data-wr-enabled="true"] .MuiMenuItem-root .MuiTouchRipple-root {
+  display: none !important;
+}
+
+/* Icons within Menu Items */
+body[data-wr-enabled="true"] .MuiMenuItem-root .MuiListItemIcon-root,
+body[data-wr-enabled="true"] .MuiMenuItem-root svg {
+  color: var(--text-secondary) !important;
+  transition: color 0.2s ease !important;
+}
+
+body[data-wr-enabled="true"] .MuiMenuItem-root:hover .MuiListItemIcon-root,
+body[data-wr-enabled="true"] .MuiMenuItem-root:hover svg {
+  color: var(--accent) !important;
+}

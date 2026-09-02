@@ -1,0 +1,68 @@
+/*
+ * Wider Recall - Settings Page Styles
+ * Premium glassmorphic settings cards and modern toggles.
+ */
+
+body.wr-page-settings {
+  /* Scope wrapper */
+}
+
+/* Settings Sections / Cards */
+body.wr-page-settings main section,
+body.wr-page-settings main .settings-card,
+body.wr-page-settings main [class*="card"] {
+  background-color: var(--bg-surface) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  padding: 24px !important;
+  margin-bottom: 24px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.wr-page-settings main section:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Settings Typography */
+body.wr-page-settings main h1,
+body.wr-page-settings main h2,
+body.wr-page-settings main h3 {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  color: var(--text-primary) !important;
+  margin-top: 0 !important;
+}
+
+body.wr-page-settings main p {
+  color: var(--text-secondary) !important;
+  line-height: 1.6 !important;
+}
+
+/* Modern Toggles (Assuming Recall uses standard input[type="checkbox"] wrappers) */
+body.wr-page-settings main input[type="checkbox"] {
+  accent-color: var(--accent) !important;
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+  cursor: pointer !important;
+}
+
+/* Inputs & Selects in Settings */
+body.wr-page-settings main input[type="text"],
+body.wr-page-settings main select,
+body.wr-page-settings main textarea {
+  background-color: var(--bg-base) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  font-family: inherit !important;
+  transition: all 0.2s ease !important;
+}
+
+body.wr-page-settings main input[type="text"]:focus,
+body.wr-page-settings main select:focus,
+body.wr-page-settings main textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2) !important;
+  outline: none !important;
+}

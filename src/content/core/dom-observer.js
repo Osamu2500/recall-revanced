@@ -1,12 +1,10 @@
 'use strict';
 
 /**
- * @fileoverview Wider Recall - DOM State Enforcer (v1.2)
- *
+ * @fileoverview Wider Recall - DOM State Enforcer
  * Handles ONLY sidebar show/hide enforcement via CSS classes and inline style fixes.
- * The dangerous "pixel-based icon hiding" has been removed entirely.
- * Sidebar hiding is primarily handled by CSS using [data-wr-hide-sidebar="true"]
- * on body, but inline style overrides for margin/padding require JS.
+ * Also sets up a MutationObserver to watch for React hydrating/remounting large chunks
+ * of the DOM to re-apply the extension's CSS and Javascript enhancements.
  */
 
 // Throttle enforcement to avoid layout thrashing
@@ -60,8 +58,6 @@ function _showSidebar() {
   });
 }
 
-// Polling fallback removed to prevent React layout thrashing.
-
 // MutationObserver — re-apply settings when React unmounts/remounts large DOM sections
 let _mutationDebounce = null;
 
@@ -82,7 +78,6 @@ const _pageObserver = new MutationObserver(() => {
       }
 
       // Run feature hooks that depend on new DOM elements
-      if (typeof window.WR_InitFocusMode  === 'function') window.WR_InitFocusMode();
       if (typeof window.WR_InitMinimap    === 'function') window.WR_InitMinimap();
       if (typeof window.WR_InitCodeTools  === 'function') window.WR_InitCodeTools();
       if (typeof window.WR_EnhanceCards   === 'function') window.WR_EnhanceCards();
@@ -92,35 +87,6 @@ const _pageObserver = new MutationObserver(() => {
     }
   }, 200);
 });
-
-// Card entrance animation + spotlight hover effect
-window.WR_EnhanceCards = function () {
-  if (!window.WR_STATE || !window.WR_STATE.enabled) return;
-
-  const cards = document.querySelectorAll(
-    'article:not([data-wr-enhanced]), div[class*="MuiCard-root"]:not([data-wr-enhanced])'
-  );
-
-  cards.forEach((card, i) => {
-    card.setAttribute('data-wr-enhanced', 'true');
-    card.classList.add('re-card-enter');
-    card.style.animationDelay = `${Math.min(i * 40, 500)}ms`;
-
-    // Spotlight mouse-tracking effect
-    if (window.WR_STATE.spotlight !== false) {
-      card.classList.add('re-spotlight');
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${((e.clientX - rect.left) / rect.width) * 100}%`);
-        card.style.setProperty('--my', `${((e.clientY - rect.top) / rect.height) * 100}%`);
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.setProperty('--mx', '50%');
-        card.style.setProperty('--my', '50%');
-      });
-    }
-  });
-};
 
 // Start observing
 if (document.body) {

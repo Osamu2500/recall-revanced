@@ -16,6 +16,17 @@
 }
 
 body[data-wr-enabled="true"][data-wr-theme="nord"] {
+  --bg-surface: var(--nord-bg-alt);
+  --bg-base: var(--nord-bg);
+  --accent: var(--nord-blue);
+  --accent-glow: rgba(129, 161, 193, 0.4);
+  --accent-rgb: 129, 161, 193;
+  --border-color: var(--nord-border);
+  --text-primary: var(--nord-fg);
+  --text-secondary: var(--nord-fg-dark);
+}
+
+body[data-wr-enabled="true"][data-wr-theme="nord"] {
   background-color: var(--nord-bg) !important;
   color: var(--nord-fg) !important;
 }

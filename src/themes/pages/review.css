@@ -1,0 +1,76 @@
+/*
+ * Wider Recall - Review Page Styles
+ * 3D Flashcards and Focus Mode Quizzes
+ */
+
+/* Scope strictly to the review page */
+body.wr-page-review {
+  background: var(--bg-surface);
+}
+
+/* 3D Flashcard flip animation */
+body.wr-page-review .flashcard-container {
+  perspective: 1000px;
+  margin-bottom: 2rem;
+}
+
+body.wr-page-review .flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+body.wr-page-review .flashcard-container.is-flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+body.wr-page-review .flashcard-front,
+body.wr-page-review .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+body.wr-page-review .flashcard-back {
+  transform: rotateY(180deg);
+  background: rgba(var(--accent-rgb), 0.05);
+}
+
+/* Quiz Focus Mode Layout */
+body.wr-page-review .quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 24px;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+body.wr-page-review .quiz-option {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+body.wr-page-review .quiz-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+}

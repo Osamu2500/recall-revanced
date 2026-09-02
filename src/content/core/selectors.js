@@ -23,7 +23,6 @@ window.WR_SELECTORS = Object.freeze({
     isSpacedRepetition:  (path) => path.startsWith('/spaced-repetition'),
     isSettings:          (path) => path.startsWith('/settings'),
     isGraph:             (path) => path.startsWith('/graph'),
-    isSearch:            (path) => path.startsWith('/search'),
     isChat:              (path) => path.startsWith('/chat'),
     isReview:            (path) => path.startsWith('/review'),
   },

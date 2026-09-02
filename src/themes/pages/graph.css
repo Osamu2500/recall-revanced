@@ -1,0 +1,44 @@
+/*
+ * Wider Recall - Graph Page Styles
+ * Fullscreen immersive knowledge graph
+ */
+
+body.wr-page-graph {
+  overflow: hidden; /* Prevent scrolling outside graph */
+}
+
+/* Force the graph container to take full viewport */
+body.wr-page-graph .graph-container,
+body.wr-page-graph canvas,
+body.wr-page-graph svg {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+/* Restyle nodes on hover */
+body.wr-page-graph .node:hover {
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  cursor: pointer;
+}
+
+/* Tooltip styling */
+body.wr-page-graph .graph-tooltip {
+  background: var(--bg-surface);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}

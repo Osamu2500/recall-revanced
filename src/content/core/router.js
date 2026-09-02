@@ -29,7 +29,6 @@ window.WR_Router = {
     else if (sel.isHomeGrid(path))    newPageId = 'home';
     else if (sel.isSettings(path))    newPageId = 'settings';
     else if (sel.isGraph(path))       newPageId = 'graph';
-    else if (sel.isSearch(path))      newPageId = 'search';
     else if (sel.isChat(path))        newPageId = 'chat';
     else if (sel.isReview(path))      newPageId = 'review';
 

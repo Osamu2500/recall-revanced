@@ -1,0 +1,118 @@
+/*
+ * Wider Recall - Table of Contents Minimap
+ * Provides a floating, auto-collapsing outline of the current chat or article.
+ */
+
+#wr-toc-wrapper {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  display: flex;
+  align-items: flex-start;
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+#wr-toc-wrapper.wr-toc-collapsed {
+  transform: translateX(calc(100% + 25px));
+  opacity: 1; /* Keep arrow visible */
+}
+
+#wr-toc-toggle {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  padding: 8px 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: -4px 4px 12px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+#wr-toc-toggle:hover {
+  color: var(--text-primary);
+  background: var(--hover-color);
+}
+
+#wr-toc-wrapper.wr-toc-collapsed #wr-toc-toggle svg {
+  transform: rotate(180deg);
+}
+
+#wr-toc-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+#wr-toc-minimap {
+  width: 250px;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  background: var(--bg-surface);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* Scrollbar for minimap */
+#wr-toc-minimap::-webkit-scrollbar { width: 6px; }
+#wr-toc-minimap::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
+
+.wr-toc-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 5px;
+  transition: all 0.2s ease;
+}
+
+.wr-toc-title:hover {
+  color: var(--accent);
+  font-weight: 700;
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.wr-toc-link {
+  display: block;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 4px 0;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 2px solid transparent;
+}
+
+.wr-toc-link:hover {
+  color: var(--text-primary);
+  padding-left: 5px;
+  border-left-color: var(--border-color);
+}
+
+.wr-toc-link.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  padding-left: 8px;
+  border-left-color: var(--accent);
+  background: rgba(128, 128, 128, 0.05);
+  border-radius: 0 4px 4px 0;
+}
+
+.wr-toc-h1 { font-weight: 600; }
+.wr-toc-h2 { margin-left: 10px; opacity: 0.9; }
+.wr-toc-h3 { margin-left: 20px; font-size: 12px; opacity: 0.7; }

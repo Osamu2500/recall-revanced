@@ -1,0 +1,47 @@
+/* 
+ * Wider Recall - Chat Page Styles
+ * Immersive glassmorphism UI for Agentic AI Chat
+ */
+
+body.wr-page-chat {
+  /* Scope styles only to the chat page */
+}
+
+/* Restyle the Agentic AI Chat Input Box */
+body.wr-page-chat .chat-input-container {
+  background: var(--bg-surface) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* Model Switcher Restyling (ChatGPT, Claude, Gemini) */
+body.wr-page-chat .model-switcher {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+body.wr-page-chat .model-switcher button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+body.wr-page-chat .model-switcher button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+body.wr-page-chat .model-switcher button.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
