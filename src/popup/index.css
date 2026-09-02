@@ -470,3 +470,5 @@
       color: var(--accent);
       font-weight: 600;
     }
+.mb-16 { margin-bottom: 16px; }
+.mt-10 { margin-top: 10px; }

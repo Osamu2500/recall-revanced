@@ -21,61 +21,61 @@
         "src/content/core/state-manager.js",
         "src/content/core/dom-observer.js",
         "src/content/core/hotkeys.js",
-        "src/content/pages/home.js",
-        "src/content/pages/item.js",
-        "src/content/pages/spaced-repetition.js",
-        "src/content/pages/home-cards.js",
-        "src/content/pages/settings.js",
-        "src/content/pages/graph.js",
-        "src/content/pages/search.js",
-        "src/content/pages/chat.js",
-        "src/content/pages/review.js",
-        "src/content/features/media-tools.js",
-        "src/content/features/code-tools.js",
-        "src/content/features/chat-prompts-core.js",
-        "src/content/features/chat-prompts.js",
-        "src/content/features/toc.js",
+        "src/content/pages/home/index.js",
+        "src/content/pages/item/index.js",
+        "src/content/pages/spaced-repetition/index.js",
+        "src/content/pages/home/cards.js",
+        "src/content/pages/settings/index.js",
+        "src/content/pages/graph/index.js",
+        "src/content/pages/search/index.js",
+        "src/content/pages/chat/index.js",
+        "src/content/pages/review/index.js",
+        "src/content/features/enhancements/media-tools.js",
+        "src/content/features/enhancements/code-tools.js",
+        "src/content/features/chat-prompts/core.js",
+        "src/content/features/chat-prompts/index.js",
+        "src/content/features/enhancements/toc.js",
         "src/content/main.js"
       ],
       "css": [
-        "wider.css",
-        "src/themes/theme-spaced-grid.css",
-        "src/themes/theme-premium.css",
-        "src/themes/wider-features.css",
-        "src/themes/theme-dracula.css",
-        "src/themes/theme-tokyo.css",
-        "src/themes/theme-nord.css",
-        "src/themes/theme-immersive-cards.css"
+        "src/themes/core/base.css",
+        "src/themes/components/spaced-grid.css",
+        "src/themes/core/premium.css",
+        "src/themes/core/features.css",
+        "src/themes/palettes/dracula.css",
+        "src/themes/palettes/tokyo.css",
+        "src/themes/palettes/nord.css",
+        "src/themes/components/immersive-cards.css"
       ],
       "run_at": "document_end"
     },
     {
       "matches": ["<all_urls>"],
       "js": [
-        "src/content/features/chat-prompts-core.js",
-        "src/content/features/chat-prompts-global.js"
+        "src/content/features/chat-prompts/core.js",
+        "src/content/features/chat-prompts/global.js"
       ],
       "run_at": "document_end"
     }
   ],
   "action": {
-    "default_popup": "src/popup/popup.html",
+    "default_popup": "src/popup/index.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
     }
   },
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "wider.css",
-        "src/themes/*.css"
+        "src/themes/core/base.css",
+        "src/themes/*/*.css"
       ],
       "matches": ["<all_urls>"]
     }

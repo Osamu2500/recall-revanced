@@ -6,7 +6,7 @@
   <title>Recall Revanced Settings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
@@ -145,7 +145,7 @@
         </div>
         <input type="range" id="widthRange" min="800" max="3000" step="100" value="1100" title="Max Width">
       </div>
-      <div class="presets-grid" style="margin-bottom:16px;">
+      <div class="presets-grid mb-16">
         <button class="pb" data-w="900">Narrow (900px)</button>
         <button class="pb" data-w="1100">Default (1100px)</button>
         <button class="pb" data-w="1400">Wide (1400px)</button>
@@ -193,7 +193,7 @@
         <label class="toggle"><input type="checkbox" id="gridCb" title="Grid View"><span class="slider"></span></label>
       </div>
 
-      <div class="range-block" style="margin-top:10px;">
+      <div class="range-block mt-10">
         <div class="range-header">
           <span class="range-label">Grid Columns</span>
           <span class="range-value" id="gval">3</span>
@@ -257,7 +257,7 @@
           <span class="setting-title">Chat Bubble Styling <span class="badge badge-soon">Soon</span></span>
           <span class="setting-desc">Custom markdown rendering for chat</span>
         </div>
-        <label class="toggle"><input type="checkbox" disabled><span class="slider"></span></label>
+        <label class="toggle"><input type="checkbox" title="Chat Bubble Styling" disabled><span class="slider"></span></label>
       </div>
 
     </div>
@@ -273,6 +273,6 @@
     <div class="footer-version">v1.2 · <span>Recall Revanced</span></div>
   </div>
 
-  <script src="popup.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
